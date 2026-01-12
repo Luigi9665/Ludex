@@ -1,0 +1,94 @@
+:root {
+  --bg: #0b1220; /* simile al tuo --background */
+  --card: #0f1b2d; /* simile al tuo --card */
+  --primary: #2bb6a6; /* simile al tuo --primary */
+  --secondaryGlow: #7c3aed;
+  --text: #eef4ff;
+  --muted: #9aa7bd;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* PAGINA DI AUTENTICAZIONE */
+
+.auth-bg {
+  background: radial-gradient(1200px circle at 20% 10%, rgba(43, 182, 166, 0.1), transparent 45%),
+    radial-gradient(900px circle at 80% 80%, rgba(124, 58, 237, 0.1), transparent 45%), #0b1220;
+  color: var(--text);
+}
+
+.auth-blob {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.7;
+}
+
+.auth-blob-1 {
+  top: 15%;
+  left: 15%;
+  background: rgba(43, 182, 166, 0.25);
+}
+
+.auth-blob-2 {
+  bottom: 15%;
+  right: 15%;
+  background: rgba(124, 58, 237, 0.22);
+}
+
+.logo-title {
+  font-family: Orbitron, Inter, sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  line-height: 1;
+  background: linear-gradient(90deg, var(--primary), var(--secondaryGlow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 0.9rem;
+  background: rgba(43, 182, 166);
+  box-shadow: 0 0 18px rgba(43, 182, 166, 0.18);
+}
+
+.logoSvg {
+  display: block;
+  width: auto;
+  height: auto;
+}
+
+.logoNav,
+.logoAuth {
+  max-width: 100%;
+}
+
+.logoNav {
+  height: 34px;
+  width: auto;
+  filter: drop-shadow(0 0 10px rgba(43, 182, 166, 0.18)) drop-shadow(0 0 14px rgba(124, 58, 237, 0.1));
+}
+
+.logoAuth {
+  height: 100px;
+  width: 125px;
+  filter: drop-shadow(0 0 16px rgba(43, 182, 166, 0.22)) drop-shadow(0 0 22px rgba(124, 58, 237, 0.14));
+}
+
+.auth-card {
+  background: #0f1b2d;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 30px rgb(66 69 69 / 25%);
+  color: #eef4ff;
+}

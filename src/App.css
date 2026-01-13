@@ -1,4 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap");
+
 :root {
+  --font-body: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-display: "Orbitron", "Inter", system-ui, sans-serif;
   --bg: #0b1220; /* simile al tuo --background */
   --card: #0f1b2d; /* simile al tuo --card */
   --primary: #2bb6a6; /* simile al tuo --primary */
@@ -8,38 +12,51 @@
 }
 
 body {
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.font-display,
+.logo-title {
+  font-family: var(--font-display);
 }
 
 /* PAGINA DI AUTENTICAZIONE */
 
-.auth-bg {
-  background: radial-gradient(1200px circle at 20% 10%, rgba(43, 182, 166, 0.1), transparent 45%),
-    radial-gradient(900px circle at 80% 80%, rgba(124, 58, 237, 0.1), transparent 45%), #0b1220;
-  color: var(--text);
+.auth-page {
+  position: relative;
+  min-height: 100vh;
+  background-image: url("/src/assets/WallpaperLudex4.png");
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: multiply;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 10px;
 }
 
-.auth-blob {
+.auth-page::before {
+  content: "";
   position: absolute;
-  width: 420px;
-  height: 420px;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.7;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
 }
 
-.auth-blob-1 {
-  top: 15%;
-  left: 15%;
-  background: rgba(43, 182, 166, 0.25);
+.auth-content {
+  position: relative;
+  z-index: 1;
 }
 
-.auth-blob-2 {
-  bottom: 15%;
-  right: 15%;
-  background: rgba(124, 58, 237, 0.22);
+.containerLogo {
+  background-image: linear-gradient(to right, #1b4d57, #225566, #2f5d75, #406484, #546a90, #576691, #5b6291, #615e90, #555086, #48437d, #3c3573, #302869);
+  border-radius: 10px;
+  box-shadow: 0px 0px 60px -20px rgba(62, 145, 212, 1);
+  padding-inline: 10px;
 }
 
 .logo-title {
@@ -54,13 +71,18 @@ body {
 }
 
 .logo-badge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem;
-  border-radius: 0.9rem;
-  background: rgba(43, 182, 166);
-  box-shadow: 0 0 18px rgba(43, 182, 166, 0.18);
+}
+
+.logo-badge {
+  height: 140px;
+}
+
+.logo-badge img {
+  height: 100%;
+  width: auto;
 }
 
 .logoSvg {
@@ -87,8 +109,53 @@ body {
 }
 
 .auth-card {
-  background: #0f1b2d;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 30px rgb(66 69 69 / 25%);
+  background: rgba(48, 46, 46, 0.6);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auth-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.auth-form .form-label {
+  color: #d7e0f3;
+  font-weight: 600;
+}
+
+.auth-form .form-control {
+  background-color: #0b1525;
+  border: 1px solid rgba(148, 163, 184, 0.3);
   color: #eef4ff;
+}
+
+.auth-form .form-control::placeholder {
+  color: rgba(226, 232, 240, 0.55);
+}
+
+.auth-form .form-control:focus {
+  border-color: rgba(43, 182, 166, 0.6);
+  box-shadow: 0 0 0 0.2rem rgba(43, 182, 166, 0.2);
+  color: #eef4ff;
+  background-color: #0b1525;
+}
+
+.auth-form .form-check-input {
+  background-color: #0b1525;
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+.auth-link {
+  color: #7dd3fc;
+  text-decoration: none;
+}
+
+.auth-link:hover,
+.auth-link:focus {
+  color: #bae6fd;
+  text-decoration: underline;
 }

@@ -10,7 +10,7 @@ const AuthPage = () => {
 
   return (
     <AuthLayout>
-      <AuthCard title="LUTEX" subtitle="Scegli i tuoi giochi e condividi le tue recensioni con gli amici">
+      <AuthCard title="LUDEX" subtitle="Scegli i tuoi giochi e condividi le tue recensioni con gli amici">
         <AuthToggle mode={mode} onChange={setMode} />
         {mode === "login" ? <LoginForm /> : <RegisterForm onRegistered={() => setMode("login")} />}
       </AuthCard>

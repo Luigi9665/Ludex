@@ -3,12 +3,23 @@
 :root {
   --font-body: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --font-display: "Orbitron", "Inter", system-ui, sans-serif;
-  --bg: #0b1220; /* simile al tuo --background */
-  --card: #0f1b2d; /* simile al tuo --card */
-  --primary: #2bb6a6; /* simile al tuo --primary */
+  --bg: #0b1220;
+  --card: #0f1b2d;
+  --primary: #2bb6a6;
   --secondaryGlow: #7c3aed;
   --text: #eef4ff;
   --muted: #9aa7bd;
+  --lx-bg: #0b1220;
+  --lx-card: rgba(15, 25, 45, 0.5);
+  --lx-card-solid: #0f192d;
+  --lx-text: #eef4ff;
+  --lx-muted: rgba(238, 244, 255, 0.7);
+  --lx-border: rgba(148, 163, 184, 0.28);
+  --lx-border-strong: rgba(148, 163, 184, 0.45);
+  --lx-primary: #2bb6a6;
+  --lx-secondary: #3b72b0;
+  --lx-warm: #f2c06e;
+  --lx-danger: #ff6b6b;
 }
 
 body {
@@ -108,11 +119,20 @@ h3,
   filter: drop-shadow(0 0 16px rgba(43, 182, 166, 0.22)) drop-shadow(0 0 22px rgba(124, 58, 237, 0.14));
 }
 
-.auth-card {
+/* .auth-card {
   background: rgba(48, 46, 46, 0.6);
   backdrop-filter: blur(12px);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+} */
+
+/* card glass */
+.auth-card {
+  background: var(--lx-card);
+  border: 1px solid var(--lx-border);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  color: var(--lx-text);
 }
 
 .auth-page::before {
@@ -122,40 +142,123 @@ h3,
   background: rgba(0, 0, 0, 0.45);
 }
 
+/* label */
 .auth-form .form-label {
-  color: #d7e0f3;
+  color: rgba(215, 224, 243, 0.95);
   font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
+/* input */
 .auth-form .form-control {
-  background-color: #0b1525;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  color: #eef4ff;
+  background: rgba(11, 21, 37, 0.92);
+  border: 1px solid var(--lx-border);
+  color: var(--lx-text);
 }
-
 .auth-form .form-control::placeholder {
-  color: rgba(226, 232, 240, 0.55);
+  color: rgba(238, 244, 255, 0.5);
 }
-
 .auth-form .form-control:focus {
-  border-color: rgba(43, 182, 166, 0.6);
-  box-shadow: 0 0 0 0.2rem rgba(43, 182, 166, 0.2);
-  color: #eef4ff;
-  background-color: #0b1525;
+  border-color: rgba(43, 182, 166, 0.75);
+  box-shadow: 0 0 0 0.2rem rgba(43, 182, 166, 0.18);
+  background: rgba(11, 21, 37, 0.92);
+  color: var(--lx-text);
 }
 
+/* bootstrap invalid/valid (così non “stona”) */
+.auth-form .form-control.is-invalid {
+  border-color: rgba(255, 107, 107, 0.75);
+  box-shadow: 0 0 0 0.18rem rgba(255, 107, 107, 0.15);
+}
+.auth-form .invalid-feedback {
+  color: rgba(255, 180, 180, 0.95);
+}
+.auth-form .form-control.is-valid {
+  border-color: rgba(43, 182, 166, 0.7);
+  box-shadow: 0 0 0 0.18rem rgba(43, 182, 166, 0.12);
+}
+
+/* checkbox */
 .auth-form .form-check-input {
-  background-color: #0b1525;
-  border-color: rgba(148, 163, 184, 0.5);
+  background-color: rgba(11, 21, 37, 0.92);
+  border-color: var(--lx-border-strong);
+}
+.auth-form .form-check-input:checked {
+  background-color: var(--lx-primary);
+  border-color: var(--lx-primary);
+}
+.auth-form .form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(43, 182, 166, 0.18);
 }
 
+/* testi muted in tema */
+.auth-page .text-muted,
+.auth-page .auth-muted {
+  color: rgba(215, 224, 243, 0.65) !important;
+}
+
+/* link stile Ludex */
 .auth-link {
   color: #7dd3fc;
   text-decoration: none;
+  font-weight: 500;
+}
+.auth-link:hover,
+.auth-link:focus {
+  color: #a5e6ff;
+  text-decoration: underline;
+}
+
+/* link secondari (es. termini, privacy) */
+.auth-link-soft {
+  color: rgba(215, 224, 243, 0.7);
+}
+.auth-link-soft:hover {
+  color: #f2c06e; /* warm accent */
 }
 
 .auth-link:hover,
 .auth-link:focus {
   color: #bae6fd;
   text-decoration: underline;
+}
+
+/* button per il toggle */
+.btn-toggle-lx {
+  background: transparent;
+  color: rgba(238, 244, 255, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  font-weight: 600;
+}
+
+.btn-toggle-lx:hover {
+  background: rgba(59, 114, 176, 0.12);
+  border-color: rgba(59, 114, 176, 0.6);
+}
+
+.btn-toggle-lx.active {
+  background: linear-gradient(90deg, rgba(43, 182, 166, 0.35), rgba(59, 114, 176, 0.35));
+  border-color: rgba(43, 182, 166, 0.75);
+  color: #eef4ff;
+}
+
+/* button per i form */
+.btn-lx-primary {
+  background: linear-gradient(90deg, rgba(43, 182, 166, 1), rgba(59, 114, 176, 1));
+  border: 0;
+  color: #081018;
+  font-weight: 700;
+}
+.btn-lx-primary:hover {
+  filter: brightness(1.05);
+}
+.btn-lx-primary:disabled {
+  opacity: 0.55;
+}
+
+.btn-lx-warm {
+  background: linear-gradient(90deg, rgba(242, 192, 110, 1), rgba(255, 173, 110, 1));
+  border: 0;
+  color: #1b1206;
+  font-weight: 800;
 }

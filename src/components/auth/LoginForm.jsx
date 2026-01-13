@@ -31,7 +31,7 @@ const LoginForm = () => {
         </button>
       </div>
 
-      <button className="btn btn-primary btn-lg" type="submit">
+      <button className="btn btn-lx-primary btn-lg" type="submit">
         Login
       </button>
 

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
-const Email = ({ baseUrl, email, confirmEmail, setEmail, setConfirmEmail, setIsEmailOkForSubmit }) => {
+const Email = ({ baseUrl, email, confirmEmail, setEmail, setConfirmEmail, setIsEmailOkForSubmit, emailServerErrorParent }) => {
   //stati per controllo duplicazioni
   const [isEmailTouched, setIsEmailTouched] = useState(false);
   const [emailAvailable, setEmailAvailable] = useState(null);
   const [checkingEmail, setCheckingEmail] = useState(false);
-  const [emailServerError, setEmailServerError] = useState("");
+  const [emailServerError, setEmailServerError] = useState(emailServerErrorParent);
 
   //controllo validazione email
   const isEmailValid = email.length > 0 && email === confirmEmail;

@@ -12,6 +12,10 @@ const RegisterForm = ({ onRegistered }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isEmailOkForSubmit, setIsEmailOkForSubmit] = useState(false);
   const [isUsernameOkForSubmit, setIsUsernameOkForSubmit] = useState(false);
+  const [emailServerError, setEmailServerError] = useState("");
+  const [userNameServerError, setUsernameServerError] = useState("");
+  const [alert, setAlert] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(null);
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -25,18 +29,28 @@ const RegisterForm = ({ onRegistered }) => {
   //booleano per controllo email e password
   const isFormValid = isEmailOkForSubmit && isUsernameOkForSubmit && isPasswordValid;
 
+  const safeJson = async (res) => {
+    try {
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     // console.log(firstName, lastName, userName, email, password);
+    setIsSubmitting(true);
+    setAlert(null);
 
-    const formdata = {
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      confirmEmail: confirmEmail,
-      password: password,
-      confirmPassword: confirmPassword,
-      userName: userName,
+    const payload = {
+      firstName,
+      lastName,
+      email,
+      confirmEmail,
+      password,
+      confirmPassword,
+      userName,
     };
 
     const URL = `${baseUrl}/api/Auth/register`;
@@ -44,15 +58,34 @@ const RegisterForm = ({ onRegistered }) => {
     try {
       const response = await fetch(URL, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
-      if (response.ok) {
-        //COMPLETARE LA POST PER LA REGISTRAZIONE !!!!!!!
+      const data = await safeJson(response);
+      if (!response.ok) {
+        throw data || { message: "Errore durante la registrazione" };
       }
-    } catch (error) {
-      console.log(error);
-    }
+      setAlert({ type: "success", message: "Registrazione completata! Ora puoi fare login." });
 
-    onRegistered();
+      setTimeout(() => {
+        onRegistered();
+      }, 800);
+    } catch (err) {
+      const field = err?.field;
+      const message = err?.message || "Errore durante la registrazione. Riprova tra poco.";
+
+      if (field === "email") {
+        setEmailServerError(message);
+      } else if (field === "username") {
+        setUsernameServerError(message);
+      } else {
+        setAlert({ type: "danger", message });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -66,7 +99,13 @@ const RegisterForm = ({ onRegistered }) => {
         <input className="form-control" placeholder="Rossi" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
       </div>
 
-      <Username userName={userName} setUserName={setUserName} baseUrl={baseUrl} setUsernameAvailableParent={setIsUsernameOkForSubmit} />
+      <Username
+        userName={userName}
+        setUserName={setUserName}
+        baseUrl={baseUrl}
+        setUsernameAvailableParent={setIsUsernameOkForSubmit}
+        userNameServerErrorParent={userNameServerError}
+      />
 
       <Email
         baseUrl={baseUrl}
@@ -75,6 +114,7 @@ const RegisterForm = ({ onRegistered }) => {
         setEmail={setEmail}
         setConfirmEmail={setConfirmEmail}
         setIsEmailOkForSubmit={setIsEmailOkForSubmit}
+        emailServerErrorParent={emailServerError}
       />
 
       <div>
@@ -109,8 +149,18 @@ const RegisterForm = ({ onRegistered }) => {
         <input className="form-check-input mt-1" type="checkbox" required />
         Accetto i termini e la privacy policy.
       </label>
-      <button className="btn btn-lx-warm btn-lg" type="submit" disabled={!isFormValid}>
+      {/* <button className="btn btn-lx-warm btn-lg" type="submit" disabled={!isFormValid}>
         Registrati
+      </button> */}
+
+      {alert && (
+        <div className={`alert alert-${alert.type} mb-3`} role="alert">
+          {alert.message}
+        </div>
+      )}
+
+      <button className="btn btn-lx-warm btn-lg" type="submit" disabled={!isFormValid || isSubmitting}>
+        {isSubmitting ? "Registrazione..." : "Registrati"}
       </button>
     </form>
   );

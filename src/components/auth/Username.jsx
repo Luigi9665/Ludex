@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 
-const Username = ({ userName, setUserName, baseUrl, setUsernameAvailableParent }) => {
+const Username = ({ userName, setUserName, baseUrl, setUsernameAvailableParent, userNameServerErrorParent }) => {
   const [isUsernameTouched, setIsUsernameTouched] = useState(false);
   const [isUsernameAvailable, setUsernameAvailable] = useState(null);
   const [checkinUsername, setCheckinUsername] = useState(false);
-  const [userNameServerError, setUsernameServerError] = useState("");
+  const [userNameServerError, setUsernameServerError] = useState(userNameServerErrorParent);
 
   const showUsernameTakenError = isUsernameTouched && isUsernameAvailable === false;
 

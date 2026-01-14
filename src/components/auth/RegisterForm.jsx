@@ -149,10 +149,6 @@ const RegisterForm = ({ onRegistered }) => {
         <input className="form-check-input mt-1" type="checkbox" required />
         Accetto i termini e la privacy policy.
       </label>
-      {/* <button className="btn btn-lx-warm btn-lg" type="submit" disabled={!isFormValid}>
-        Registrati
-      </button> */}
-
       {alert && (
         <div className={`alert alert-${alert.type} mb-3`} role="alert">
           {alert.message}

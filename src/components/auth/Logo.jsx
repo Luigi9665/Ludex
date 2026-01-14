@@ -1,5 +1,5 @@
 import LogoLudex from "../../assets/logoSVG.svg?react";
-import LogoLudexPng from "../../assets/LogoLudex3.png";
+import LogoLudexPng from "../../assets/LogoLudex3Ridimensionato.png";
 
 export default function Logo({ subtitle, variant = "auth" }) {
   return (

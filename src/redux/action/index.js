@@ -37,16 +37,12 @@ export const loginAction = (credentials) => {
 
       const data = await safeJson(response);
 
-      console.log(data);
-
       if (!response.ok) {
         throw data || { message: "Credenziali non valide" };
       }
 
       const claims = jwtDecode(data.accessToken);
       const user = mapUserFromClaims(claims);
-
-      console.log(user);
 
       dispatch({
         type: LOGIN_SUCCESS,

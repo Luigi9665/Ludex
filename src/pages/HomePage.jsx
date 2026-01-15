@@ -1,6 +1,6 @@
 const HomePage = () => {
   return (
-    <div className="container mt-5">
+    <div className="">
       <h1>Home</h1>
       <p>Area privata</p>
     </div>

@@ -14,18 +14,37 @@
   --lx-card-solid: #0f192d;
   --lx-text: #eef4ff;
   --lx-muted: rgba(238, 244, 255, 0.7);
-  --lx-border: rgba(148, 163, 184, 0.28);
   --lx-border-strong: rgba(148, 163, 184, 0.45);
   --lx-primary: #2bb6a6;
   --lx-secondary: #3b72b0;
   --lx-warm: #f2c06e;
   --lx-danger: #ff6b6b;
+  --lx-bg-primary: #0a0a0f;
+  --lx-bg-secondary: #13131a;
+  --lx-bg-card: rgba(25, 25, 35, 0.6);
+  --lx-cyan: #00d9ff;
+  --lx-purple: #9d4edd;
+  --lx-cyan-glow: rgba(0, 217, 255, 0.3);
+  --lx-purple-glow: rgba(157, 78, 221, 0.3);
+  --lx-text-primary: #ffffff;
+  --lx-text-secondary: #a0a0b0;
+  --lx-border: rgba(255, 255, 255, 0.1);
+  --lx-navbar-h: 70px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
   font-family: var(--font-body);
-  background: var(--bg);
-  color: var(--text);
+  background: radial-gradient(1200px 700px at 15% -10%, rgba(0, 217, 255, 0.14), transparent 62%),
+    radial-gradient(1100px 650px at 90% 0%, rgba(157, 78, 221, 0.16), transparent 64%),
+    radial-gradient(900px 650px at 50% 110%, rgba(255, 200, 120, 0.1), transparent 70%), linear-gradient(180deg, #070a14 0%, #060812 100%);
+  color: var(--lx-text-primary);
+  min-height: 100vh;
 }
 
 h1,
@@ -119,13 +138,6 @@ h3,
   filter: drop-shadow(0 0 16px rgba(43, 182, 166, 0.22)) drop-shadow(0 0 22px rgba(124, 58, 237, 0.14));
 }
 
-/* .auth-card {
-  background: rgba(48, 46, 46, 0.6);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-} */
-
 /* card glass */
 .auth-card {
   background: var(--lx-card);
@@ -165,7 +177,7 @@ h3,
   color: var(--lx-text);
 }
 
-/* bootstrap invalid/valid (così non “stona”) */
+/* bootstrap invalid/valid */
 .auth-form .form-control.is-invalid {
   border-color: rgba(255, 107, 107, 0.75);
   box-shadow: 0 0 0 0.18rem rgba(255, 107, 107, 0.15);
@@ -261,4 +273,239 @@ h3,
   border: 0;
   color: #1b1206;
   font-weight: 800;
+}
+
+/* ===== NAVBAR ===== */
+/* Navbar: effetto vetro (glass) con blur e un bordo sotto leggero */
+.lx-navbar {
+  height: var(--lx-navbar-h);
+  margin: 14px 16px 0;
+  border-radius: 18px;
+
+  background: rgba(10, 12, 20, 0.56) !important;
+  backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 217, 255, 0.05) inset;
+
+  padding: 0.85rem 0.75rem;
+
+  position: sticky;
+  top: 10px;
+  z-index: 1030;
+}
+
+/* Overlay colorato sopra la navbar: dà “vibe Ludex” (cyan/viola/oro) senza diventare troppo acceso */
+.lx-navbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+  background: radial-gradient(700px 170px at 18% 0%, rgba(0, 217, 255, 0.18), transparent 60%),
+    radial-gradient(700px 170px at 82% 0%, rgba(157, 78, 221, 0.18), transparent 60%),
+    radial-gradient(900px 260px at 50% 120%, rgba(255, 200, 120, 0.1), transparent 65%);
+}
+
+/* Riporta i contenuti della navbar “sopra” l’overlay ::before */
+.lx-navbar > .container-fluid {
+  position: relative;
+  z-index: 1;
+}
+
+/* Box del logo (se lo usi): gradient + glow */
+.lx-logo-box {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--lx-cyan), var(--lx-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.5rem;
+  box-shadow: 0 0 22px var(--lx-cyan-glow);
+}
+
+/* Testo brand in gradient (effetto “neon soft”) */
+.lx-brand-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, var(--lx-cyan), var(--lx-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Limito la searchbar per non diventare enorme su desktop */
+.lx-search-form {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Input “glass”: trasparente + blur, con colori leggibili */
+.lx-input-glass {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--lx-text-primary) !important;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s;
+}
+
+/* Focus dell’input: glow cyan */
+.lx-input-glass:focus {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(0, 217, 255, 0.55) !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 217, 255, 0.12), 0 0 18px var(--lx-cyan-glow);
+}
+
+/* Placeholder più “soft” */
+.lx-input-glass::placeholder {
+  color: rgba(230, 238, 255, 0.55);
+}
+
+/* Link della navbar: chiari e con hover “neon” */
+.nav-link {
+  color: rgba(230, 238, 255, 0.72) !important;
+  transition: color 0.25s, text-shadow 0.25s;
+  padding: 0.5rem 1rem !important;
+}
+
+.nav-link:hover {
+  color: var(--lx-cyan) !important;
+  text-shadow: 0 0 16px rgba(0, 217, 255, 0.3);
+}
+
+/* Avatar piccolo (se serve in liste) */
+.lx-avatar-xs {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 217, 255, 0.65);
+}
+
+/* Avatar principale (navbar): glow leggero e hover più vivo */
+.lx-avatar-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 217, 255, 0.65);
+  cursor: pointer;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+
+.lx-avatar-sm:hover {
+  transform: scale(1.05);
+  border-color: rgba(157, 78, 221, 0.7);
+  box-shadow: 0 0 18px rgba(0, 217, 255, 0.28), 0 0 22px rgba(157, 78, 221, 0.22);
+}
+
+/* Classe “glass” riutilizzabile per card / dropdown */
+.lx-glass {
+  background: rgba(25, 25, 35, 0.82);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+/* Dropdown con overlay gradient così si integra con lo sfondo auth */
+.dropdown-menu.lx-glass {
+  background: radial-gradient(420px 160px at 20% 0%, rgba(0, 217, 255, 0.14), transparent 60%),
+    radial-gradient(420px 160px at 80% 0%, rgba(157, 78, 221, 0.14), transparent 60%), rgba(18, 18, 26, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+}
+
+/* Voci del dropdown */
+.dropdown-item {
+  color: rgba(238, 244, 255, 0.92);
+  transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--lx-cyan);
+}
+
+/* Pulsanti: primario (cyan) */
+.lx-btn-primary {
+  background: linear-gradient(135deg, var(--lx-cyan), #0099cc);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform 0.25s, box-shadow 0.25s;
+  box-shadow: 0 4px 15px var(--lx-cyan-glow);
+}
+
+.lx-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0, 217, 255, 0.3);
+}
+
+/* Pulsanti: warm (viola) */
+.lx-btn-warm {
+  background: linear-gradient(135deg, var(--lx-purple), #7b2cbf);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform 0.25s, box-shadow 0.25s;
+  box-shadow: 0 4px 15px var(--lx-purple-glow);
+}
+
+.lx-btn-warm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(157, 78, 221, 0.3);
+}
+
+/* Pulsanti outline: trasparenti ma “glow” */
+.lx-btn-outline {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(0, 217, 255, 0.65);
+  color: rgba(215, 248, 255, 0.92);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.25s, box-shadow 0.25s, color 0.25s, border-color 0.25s;
+}
+
+.lx-btn-outline:hover {
+  background: rgba(0, 217, 255, 0.12);
+  border-color: rgba(157, 78, 221, 0.55);
+  color: white;
+  box-shadow: 0 0 18px rgba(0, 217, 255, 0.24);
+}
+
+/* Wrapper per il dropdown: ci serve come “aggancio” logico */
+.lx-user-dropdown {
+  position: relative;
+}
+
+/* Dropdown “bulletproof”: fixed così non crea overflow e non spacca il layout */
+.lx-user-dropdown .dropdown-menu {
+  position: fixed !important;
+  top: calc(var(--lx-navbar-h) + 20px);
+  right: clamp(12px, 4vw, 24px);
+  left: auto !important;
+  min-width: 220px;
+  max-width: calc(100vw - 24px);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: lx-dropdown-in 0.18s ease-out;
+  z-index: 2000;
+}
+
+/* Animazione entrata dropdown: più “premium” */
+@keyframes lx-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

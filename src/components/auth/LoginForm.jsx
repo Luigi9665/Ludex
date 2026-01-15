@@ -1,16 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginAction } from "../../redux/action";
+import { useNavigate } from "react-router";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isEmailTouched, setIsEmailTouched] = useState(false);
   const [isPasswordTouched, setIsPasswordTouched] = useState(false);
-  const [backendError, setBackendError] = useState("");
 
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const { loadig, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/home", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -34,7 +41,6 @@ const LoginForm = () => {
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
-            setBackendError("");
           }}
           onBlur={() => setIsEmailTouched(true)}
           required
@@ -52,7 +58,6 @@ const LoginForm = () => {
           value={password}
           onChange={(e) => {
             setPassword(e.target.value);
-            setBackendError("");
           }}
           onBlur={() => setIsPasswordTouched(true)}
           required
@@ -71,13 +76,18 @@ const LoginForm = () => {
         </button>
       </div> */}
 
-      {backendError && <div className="alert alert-danger text-center mb-2">{backendError}</div>}
+      {error && <div className="alert alert-danger text-center mb-2">{error}</div>}
 
-      <button className="btn btn-lx-primary btn-lg" type="submit" disabled={!isFormValid}>
-        Login
+      <button className="btn btn-lx-primary btn-lg d-flex align-items-center justify-content-center gap-2" type="submit" disabled={!isFormValid || loading}>
+        {loading ? (
+          <>
+            <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span role="status">Accesso in corso...</span>
+          </>
+        ) : (
+          "Login"
+        )}
       </button>
-
-      <p className="text-muted small text-center mb-0">Demo: user / admin (quando lo colleghiamo al backend)</p>
     </form>
   );
 };

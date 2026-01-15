@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router";
 import "./App.css";
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
+import MainLayout from "./layouts/MainLayout";
 
 function App() {
   return (
@@ -10,7 +11,9 @@ function App() {
 
       <Route path="/auth" element={<AuthPage />} />
 
-      <Route path="/home" element={<HomePage />} />
+      <Route element={<MainLayout />}>
+        <Route path="/home" element={<HomePage />} />
+      </Route>
 
       <Route path="*" element={<h2>Pagina non trovata</h2>} />
     </Routes>

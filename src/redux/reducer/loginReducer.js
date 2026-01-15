@@ -5,7 +5,7 @@ const initialstate = {
   refreshToken: null,
   expiresAt: null,
   user: null,
-  isAuthenticated: null,
+  isAuthenticated: false,
   loading: false,
   error: null,
 };
@@ -37,9 +37,7 @@ export default function loginReducer(state = initialstate, action) {
         isAuthenticated: false,
       };
     case LOGOUT:
-      return {
-        initialstate,
-      };
+      return initialstate;
     default:
       return state;
   }

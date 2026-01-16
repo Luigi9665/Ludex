@@ -43,7 +43,10 @@ const MyNavbar = ({ user }) => {
 
     fetchHealth();
 
-    const id = user?.role === "Admin" ? setInterval(fetchHealth, 30000) : null;
+    // Chiamate periodiche
+    const id = setInterval(() => {
+      if (document.visibilityState === "visible") fetchHealth();
+    }, 60000); // ogni 60s
 
     return () => {
       cancelled = true;
@@ -75,7 +78,7 @@ const MyNavbar = ({ user }) => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`}>
+        <div className={`collapse navbar-collapse ${isOpen ? "lx-glass text-center py-2 show" : ""}`}>
           <form className="d-flex mx-auto my-2 my-lg-0 lx-search-form" role="search">
             <input className="form-control lx-input-glass" type="search" placeholder="Cerca giochi ..." aria-label="Search" />
           </form>

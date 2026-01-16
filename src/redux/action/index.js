@@ -1,9 +1,6 @@
 import { jwtDecode } from "jwt-decode";
-
-export const LOGIN_REQUEST = "LOGIN_REQUEST";
-export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
-export const LOGIN_ERROR = "LOGIN_ERROR";
-export const LOGOUT = "LOGOUT";
+import { apiFetch } from "../../apiFetch Autenticate/apiFetch";
+import { LOGIN_ERROR, LOGIN_REQUEST, LOGIN_SUCCESS, LOGOUT, USER_DATA_CLEAR, USER_DATA_ERROR, USER_DATA_REQUEST, USER_DATA_SUCCESS } from "../authTypes";
 
 const safeJson = async (res) => {
   try {
@@ -22,6 +19,7 @@ const mapUserFromClaims = (c) => ({
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
+//azione per il login , salva le credenziali come il token, il refreshToken e alcuni dati dell'user come l'id, email e ruolo
 export const loginAction = (credentials) => {
   return async (dispatch) => {
     dispatch({ type: LOGIN_REQUEST });
@@ -57,10 +55,41 @@ export const loginAction = (credentials) => {
   };
 };
 
+//pulisce completamente lo stato del redux per quanto riguarda l'autenticazione
 export const logoutAction = () => {
   return (dispatch) => {
     dispatch({
       type: LOGOUT,
     });
+    dispatch({
+      type: USER_DATA_CLEAR,
+    });
+  };
+};
+
+//azione per prelevare dal db i dettagli di un giocatore
+export const loadUserDetails = (userId) => {
+  return async (dispatch) => {
+    dispatch({ type: USER_DATA_REQUEST });
+
+    try {
+      const response = await apiFetch(`/api/Users/GetUtenteById?id=${userId}`, { method: "GET" });
+
+      if (!response.ok) {
+        throw new Error("Impossibile caricare i dati");
+      }
+
+      const data = await safeJson(response);
+
+      dispatch({
+        type: USER_DATA_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: USER_DATA_ERROR,
+        payload: error?.message || "Errore durante il caricamento, riprova più tardi",
+      });
+    }
   };
 };

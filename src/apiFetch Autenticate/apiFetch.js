@@ -1,23 +1,26 @@
 import { jwtDecode } from "jwt-decode";
-import { LOGIN_SUCCESS, logoutAction } from "../redux/action";
 import { store } from "../redux/store/store";
 import { safeJson } from "./safeJson,js";
+import { LOGIN_SUCCESS, LOGOUT, USER_DATA_CLEAR } from "../redux/authTypes";
 
-export const apiFetch = async (URL, option = {}) => {
+export const apiFetch = async (URL, options = {}) => {
   const state = store.getState();
   const accessToken = state.auth.accessToken;
   const refreshToken = state.auth.refreshToken;
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  const doFetch = (token) =>
-    fetch(`${baseUrl}${URL}`, {
-      ...option,
-      headers: {
-        ...(option.header || {}),
-        Authorization: token ? `Bearer ${token}` : undefined,
-      },
+  const doFetch = (token) => {
+    const headers = {
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+
+    return fetch(`${baseUrl}${URL}`, {
+      ...options,
+      headers,
     });
+  };
 
   // 1) prima chiamata con accessToken attuale
   let res = await doFetch(accessToken);
@@ -26,7 +29,8 @@ export const apiFetch = async (URL, option = {}) => {
 
   // 2) se 401 e non ho refreshToken → sessione veramente morta
   if (!refreshToken) {
-    store.dispatch(logoutAction());
+    store.dispatch({ type: LOGOUT });
+    store.dispatch({ type: USER_DATA_CLEAR });
     return res;
   }
 
@@ -39,7 +43,8 @@ export const apiFetch = async (URL, option = {}) => {
 
   if (!refreshRes.ok) {
     // refresh fallito → logout e ritorno la vecchia 401
-    store.dispatch(logoutAction());
+    store.dispatch({ type: LOGOUT });
+    store.dispatch({ type: USER_DATA_CLEAR });
     return res;
   }
 

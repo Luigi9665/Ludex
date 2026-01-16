@@ -1,4 +1,4 @@
-import { LOGIN_ERROR, LOGIN_REQUEST, LOGIN_SUCCESS, LOGOUT } from "../action";
+import { LOGIN_ERROR, LOGIN_REQUEST, LOGIN_SUCCESS, LOGOUT } from "../authTypes";
 
 const initialstate = {
   accessToken: null,

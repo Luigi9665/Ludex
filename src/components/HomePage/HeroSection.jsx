@@ -1,4 +1,4 @@
-const HeroSection = ({ user }) => {
+const HeroSection = ({ user, stats }) => {
   return (
     <section className="lx-hero">
       <div className="container">
@@ -21,15 +21,15 @@ const HeroSection = ({ user }) => {
             <div className="lx-glass p-4">
               <div className="row text-center">
                 <div className="col-4">
-                  <div className="lx-stat-number">{user.stats.gamesCount}</div>
+                  <div className="lx-stat-number">{stats.gamesCount}</div>
                   <div className="lx-stat-label">Giochi</div>
                 </div>
                 <div className="col-4">
-                  <div className="lx-stat-number">{user.stats.reviewsCount}</div>
+                  <div className="lx-stat-number">{stats.reviewsCount}</div>
                   <div className="lx-stat-label">Recensioni</div>
                 </div>
                 <div className="col-4">
-                  <div className="lx-stat-number">{user.stats.friendsCount}</div>
+                  <div className="lx-stat-number">{stats.friendsCount}</div>
                   <div className="lx-stat-label">Amici</div>
                 </div>
               </div>

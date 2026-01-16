@@ -1,20 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import LogoLudexPng from "../../assets/LogoLudex3Ridimensionato.png";
 import avatar from "../../assets/avatar.png";
 import avatarAdmin from "../../assets/avatarAdmin.png";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutAction } from "../../redux/action";
+import { apiFetch } from "../../apiFetch Autenticate/apiFetch";
+import { safeJson } from "../../apiFetch Autenticate/safeJson,js";
 
 const MyNavbar = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const [health, setHealth] = useState("loading");
 
   const dispatch = useDispatch();
 
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchHealth = async () => {
+      if (user?.role !== "Admin") return;
+
+      setHealth("loading");
+
+      try {
+        const res = await apiFetch("/api/Health", { method: "GET" });
+
+        const data = await safeJson(res);
+
+        const ok = data?.status === "Healthy" && data?.database === "OK";
+        if (!cancelled) setHealth(ok ? "ok" : "down");
+      } catch (err) {
+        if (!cancelled) setHealth("down");
+        console.log(err);
+      }
+    };
+
+    fetchHealth();
+
+    const id = user?.role === "Admin" ? setInterval(fetchHealth, 30000) : null;
+
+    return () => {
+      cancelled = true;
+      if (id) clearInterval(id);
+    };
+  }, [user?.role]);
 
   const navigateToAuth = () => {
     navigate("/auth", { replace: true });
@@ -26,6 +61,15 @@ const MyNavbar = ({ user }) => {
         <Link className="navbar-brand d-flex align-items-center" to="/home">
           <img src={LogoLudexPng} style={{ width: "90px", height: "40px", objectFit: "contain" }} alt="Ludex logo" />
         </Link>
+
+        {user?.role === "Admin" && <span className="lx-badge-admin ms-2">ADMIN</span>}
+
+        {user?.role === "Admin" && (
+          <span className={`lx-health ms-2 ${health}`}>
+            <span className="lx-health-dot" />
+            DB
+          </span>
+        )}
 
         <button className="navbar-toggler border-0" type="button" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
@@ -79,7 +123,9 @@ const MyNavbar = ({ user }) => {
               )}
             </div>
           ) : (
-            <button onClick={navigateToAuth}> Login </button>
+            <button type="button" onClick={navigateToAuth} className="btn lx-btn-nav">
+              Login
+            </button>
           )}
         </div>
       </div>

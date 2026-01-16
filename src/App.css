@@ -60,7 +60,7 @@ h3,
 .auth-page {
   position: relative;
   min-height: 100vh;
-  background-image: url("/src/assets/WallpaperLudex4.png");
+  background-image: url("/src/assets/WallpaperLudex6.png");
   background-size: cover;
   background-position: center;
   background-blend-mode: multiply;
@@ -279,7 +279,7 @@ h3,
 /* Navbar: effetto vetro (glass) con blur e un bordo sotto leggero */
 .lx-navbar {
   height: var(--lx-navbar-h);
-  margin: 14px 16px 0;
+  margin: 0 16px;
   border-radius: 18px;
 
   background: rgba(10, 12, 20, 0.56) !important;
@@ -496,6 +496,85 @@ h3,
   overflow: hidden;
   animation: lx-dropdown-in 0.18s ease-out;
   z-index: 2000;
+}
+
+/* button login */
+.lx-btn-nav {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 217, 255, 0.45);
+  color: rgba(238, 244, 255, 0.92);
+  padding: 0.55rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(12px);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.lx-btn-nav:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 217, 255, 0.1);
+  border-color: rgba(157, 78, 221, 0.55);
+  box-shadow: 0 0 18px rgba(0, 217, 255, 0.18), 0 0 22px rgba(157, 78, 221, 0.14);
+}
+
+.lx-btn-nav:active {
+  transform: translateY(0);
+}
+
+.lx-btn-nav:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 217, 255, 0.16), 0 0 18px rgba(0, 217, 255, 0.2);
+}
+
+/* logo ROLE */
+.lx-badge-admin {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.92);
+  background: linear-gradient(135deg, rgba(157, 78, 221, 0.55), rgba(0, 217, 255, 0.35));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 0 18px rgba(157, 78, 221, 0.18);
+}
+
+/* logo stato DB  */
+.lx-health {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.72rem;
+  color: rgba(238, 244, 255, 0.92);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.lx-health-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.lx-health.loading .lx-health-dot {
+  background: rgba(255, 200, 120, 0.95);
+  box-shadow: 0 0 12px rgba(255, 200, 120, 0.35);
+}
+
+.lx-health.ok .lx-health-dot {
+  background: rgba(43, 182, 166, 0.95);
+  box-shadow: 0 0 12px rgba(43, 182, 166, 0.35);
+}
+
+.lx-health.down .lx-health-dot {
+  background: rgba(255, 99, 132, 0.95);
+  box-shadow: 0 0 12px rgba(255, 99, 132, 0.35);
 }
 
 /* Animazione entrata dropdown: più “premium” */

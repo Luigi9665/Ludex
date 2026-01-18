@@ -1,4 +1,32 @@
 const HeroSection = ({ user, stats }) => {
+  const isGuest = !user || !stats;
+
+  // MODE: GUEST (utente non connesso)
+  if (isGuest) {
+    return (
+      <section className="lx-hero lx-hero-guest">
+        <div className="container text-center py-5">
+          <h1 className="lx-hero-title">Benvenuto Viaggiatore 👾</h1>
+
+          <p className="lx-hero-guest-text mt-3">
+            Stai esplorando LUDEX in modalità ospite. Accedi o crea un profilo per sbloccare la tua libreria personale, salvare giochi e lasciare recensioni
+            luminose come un critico d'élite.
+          </p>
+
+          <div className="mt-4 d-flex justify-content-center gap-3">
+            <a href="/auth" className="btn lx-btn-primary">
+              Accedi
+            </a>
+            <a href="/auth" className="btn lx-btn-outline">
+              Crea Account
+            </a>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // MODE: USER LOGGATO
   return (
     <section className="lx-hero">
       <div className="container">

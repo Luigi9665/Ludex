@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loadUserDetails } from "../redux/action";
 import HeroSection from "../components/HomePage/HeroSection";
 import LxLoader from "../components/LxLoader";
+import LibraryGames from "../components/HomePage/LibraryGames";
 
 const HomePage = () => {
   const authUser = useSelector((state) => state.auth.user);
@@ -19,6 +20,8 @@ const HomePage = () => {
   // preparo dati stats SOLO se ho userDetails
   const games = userDetails?.games || [];
   const reviews = games.filter((g) => (g.review ?? "").trim().length > 0);
+
+  console.log(games);
 
   const stats = {
     gamesCount: games.length,
@@ -37,7 +40,14 @@ const HomePage = () => {
       {isLogged ? (
         // utente loggato → o loader oppure hero con stats
         isStatsReady ? (
-          <HeroSection user={authUser} stats={stats} />
+          <>
+            <div>
+              <HeroSection user={authUser} stats={stats} />
+            </div>
+            <div className="mt-3">
+              <LibraryGames games={games} />
+            </div>
+          </>
         ) : (
           <LxLoader message="Carico la tua libreria..." />
         )
@@ -45,8 +55,6 @@ const HomePage = () => {
         // utente non loggato → hero in modalità guest
         <HeroSection user={null} stats={null} />
       )}
-
-      <p>Area privata</p>
     </div>
   );
 };

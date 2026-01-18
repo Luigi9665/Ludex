@@ -12,7 +12,7 @@ const LibraryGames = ({ games }) => {
           <div className="lx-glass p-5 text-center">
             <i className="bi bi-controller display-1 mb-3 lx-text-glow"></i>
             <h3>Nessun gioco ancora</h3>
-            <p className="text-muted mb-4">La tua libreria è ancora vuota. Inizia ad aggiungere i tuoi titoli preferiti.</p>
+            <p className="text-white-50 mb-4">La tua libreria è ancora vuota. Inizia ad aggiungere i tuoi titoli preferiti.</p>
             <button className="btn lx-btn-primary">Aggiungi il primo gioco</button>
           </div>
         </div>

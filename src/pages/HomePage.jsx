@@ -1,60 +1,82 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { loadUserDetails } from "../redux/action";
-import HeroSection from "../components/HomePage/HeroSection";
-import LxLoader from "../components/LxLoader";
-import LibraryGames from "../components/HomePage/LibraryGames";
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  loadLatestReviews,
+  loadTopReviewers,
+  loadTrendingWeeklyGames,
+  loadUserDetails,
+} from '../redux/action';
+import HomePrivateArea from '../components/HomePage/HomePrivateArea';
+import HomePublicArea from '../components/HomePage/HomePublicArea';
 
 const HomePage = () => {
-  const authUser = useSelector((state) => state.auth.user);
-  const { userDetails, loading } = useSelector((state) => state.userData);
-
   const dispatch = useDispatch();
 
+  // QUI: assicurati che sia davvero state.auth.user
+  const authUser = useSelector(state => state.auth.user);
+  // se nel tuo reducer hai isAuthenticated, usa quello:
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated ?? false);
+
+  // fallback nel caso non ci sia isAuthenticated
+  const isLogged = isAuthenticated || !!authUser?.userId;
+
+  // dati privati utente
+  const { userDetails, loading } = useSelector(state => state.userData);
+
+  // dati pubblici home
+  const homePublic = useSelector(state => state.homePublic) || {};
+
+  const trendingWeeklyGames = homePublic.trendingWeeklyGames || {
+    items: [],
+    loading: false,
+    error: null,
+  };
+
+  const latestReviews = homePublic.latestReviews || {
+    items: [],
+    loading: false,
+    error: null,
+  };
+
+  const topReviewers = homePublic.topReviewers || {
+    items: [],
+    loading: false,
+    error: null,
+  };
+
+  // load dati utente solo se loggato
   useEffect(() => {
     if (authUser?.userId) {
       dispatch(loadUserDetails(authUser.userId));
     }
   }, [authUser?.userId, dispatch]);
 
-  // preparo dati stats SOLO se ho userDetails
-  const games = userDetails?.games || [];
-  const reviews = games.filter((g) => (g.review ?? "").trim().length > 0);
-
-  console.log(games);
-
-  const stats = {
-    gamesCount: games.length,
-    reviewsCount: reviews.length,
-    friendsCount: 0,
-  };
-
-  const isLogged = !!authUser;
-  const isStatsReady = isLogged && !loading && userDetails;
+  // load sezioni pubbliche
+  useEffect(() => {
+    dispatch(loadTrendingWeeklyGames());
+    dispatch(loadLatestReviews());
+    dispatch(loadTopReviewers());
+  }, [dispatch]);
 
   return (
     <div className="container-fluid pt-3">
+      {/* H1 SEO soft */}
       <h1 className="lx-h1-soft text-end">Ludex</h1>
 
-      {/* HERO SECTION */}
-      {isLogged ? (
-        // utente loggato → o loader oppure hero con stats
-        isStatsReady ? (
-          <>
-            <div>
-              <HeroSection user={authUser} stats={stats} />
-            </div>
-            <div className="mt-3">
-              <LibraryGames games={games} />
-            </div>
-          </>
-        ) : (
-          <LxLoader message="Carico la tua libreria..." />
-        )
-      ) : (
-        // utente non loggato → hero in modalità guest
-        <HeroSection user={null} stats={null} />
-      )}
+      {/* AREA PRIVATA */}
+      <HomePrivateArea
+        isLogged={isLogged}
+        authUser={authUser}
+        userDetails={userDetails}
+        userLoading={loading}
+      />
+
+      {/* AREA PUBBLICA */}
+      <HomePublicArea
+        trending={trendingWeeklyGames}
+        latest={latestReviews}
+        topReviewers={topReviewers}
+      />
     </div>
   );
 };

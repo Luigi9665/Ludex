@@ -294,48 +294,50 @@ export const loadLibraryPage = (page = 1) => {
 
 //action per la search
 export const searchLibraryGames = ({ page = 1, search = "", genres = [], platforms = [] }) => {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     dispatch({ type: LIBRARY_REQUEST });
 
     try {
-      const pageSize = getState().libraryGames.pageSize ?? 20;
+      const params = [];
 
-      const params = new URLSearchParams();
-      params.set("page", page);
-      params.set("pageSize", pageSize);
-
-      if (search.trim()) {
-        params.set("Search", search.trim());
+      // --- TESTO ---
+      if (search.trim() !== "") {
+        params.push(`Title=${encodeURIComponent(search.trim())}`);
       }
 
-      genres.forEach((g) => params.append("Genres", g));
-      platforms.forEach((p) => params.append("Platforms", p));
+      // --- GENERI ---
+      genres.forEach((g) => {
+        params.push(`Genres=${encodeURIComponent(g)}`);
+      });
 
-      const response = await apiFetch(`/api/Games/search?${params.toString()}`);
+      // --- PIATTAFORME ---
+      platforms.forEach((p) => {
+        params.push(`Platforms=${encodeURIComponent(p)}`);
+      });
 
-      if (!response.ok) {
-        throw new Error("Impossibile filtrare i giochi");
-      }
+      // --- PAGINAZIONE ---
+      params.push(`page=${page}`);
+      params.push(`pageSize=20`);
+
+      const url = `/api/Games/search?${params.join("&")}`;
+
+      const response = await apiFetch(url);
+      if (!response.ok) throw new Error("Errore nel caricamento dei giochi filtrati");
 
       const data = await safeJson(response);
-      // { items, page, pageSize, totalItems, totalPages }
 
       dispatch({
         type: LIBRARY_SUCCESS,
         payload: {
-          items: data.items,
-          page: data.page,
-          pageSize: data.pageSize,
-          totalItems: data.totalItems,
-          totalPages: data.totalPages,
-          filters: { search, genres, platforms },
+          ...data,
           mode: "search",
+          filters: { search, genres, platforms },
         },
       });
     } catch (err) {
       dispatch({
         type: LIBRARY_ERROR,
-        payload: err?.message || "Errore durante la ricerca giochi",
+        payload: err.message,
       });
     }
   };

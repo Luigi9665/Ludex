@@ -15,7 +15,7 @@ const LibraryGrid = ({ games }) => {
   return (
     <div className="row g-4 mb-4">
       {games.map((game) => (
-        <div key={game.gameId} className="col-6 col-md-4 col-xl-3">
+        <div key={game.gameId} className="col-6 col-md-4 col-lg-3 col-xl-2">
           <GameCard game={game} />
         </div>
       ))}

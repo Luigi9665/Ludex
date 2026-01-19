@@ -7,10 +7,15 @@ const LibraryFilters = ({ search, onSearchChange, selectedGenres, onGenresChange
   const dispatch = useDispatch();
   const { genres, platforms } = useSelector((state) => state.selectGame);
 
+  // normalizzo
+  const genreList = Array.isArray(genres) ? genres : (genres?.items ?? []);
+
+  const platformList = Array.isArray(platforms) ? platforms : (platforms?.items ?? []);
+
   useEffect(() => {
-    if (!genres || genres.length === 0) dispatch(loadGenres());
-    if (!platforms || platforms.length === 0) dispatch(loadPlatforms());
-  }, [dispatch, genres, platforms]);
+    dispatch(loadGenres());
+    dispatch(loadPlatforms());
+  }, [dispatch]);
 
   const toggleValue = (current, value) => {
     return current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
@@ -59,14 +64,15 @@ const LibraryFilters = ({ search, onSearchChange, selectedGenres, onGenresChange
         </label>
 
         <div className="lx-multiselect-list">
-          {genres && genres.length > 0 ? (
-            genres.map((g) => {
+          {genreList && genreList.length > 0 ? (
+            genreList.map((g) => {
               const name = g.name;
               const active = selectedGenres.includes(name);
+              const inputId = `genre-${g.genreId ?? g.id ?? name}`;
 
               return (
-                <label key={g.genreId ?? g.id} className={`lx-multiselect-item ${active ? "is-checked" : ""}`} onClick={() => handleGenreToggle(name)}>
-                  <input type="checkbox" className="form-check-input me-2" checked={active} readOnly />
+                <label key={g.genreId ?? g.id ?? name} htmlFor={inputId} className={`lx-multiselect-item ${active ? "is-checked" : ""}`}>
+                  <input id={inputId} type="checkbox" className="form-check-input me-2" checked={active} onChange={() => handleGenreToggle(name)} />
                   <span>{name}</span>
                 </label>
               );
@@ -85,14 +91,15 @@ const LibraryFilters = ({ search, onSearchChange, selectedGenres, onGenresChange
         </label>
 
         <div className="lx-multiselect-list">
-          {platforms && platforms.length > 0 ? (
-            platforms.map((p) => {
+          {platformList && platformList.length > 0 ? (
+            platformList.map((p) => {
               const name = p.name;
               const active = selectedPlatforms.includes(name);
+              const inputId = `platform-${p.platformId ?? p.id ?? name}`;
 
               return (
-                <label key={p.platformId ?? p.id} className={`lx-multiselect-item ${active ? "is-checked" : ""}`} onClick={() => handlePlatformToggle(name)}>
-                  <input type="checkbox" className="form-check-input me-2" checked={active} readOnly />
+                <label key={p.platformId ?? p.id ?? name} htmlFor={inputId} className={`lx-multiselect-item ${active ? "is-checked" : ""}`}>
+                  <input id={inputId} type="checkbox" className="form-check-input me-2" checked={active} onChange={() => handlePlatformToggle(name)} />
                   <span>{name}</span>
                 </label>
               );

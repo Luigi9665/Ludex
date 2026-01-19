@@ -959,19 +959,32 @@ h3,
   font-weight: 500;
 }
 
+/* Row che contiene i badge dei generi nella card */
 .lx-genre-row {
-  margin-top: 0.1rem;
+  display: flex;
+  flex-wrap: wrap; /* i badge vanno a capo in modo naturale */
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+
+  /* importantissimo per evitare robe strane */
+  max-width: 100%;
 }
 
+/* Singolo badge genere (pill) */
 .lx-genre-pill {
-  display: inline-block;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0.15rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
   border-radius: 999px;
   border: 1px solid rgba(157, 78, 221, 0.8);
   color: var(--lx-purple);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap; /* il testo del singolo genere non va a capo */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis; /* se il nome è assurdo tipo "Action-Adventure RPG" si tronca */
 }
 
 /* ===== STAR RATING ===== */
@@ -1493,6 +1506,70 @@ h3,
   .lx-admin-preview-card {
     margin-top: 1.5rem;
   }
+}
+
+/* filtri libreria */
+.lx-multiselect-item {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.lx-multiselect-item span {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* ===== LIBRARY FILTERS (FIX OVERFLOW) ===== */
+
+.lx-multiselect-list {
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden; /* ✅ blocca lo scroll orizzontale */
+  padding: 0.25rem 0;
+}
+
+.lx-multiselect-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box; /* ✅ evita allargamenti strani */
+  padding: 0.45rem 0.65rem;
+  margin-bottom: 0.25rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.lx-multiselect-item .form-check-input {
+  flex: 0 0 auto; /* ✅ non schiacciare / non espandere */
+}
+
+.lx-multiselect-item span {
+  flex: 1 1 auto;
+  min-width: 0; /* ✅ importantissimo per ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* ✅ niente wrap, niente overflow */
+}
+
+.lx-multiselect-item:hover {
+  background: rgba(0, 217, 255, 0.1);
+  /* ❌ niente translateX: crea overflow */
+}
+
+.lx-multiselect-item.is-checked {
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.18), rgba(157, 78, 221, 0.18));
+  box-shadow: inset 3px 0 0 var(--lx-cyan); /* ✅ “border-left” senza allargare */
 }
 
 /* ===== FOOTER ===== */

@@ -7,7 +7,7 @@ const LibraryGrid = ({ games }) => {
       <div className="lx-glass p-5 text-center">
         <i className="bi bi-controller display-4 mb-3 lx-text-glow"></i>
         <h4 className="mb-2">Nessun gioco trovato</h4>
-        <p className="text-muted mb-0">Prova a cambiare i filtri o la ricerca.</p>
+        <p className="text-white-50 mb-0">Prova a cambiare i filtri o la ricerca.</p>
       </div>
     );
   }

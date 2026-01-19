@@ -1,24 +1,30 @@
-import LxLoader from '../LxLoader';
-import HeroSection from './HeroSection';
-import LibraryGames from './LibraryGames';
+import { Link } from "react-router";
+import LxLoader from "../LxLoader";
+import HeroSection from "./HeroSection";
+import LibraryGames from "./LibraryGames";
 
 const HomePrivateArea = ({ isLogged, authUser, userDetails, userLoading }) => {
   // ❌ non loggato
   if (!isLogged) {
     return (
-      <section className="lx-hero-guest">
-        <div className="container">
-          <div className="lx-glass p-4 p-md-5 text-center">
-            <h2 className="mb-3 lx-hero-title">
-              Benvenuto in <span className="lx-text-glow">Ludex</span>
-            </h2>
-            <p className="lx-hero-guest-text mb-4">
-              Crea il tuo profilo, costruisci la tua libreria e scopri i giochi che stanno
-              appassionando la community.
-            </p>
-            <p className="text-white-50 small mb-0">
-              Accedi o registrati per vedere la tua dashboard personalizzata.
-            </p>
+      <section className="lx-hero lx-hero-guest">
+        <div className="container text-center py-5">
+          <h1 className="lx-hero-title">
+            <span className="lx-text-glow">Benvenuto </span>Viaggiatore 👾
+          </h1>
+
+          <p className="lx-hero-guest-text mt-3">
+            Stai esplorando LUDEX in modalità ospite. Accedi o crea un profilo per sbloccare la tua libreria personale, salvare giochi e lasciare recensioni
+            luminose come un critico d'élite.
+          </p>
+
+          <div className="mt-4 d-flex justify-content-center gap-3">
+            <Link to="/auth" className="btn lx-btn-primary" style={{ textDecoration: "" }}>
+              Accedi
+            </Link>
+            <Link to="/auth" className="btn lx-btn-outline">
+              Crea Account
+            </Link>
           </div>
         </div>
       </section>
@@ -38,7 +44,7 @@ const HomePrivateArea = ({ isLogged, authUser, userDetails, userLoading }) => {
 
   // ✅ loggato + dettagli pronti
   const games = userDetails.games || [];
-  const reviews = games.filter(g => (g.review ?? '').trim().length > 0);
+  const reviews = games.filter((g) => (g.review ?? "").trim().length > 0);
 
   const stats = {
     gamesCount: games.length,

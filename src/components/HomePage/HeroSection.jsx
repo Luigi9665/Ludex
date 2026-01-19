@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 const HeroSection = ({ user, stats }) => {
   const isGuest = !user || !stats;
 
@@ -14,12 +16,12 @@ const HeroSection = ({ user, stats }) => {
           </p>
 
           <div className="mt-4 d-flex justify-content-center gap-3">
-            <a href="/auth" className="btn lx-btn-primary">
+            <Link to="/auth" className="btn lx-btn-primary" style={{ textDecoration: "" }}>
               Accedi
-            </a>
-            <a href="/auth" className="btn lx-btn-outline">
+            </Link>
+            <Link to="/auth" className="btn lx-btn-outline">
               Crea Account
-            </a>
+            </Link>
           </div>
         </div>
       </section>

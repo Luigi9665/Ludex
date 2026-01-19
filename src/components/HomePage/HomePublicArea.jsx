@@ -1,5 +1,7 @@
-import LxLoader from '../LxLoader';
-import TrendingGames from './TrendingGames';
+import LxLoader from "../LxLoader";
+import LatestReviewsSection from "./LatestReviewsSection";
+import TopReviewersSection from "./TopReviewersSection";
+import TrendingGames from "./TrendingGames";
 
 const HomePublicArea = ({ trending, latest, topReviewers }) => {
   const trendingLoading = trending?.loading ?? false;
@@ -23,31 +25,19 @@ const HomePublicArea = ({ trending, latest, topReviewers }) => {
         <section className="lx-section">
           <div className="container">
             <div className="lx-glass p-4 text-center">
-              <p className="text-muted mb-0">
-                Non riesco a caricare i giochi in tendenza al momento.
-              </p>
+              <p className="text-muted mb-0">Non riesco a caricare i giochi in tendenza al momento.</p>
             </div>
           </div>
         </section>
       )}
 
       {/* ULTIME RECENSIONI - quando avrai il componente LatestReviewsSection */}
-      {/*
-      <LatestReviewsSection
-        loading={latest.loading}
-        error={latest.error}
-        reviews={latest.items || []}
-      />
-      */}
+
+      <LatestReviewsSection loading={latest.loading} error={latest.error} reviews={latest.items || []} />
 
       {/* TOP REVIEWERS - quando avrai il componente TopReviewersSection */}
-      {/*
-      <TopReviewersSection
-        loading={topReviewers.loading}
-        error={topReviewers.error}
-        users={topReviewers.items || []}
-      />
-      */}
+
+      <TopReviewersSection loading={topReviewers.loading} error={topReviewers.error} users={topReviewers.items || []} />
     </>
   );
 };

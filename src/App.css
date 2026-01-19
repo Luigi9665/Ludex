@@ -835,7 +835,7 @@ h3,
 }
 
 .lx-hero-guest-text {
-  max-width: 600px;
+  max-width: 730px;
   margin: 0 auto;
   color: var(--lx-text-secondary);
   font-size: 1.1rem;
@@ -1182,6 +1182,316 @@ h3,
 .lx-trend-reviews {
   font-size: 0.8rem;
   color: var(--lx-text-secondary);
+}
+
+/* ===== LATEST REVIEWS (carousel cards) ===== */
+.lx-carousel-track--reviews {
+  padding-bottom: 0.75rem;
+}
+
+.lx-review-item {
+  flex: 0 0 320px;
+}
+
+@media (min-width: 768px) {
+  .lx-review-item {
+    flex-basis: 360px;
+  }
+}
+
+.lx-review-card2 {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-height: 230px;
+}
+
+.lx-review-head {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+}
+
+.lx-review-cover2 {
+  width: 78px;
+  height: 78px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--lx-border);
+  box-shadow: 0 0 16px rgba(0, 217, 255, 0.14);
+}
+
+.lx-review-title {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
+.lx-review-meta {
+  color: var(--lx-text-secondary);
+  font-size: 0.85rem;
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  opacity: 0.9;
+}
+
+.lx-review-user {
+  color: rgba(0, 217, 255, 0.85);
+}
+
+.lx-dot {
+  opacity: 0.6;
+}
+
+.lx-review-snippet2 {
+  color: var(--lx-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* ===== TOP REVIEWERS ===== */
+.lx-topper-card {
+  position: relative;
+}
+
+.lx-rank-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--lx-border);
+  box-shadow: 0 0 16px rgba(157, 78, 221, 0.12);
+}
+
+.lx-rank-badge--top {
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.35), rgba(157, 78, 221, 0.28));
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 0 22px rgba(0, 217, 255, 0.14),
+    0 0 22px rgba(157, 78, 221, 0.12);
+}
+
+.lx-topper-name {
+  font-weight: 800;
+}
+
+.lx-topper-count {
+  min-width: 58px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  color: var(--lx-cyan);
+  background: rgba(0, 217, 255, 0.08);
+  border: 1px solid rgba(0, 217, 255, 0.22);
+}
+
+/* ===== UNAUTHORIZED ===== */
+.lx-unauth-card {
+  max-width: 520px;
+  animation: lx-fade-up 0.4s ease-out;
+}
+
+.lx-unauth-icon {
+  font-size: 3rem;
+  color: var(--lx-purple);
+  text-shadow: 0 0 18px var(--lx-purple-glow);
+}
+
+/* ===== NOT FOUND ===== */
+.lx-notfound-card {
+  max-width: 560px;
+  animation: lx-fade-up 0.4s ease-out;
+}
+
+.lx-notfound-code {
+  font-size: clamp(3.5rem, 6vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+
+  background: linear-gradient(135deg, var(--lx-cyan), var(--lx-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  text-shadow: 0 0 24px rgba(0, 217, 255, 0.25);
+}
+
+/* ===== ANIMAZIONE INGRESSO ===== */
+@keyframes lx-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== ADMIN AREA ===== */
+.lx-admin-card {
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+}
+
+.lx-admin-pill {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.22), rgba(157, 78, 221, 0.28));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 16px rgba(0, 217, 255, 0.18);
+}
+
+/* ===== ADMIN FORM ===== */
+.lx-admin-form .lx-field-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.lx-admin-form .lx-field-control {
+  background: rgba(11, 21, 37, 0.92);
+  border: 1px solid var(--lx-border);
+  color: var(--lx-text);
+  font-size: 0.9rem;
+}
+
+.lx-admin-form .lx-field-control:focus {
+  border-color: rgba(0, 217, 255, 0.75);
+  box-shadow: 0 0 0 0.18rem rgba(0, 217, 255, 0.18);
+  background: rgba(11, 21, 37, 0.98);
+  color: var(--lx-text);
+}
+
+.lx-field-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+/* ===== ADMIN PREVIEW ===== */
+.lx-admin-preview-header {
+  font-size: 0.8rem;
+  color: var(--lx-text-secondary);
+}
+
+.lx-admin-preview-badge {
+  border-radius: 999px;
+  border: 1px solid rgba(0, 217, 255, 0.6);
+  color: rgba(0, 217, 255, 0.9);
+  font-size: 0.7rem;
+}
+
+.lx-admin-preview-card {
+  margin-top: 0.5rem;
+  padding: 0.9rem;
+}
+
+.lx-admin-cover-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(148, 163, 184, 0.9);
+  background: radial-gradient(circle at 30% 30%, rgba(0, 217, 255, 0.12), transparent 55%), rgba(15, 23, 42, 0.9);
+}
+
+.lx-admin-cover-placeholder i {
+  font-size: 1.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.lx-admin-form .lx-field-control::placeholder {
+  color: rgba(238, 244, 255, 0.55);
+}
+
+/* Lista multiselect in stile Ludex */
+.lx-multiselect-list {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.5rem;
+  max-height: 170px; /* leggermente più ampia */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Scrollbar */
+.lx-multiselect-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.lx-multiselect-list::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 10px;
+}
+
+.lx-multiselect-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--lx-cyan), var(--lx-purple));
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.4);
+}
+
+/* Singola voce */
+.lx-multiselect-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: rgba(226, 232, 240, 0.92);
+  transition:
+    background 0.15s,
+    box-shadow 0.15s,
+    transform 0.1s;
+}
+
+.lx-multiselect-item:hover {
+  background: rgba(148, 163, 184, 0.14);
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.14);
+}
+
+.lx-multiselect-item.is-checked {
+  background: rgba(0, 217, 255, 0.18);
+  box-shadow: 0 0 14px rgba(0, 217, 255, 0.28);
+}
+
+/* input checkbox */
+.lx-multiselect-item .form-check-input {
+  cursor: pointer;
+  margin-top: 0;
+}
+
+/* leggero spacing su mobile */
+@media (max-width: 991.98px) {
+  .lx-admin-preview-card {
+    margin-top: 1.5rem;
+  }
 }
 
 /* ===== FOOTER ===== */

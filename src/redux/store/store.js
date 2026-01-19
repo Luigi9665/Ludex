@@ -4,6 +4,7 @@ import loginReducer from "../reducer/loginReducer";
 import userReducer from "../reducer/userReducer";
 import { persistReducer, persistStore } from "redux-persist";
 import homePublicReducer from "../reducer/homePublicReducer";
+import genresPlatformsReducer from "../reducer/genresPlatformsReducer";
 
 const persistConfig = {
   key: "root",
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   auth: loginReducer,
   userData: userReducer,
   homePublic: homePublicReducer,
+  selectGame: genresPlatformsReducer,
 });
 
 const persisterReducer = persistReducer(persistConfig, rootReducer);

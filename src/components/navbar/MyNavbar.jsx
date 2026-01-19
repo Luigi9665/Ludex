@@ -68,7 +68,7 @@ const MyNavbar = ({ user }) => {
         {user?.role === "Admin" && <span className="lx-badge-admin ms-2">ADMIN</span>}
 
         {user?.role === "Admin" && (
-          <span className={`lx-health ms-2 ${health}`}>
+          <span className={`lx-health ms-2 ${health} me-2`}>
             <span className="lx-health-dot" />
             DB
           </span>
@@ -78,7 +78,7 @@ const MyNavbar = ({ user }) => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className={`collapse navbar-collapse ${isOpen ? "lx-glass text-center py-2 show" : ""}`}>
+        <div className={`collapse navbar-collapse ${isOpen ? "bg-dark text-center py-2 show" : ""}`}>
           <form className="d-flex mx-auto my-2 my-lg-0 lx-search-form" role="search">
             <input className="form-control lx-input-glass" type="search" placeholder="Cerca giochi ..." aria-label="Search" />
           </form>
@@ -118,6 +118,12 @@ const MyNavbar = ({ user }) => {
                   <Link className="dropdown-item" to="/settings">
                     <i className="bi bi-gear me-2"></i>Settings
                   </Link>
+                  {user?.role === "Admin" && (
+                    <Link to="/admin/games/new" className="nav-link">
+                      <i className="bi bi-plus-circle me-2" />
+                      Nuovo gioco
+                    </Link>
+                  )}
                   <hr className="dropdown-divider" />
                   <button className="dropdown-item text-danger" onClick={() => dispatch(logoutAction())}>
                     <i className="bi bi-box-arrow-right me-2"></i>Logout

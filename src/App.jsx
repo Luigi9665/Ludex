@@ -3,6 +3,9 @@ import "./App.css";
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import MainLayout from "./layouts/MainLayout";
+import AdminCreateGamePage from "./pages/admin/AdminCreateGamePage";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -15,7 +18,11 @@ function App() {
         <Route path="/home" element={<HomePage />} />
       </Route>
 
-      <Route path="*" element={<h2>Pagina non trovata</h2>} />
+      <Route path="/admin/games/new" element={<AdminCreateGamePage />} />
+
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

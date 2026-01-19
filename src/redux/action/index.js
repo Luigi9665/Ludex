@@ -1,6 +1,9 @@
 import { jwtDecode } from "jwt-decode";
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch";
 import {
+  GENRES_ERROR,
+  GENRES_REQUEST,
+  GENRES_SUCCESS,
   LATESTREVIEWS_ERROR,
   LATESTREVIEWS_REQUEST,
   LATESTREVIEWS_SUCCESS,
@@ -8,6 +11,9 @@ import {
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
   LOGOUT,
+  PLATFORMS_ERROR,
+  PLATFORMS_REQUEST,
+  PLATFORMS_SUCCESS,
   TOPREVIEWERS_ERROR,
   TOPREVIEWERS_REQUEST,
   TOPREVIEWERS_SUCCESS,
@@ -188,6 +194,58 @@ export const loadTopReviewers = () => {
       dispatch({
         type: TOPREVIEWERS_ERROR,
         payload: error?.message || "Errore durante il caricamento, riprova più tardi",
+      });
+    }
+  };
+};
+
+//action per prendere i Generi di un game
+export const loadGenres = () => {
+  return async (dispatch) => {
+    dispatch({ type: GENRES_REQUEST });
+    try {
+      const response = await apiFetch("/api/Genre");
+
+      if (!response.ok) {
+        throw new Error("Impossibile caricare i dati");
+      }
+
+      const data = await safeJson(response);
+
+      dispatch({
+        type: GENRES_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: GENRES_ERROR,
+        payload: error?.message || "Errore generi",
+      });
+    }
+  };
+};
+
+//action per prendere le Platforms di un game
+export const loadPlatforms = () => {
+  return async (dispatch) => {
+    dispatch({ type: PLATFORMS_REQUEST });
+    try {
+      const response = await apiFetch("/api/Platform");
+
+      if (!response.ok) {
+        throw new Error("Impossibile caricare i dati");
+      }
+
+      const data = await safeJson(response);
+
+      dispatch({
+        type: PLATFORMS_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: PLATFORMS_ERROR,
+        payload: error?.message || "Errore piattaforme",
       });
     }
   };

@@ -6,6 +6,7 @@ import MainLayout from "./layouts/MainLayout";
 import AdminCreateGamePage from "./pages/admin/AdminCreateGamePage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import LibraryPage from "./components/Library/LibraryPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
 
       <Route element={<MainLayout />}>
         <Route path="/home" element={<HomePage />} />
+        <Route path="/library" element={<LibraryPage />} />
       </Route>
 
       <Route path="/admin/games/new" element={<AdminCreateGamePage />} />

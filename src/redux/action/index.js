@@ -7,6 +7,9 @@ import {
   LATESTREVIEWS_ERROR,
   LATESTREVIEWS_REQUEST,
   LATESTREVIEWS_SUCCESS,
+  LIBRARY_ERROR,
+  LIBRARY_REQUEST,
+  LIBRARY_SUCCESS,
   LOGIN_ERROR,
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
@@ -246,6 +249,93 @@ export const loadPlatforms = () => {
       dispatch({
         type: PLATFORMS_ERROR,
         payload: error?.message || "Errore piattaforme",
+      });
+    }
+  };
+};
+
+//action per il load dei giochi
+export const loadLibraryPage = (page = 1) => {
+  return async (dispatch, getState) => {
+    dispatch({ type: LIBRARY_REQUEST });
+
+    try {
+      const pageSize = getState().libraryGames.pageSize ?? 20;
+
+      const response = await apiFetch(`/api/Games/pages?page=${page}&pageSize=${pageSize}`);
+
+      if (!response.ok) {
+        throw new Error("Impossibile caricare il catalogo giochi");
+      }
+
+      const data = await safeJson(response);
+      // { items, page, pageSize, totalItems, totalPages }
+
+      dispatch({
+        type: LIBRARY_SUCCESS,
+        payload: {
+          items: data.items,
+          page: data.page,
+          pageSize: data.pageSize,
+          totalItems: data.totalItems,
+          totalPages: data.totalPages,
+          filters: { search: "", genres: [], platforms: [] },
+          mode: "all",
+        },
+      });
+    } catch (err) {
+      dispatch({
+        type: LIBRARY_ERROR,
+        payload: err?.message || "Errore durante il caricamento della libreria",
+      });
+    }
+  };
+};
+
+//action per la search
+export const searchLibraryGames = ({ page = 1, search = "", genres = [], platforms = [] }) => {
+  return async (dispatch, getState) => {
+    dispatch({ type: LIBRARY_REQUEST });
+
+    try {
+      const pageSize = getState().libraryGames.pageSize ?? 20;
+
+      const params = new URLSearchParams();
+      params.set("page", page);
+      params.set("pageSize", pageSize);
+
+      if (search.trim()) {
+        params.set("Search", search.trim());
+      }
+
+      genres.forEach((g) => params.append("Genres", g));
+      platforms.forEach((p) => params.append("Platforms", p));
+
+      const response = await apiFetch(`/api/Games/search?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error("Impossibile filtrare i giochi");
+      }
+
+      const data = await safeJson(response);
+      // { items, page, pageSize, totalItems, totalPages }
+
+      dispatch({
+        type: LIBRARY_SUCCESS,
+        payload: {
+          items: data.items,
+          page: data.page,
+          pageSize: data.pageSize,
+          totalItems: data.totalItems,
+          totalPages: data.totalPages,
+          filters: { search, genres, platforms },
+          mode: "search",
+        },
+      });
+    } catch (err) {
+      dispatch({
+        type: LIBRARY_ERROR,
+        payload: err?.message || "Errore durante la ricerca giochi",
       });
     }
   };

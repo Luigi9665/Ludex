@@ -740,7 +740,8 @@ h3,
   position: relative;
   padding: 4rem 0 3rem;
   overflow: hidden;
-  margin: 0 16px;
+  max-width: 1500px;
+  margin: 0 auto;
   border-radius: 18px;
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);

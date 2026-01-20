@@ -63,6 +63,7 @@ const Username = ({ userName, setUserName, baseUrl, setUsernameAvailableParent, 
           checkUsernameAvailable();
         }}
         required
+        maxLength={32}
       />
       {showUsernameTakenError && <div className="invalid-feedback">Username già in uso.</div>}
 

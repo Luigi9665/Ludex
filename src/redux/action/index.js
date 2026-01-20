@@ -14,6 +14,11 @@ import {
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
   LOGOUT,
+  NAVSEARCH_CLEAR,
+  NAVSEARCH_ERROR,
+  NAVSEARCH_REQUEST,
+  NAVSEARCH_SET_QUERY,
+  NAVSEARCH_SUCCESS,
   PLATFORMS_ERROR,
   PLATFORMS_REQUEST,
   PLATFORMS_SUCCESS,
@@ -338,6 +343,49 @@ export const searchLibraryGames = ({ page = 1, search = "", genres = [], platfor
       dispatch({
         type: LIBRARY_ERROR,
         payload: err.message,
+      });
+    }
+  };
+};
+
+//action per la gestione della navSearch
+
+export const setNavSearchQuery = (q) => ({ type: NAVSEARCH_SET_QUERY, payload: q });
+
+export const clearNavSearch = () => ({ type: NAVSEARCH_CLEAR });
+
+export const loadNavSearchPreview = ({ title, pageSize = 20 }) => {
+  return async (dispatch) => {
+    const q = (title ?? "").trim();
+
+    if (q.length < 2) {
+      dispatch(clearNavSearch());
+      dispatch(setNavSearchQuery(q));
+      return;
+    }
+
+    dispatch(setNavSearchQuery(q));
+    dispatch({ type: NAVSEARCH_REQUEST });
+
+    try {
+      const url = `/api/Games/search?Title=${encodeURIComponent(q)}&page=1&pageSize=${pageSize}`;
+      const res = await apiFetch(url, { method: "GET" });
+
+      if (!res.ok) throw new Error("Errore nel caricamento risultati ricerca");
+
+      const data = await safeJson(res);
+
+      dispatch({
+        type: NAVSEARCH_SUCCESS,
+        payload: {
+          items: data?.items ?? [],
+          totalItems: data?.totalItems ?? data?.items?.length ?? 0,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: NAVSEARCH_ERROR,
+        payload: error?.message || "Errore ricerca, riprova",
       });
     }
   };

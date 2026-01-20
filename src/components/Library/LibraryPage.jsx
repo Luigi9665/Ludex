@@ -6,12 +6,18 @@ import LibraryFilters from "../Library/LibraryFilters";
 import LibraryGrid from "../Library/LibraryGrid";
 import LibraryPagination from "../Library/LibraryPagination";
 import { loadLibraryPage, searchLibraryGames } from "../../redux/action";
+import { useLocation } from "react-router";
 
 const LibraryPage = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+
   const library = useSelector((state) => state.libraryGames);
 
   const { items, loading, error, page, pageSize, totalItems, totalPages, filters, mode } = library;
+
+  const params = new URLSearchParams(location.search);
+  const titleFromUrl = params.get("Title") || "";
 
   // stato locale per i filtri (così non spari request a ogni click di checkbox)
   const [searchText, setSearchText] = useState(filters.search || "");
@@ -20,8 +26,23 @@ const LibraryPage = () => {
 
   // primo load → catalogo completo
   useEffect(() => {
-    dispatch(loadLibraryPage(1));
-  }, [dispatch]);
+    if (titleFromUrl.trim().length >= 2) {
+      // modalità search
+      dispatch(
+        searchLibraryGames({
+          page: 1,
+          search: titleFromUrl,
+          genres: [],
+          platforms: [],
+        }),
+      );
+    } else {
+      // modalità catalogo base
+      if (!items || items.length === 0) {
+        dispatch(loadLibraryPage(1));
+      }
+    }
+  }, [titleFromUrl, dispatch]);
 
   const handleApplyFilters = () => {
     dispatch(
@@ -72,7 +93,7 @@ const LibraryPage = () => {
 
         <div className="row">
           {/* FILTRI */}
-          <div className="col-lg-3 col-md-4 mb-4">
+          <div className="col-lg-2 col-md-4 mb-4">
             <LibraryFilters
               search={searchText}
               onSearchChange={setSearchText}
@@ -86,7 +107,7 @@ const LibraryPage = () => {
           </div>
 
           {/* CONTENUTO PRINCIPALE */}
-          <div className="col-lg-9 col-md-8">
+          <div className="col-lg-10 col-md-8">
             {loading && <LxLoader message="Carico il catalogo giochi..." />}
 
             {!loading && error && (

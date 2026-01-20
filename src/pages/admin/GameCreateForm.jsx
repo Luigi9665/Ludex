@@ -16,6 +16,7 @@ const GameCreateForm = ({ genres, platforms }) => {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [coverWarning, setCoverWarning] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,18 +26,6 @@ const GameCreateForm = ({ genres, platforms }) => {
       [name]: value,
     }));
   };
-
-  //   const handleMultiSelectChange = (e) => {
-  //     const { name, options } = e.target;
-  //     const selected = Array.from(options)
-  //       .filter((o) => o.selected)
-  //       .map((o) => o.value);
-
-  //     setForm((prev) => ({
-  //       ...prev,
-  //       [name]: selected,
-  //     }));
-  //   };
 
   const validate = () => {
     if (!form.title.trim()) return "Il titolo è obbligatorio.";
@@ -49,6 +38,27 @@ const GameCreateForm = ({ genres, platforms }) => {
     if (!form.genreIds.length) return "Seleziona almeno un genere.";
 
     return null;
+  };
+
+  const handleCoverChange = (e) => {
+    const value = e.target.value;
+    setForm((prev) => ({ ...prev, coverUrl: value }));
+
+    setCoverWarning("");
+
+    const trimmed = value.trim();
+    if (!/^https?:\/\//i.test(trimmed)) return;
+
+    const img = new Image();
+    img.onload = () => {
+      if (img.naturalWidth > 2000 || img.naturalHeight > 2000) {
+        setCoverWarning("Attenzione: la cover sembra molto grande (risoluzione elevata). Meglio usare una versione ridotta.");
+      }
+    };
+    img.onerror = () => {
+      setCoverWarning("Impossibile caricare l'immagine da questo URL.");
+    };
+    img.src = trimmed;
   };
 
   const handleSubmit = async (e) => {
@@ -165,10 +175,11 @@ const GameCreateForm = ({ genres, platforms }) => {
               name="coverUrl"
               className="form-control lx-field-control"
               value={form.coverUrl}
-              onChange={handleChange}
+              onChange={handleCoverChange}
               placeholder="https://..."
             />
-            <small className="lx-field-hint">Usa un link diretto a un&apos;immagine (JPG / PNG).</small>
+            <small className="lx-field-hint">Usa un link diretto a un'immagine (JPG / PNG / WebP).</small>
+            {coverWarning && <div className="text-warning small mt-1">{coverWarning}</div>}
           </div>
 
           <div className="col-12 col-md-6">

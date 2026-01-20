@@ -46,6 +46,8 @@ const HomePrivateArea = ({ isLogged, authUser, userDetails, userLoading }) => {
   const games = userDetails.games || [];
   const reviews = games.filter((g) => (g.review ?? "").trim().length > 0);
 
+  console.log("Homeprivate", games);
+
   const stats = {
     gamesCount: games.length,
     reviewsCount: reviews.length,

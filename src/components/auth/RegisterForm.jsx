@@ -26,8 +26,11 @@ const RegisterForm = ({ onRegistered }) => {
   const passwordsMatch = password === confirmPassword;
   const isPasswordValid = hasMinLength && hasUppercase && hasLowercase && passwordsMatch;
 
+  const isFirstNameValid = firstName.trim().length >= 2;
+  const isLastNameValid = lastName.trim().length >= 2;
+
   //booleano per controllo email e password
-  const isFormValid = isEmailOkForSubmit && isUsernameOkForSubmit && isPasswordValid;
+  const isFormValid = isEmailOkForSubmit && isUsernameOkForSubmit && isPasswordValid && isFirstNameValid && isLastNameValid;
 
   const safeJson = async (res) => {
     try {
@@ -44,8 +47,8 @@ const RegisterForm = ({ onRegistered }) => {
     setAlert(null);
 
     const payload = {
-      firstName,
-      lastName,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       email,
       confirmEmail,
       password,
@@ -92,11 +95,27 @@ const RegisterForm = ({ onRegistered }) => {
     <form onSubmit={onSubmit} className="d-grid gap-3 auth-form">
       <div>
         <label className="form-label">Name</label>
-        <input className="form-control" placeholder="Mario" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+        <input
+          className="form-control"
+          placeholder="Mario"
+          type="text"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          required
+          maxLength={50}
+        />
       </div>
       <div>
         <label className="form-label">Cognome</label>
-        <input className="form-control" placeholder="Rossi" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+        <input
+          className="form-control"
+          placeholder="Rossi"
+          type="text"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          required
+          maxLength={50}
+        />
       </div>
 
       <Username

@@ -38,14 +38,98 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+#root {
+  padding-top: calc(var(--lx-navbar-h) + 20px);
+}
+
+/* ===== GLOBAL BODY / BACKGROUND LUDEX ===== */
+
 body {
   font-family: var(--font-body);
-  background:
-    radial-gradient(1200px 700px at 15% -10%, rgba(0, 217, 255, 0.14), transparent 62%),
-    radial-gradient(1100px 650px at 90% 0%, rgba(157, 78, 221, 0.16), transparent 64%),
-    radial-gradient(900px 650px at 50% 110%, rgba(255, 200, 120, 0.1), transparent 70%), linear-gradient(180deg, #070a14 0%, #060812 100%);
   color: var(--lx-text-primary);
   min-height: 100vh;
+
+  /* layer “base” scuro con glow soft centrale */
+  background:
+    radial-gradient(1600px 1100px at -15% 10%, rgba(0, 217, 255, 0.25), transparent 60%),
+    radial-gradient(1600px 1100px at 115% 15%, rgba(157, 78, 221, 0.27), transparent 60%),
+    radial-gradient(1200px 800px at 50% 115%, rgba(255, 200, 120, 0.18), transparent 70%),
+    radial-gradient(900px 600px at 50% 0%, rgba(0, 217, 255, 0.16), transparent 65%),
+    radial-gradient(900px 600px at 50% 20%, rgba(157, 78, 221, 0.15), transparent 65%),
+    radial-gradient(1px 1px at 12% 22%, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px),
+    radial-gradient(1px 1px at 88% 28%, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px),
+    radial-gradient(1px 1px at 20% 80%, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px),
+    radial-gradient(1px 1px at 80% 82%, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px), linear-gradient(180deg, #070a14 0%, #060812 100%);
+
+  background-attachment: fixed;
+  background-size:
+    auto,
+    auto,
+    auto,
+    auto,
+    auto,
+    260px 260px,
+    260px 260px,
+    260px 260px,
+    260px 260px,
+    auto;
+
+  /* vignetta soft laterale per evitare “vuoti” */
+  box-shadow:
+    inset 120px 0 180px rgba(0, 217, 255, 0.08),
+    inset -120px 0 180px rgba(157, 78, 221, 0.1);
+}
+
+/* ===== ONDE / STRISCE LATERALI (SOFT) ===== */
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  width: 220px; /* prima 320px */
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(0.6px); /* ammorbidisce senza “nebbiare” troppo */
+  opacity: 0.4; /* abbassa la presenza globale */
+}
+
+/* SINISTRA – cyan (soft, più “aria”) */
+body::before {
+  left: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 217, 255, 0.12), /* prima 0.24 */ rgba(0, 217, 255, 0.04), /* prima 0.10 */ transparent 72%),
+    repeating-linear-gradient(
+      180deg,
+      rgba(0, 217, 255, 0.08) 0px,
+      /* prima 0.18 */ rgba(0, 217, 255, 0.08) 1px,
+      transparent 1px,
+      transparent 18px /* più spazio = meno “pattern” */
+    );
+  mask-image: linear-gradient(to right, black 0%, transparent 75%); /* sfuma prima */
+}
+
+/* DESTRA – purple (soft) */
+body::after {
+  right: 0;
+  background:
+    linear-gradient(270deg, rgba(157, 78, 221, 0.12), rgba(157, 78, 221, 0.04), transparent 72%),
+    repeating-linear-gradient(180deg, rgba(157, 78, 221, 0.08) 0px, rgba(157, 78, 221, 0.08) 1px, transparent 1px, transparent 20px);
+  mask-image: linear-gradient(to left, black 0%, transparent 75%);
+}
+
+/* Mobile: ancora più leggero */
+@media (max-width: 768px) {
+  body::before,
+  body::after {
+    width: 140px;
+    opacity: 0.45;
+  }
 }
 
 h1,
@@ -281,12 +365,20 @@ h3,
 
   padding: 0.85rem 0.75rem;
 
-  position: sticky;
+  position: fixed;
   top: 10px;
+  left: 0;
+  right: 0;
   z-index: 1030;
+
+  /* animazione hide/show */
+  transition:
+    transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.18s ease;
+  will-change: transform, opacity;
 }
 
-/* Overlay colorato sopra la navbar: dà “vibe Ludex” (cyan/viola/oro) senza diventare troppo acceso */
+/* overlay colorato che già avevi, tienilo pure */
 .lx-navbar::before {
   content: "";
   position: absolute;
@@ -303,6 +395,41 @@ h3,
 .lx-navbar > .container-fluid {
   position: relative;
   z-index: 1;
+}
+
+.lx-navbar {
+  transition:
+    transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.18s ease,
+    max-width 0.25s ease,
+    padding 0.25s ease,
+    margin 0.25s ease;
+  will-change: transform, opacity, max-width, padding, margin;
+}
+
+.lx-nav-home {
+  max-width: 1500px;
+  margin: 10px auto 0;
+  border-radius: 16px;
+  padding: 0.55rem 0.75rem;
+}
+
+.lx-nav-wide {
+  max-width: 1800px;
+  margin: 10px auto 0;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+}
+
+.lx-nav-shown {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.lx-nav-hidden {
+  transform: translateY(calc(-100% - 20px));
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Box del logo (se lo usi): gradient + glow */
@@ -891,10 +1018,52 @@ h3,
   height: 100%;
 }
 
+/* ===================== */
+/* REVEAL ON SCROLL CARD */
+/* ===================== */
+
+.lx-reveal {
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
+  transition:
+    opacity 0.45s cubic-bezier(0.21, 0.8, 0.25, 1),
+    transform 0.45s cubic-bezier(0.21, 0.8, 0.25, 1);
+  will-change: opacity, transform;
+}
+
+.lx-reveal-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Stagger leggero quando hai una grid/lista di card */
+.lx-library-grid .lx-reveal:nth-child(1) {
+  transition-delay: 0.02s;
+}
+.lx-library-grid .lx-reveal:nth-child(2) {
+  transition-delay: 0.05s;
+}
+.lx-library-grid .lx-reveal:nth-child(3) {
+  transition-delay: 0.08s;
+}
+.lx-library-grid .lx-reveal:nth-child(4) {
+  transition-delay: 0.11s;
+}
+
+/* Accessibilità: se l’utente non vuole animazioni, spegnile */
+@media (prefers-reduced-motion: reduce) {
+  .lx-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 .lx-game-cover {
   position: relative;
   width: 100%;
   padding-bottom: 133%;
+  aspect-ratio: 3/4;
   overflow: hidden;
 }
 
@@ -987,20 +1156,90 @@ h3,
   text-overflow: ellipsis; /* se il nome è assurdo tipo "Action-Adventure RPG" si tronca */
 }
 
-/* ===== STAR RATING ===== */
+/* ===== RATING ROW (GameCard) – versione responsive safe ===== */
+.lx-game-rating-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  padding: 0.1rem 0; /*  meno padding */
+  border-radius: 0; /* niente “contenitore” pill */
+  background: transparent; /* togli il gradient */
+  border: none; /* niente bordo */
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.lx-game-rating-row > * {
+  min-width: 0; /*  permette al testo di comprimersi/troncarsi */
+}
+
+/* blocco sinistro: stelle + valore */
+.lx-game-rating-main {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+/* valore numerico */
+.lx-game-rating-value {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: rgba(238, 244, 255, 0.95);
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.35);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* testo count */
+.lx-game-rating-count {
+  font-size: 0.75rem;
+  color: rgba(238, 244, 255, 0.75);
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+/* su schermi stretti: rating su due righe, niente pill enorme */
+@media (max-width: 576px) {
+  .lx-game-rating-row {
+    padding: 0.3rem 0.5rem;
+    border-radius: 8px;
+    justify-content: flex-start;
+    gap: 0.25rem 0.5rem;
+  }
+
+  .lx-game-rating-count {
+    white-space: normal; /* 👈 può andare a capo */
+  }
+}
+
+/* StarRating generico (se non l'hai già così) */
 .lx-rating {
   display: inline-flex;
+  align-items: center;
   gap: 2px;
+  line-height: 1;
+}
+
+.lx-rating-xs {
+  font-size: 0.78rem;
+}
+.lx-rating-sm {
+  font-size: 0.9rem;
+}
+.lx-rating-md {
+  font-size: 1.05rem;
 }
 
 .lx-star {
-  color: #ffd700;
-  font-size: 0.9rem;
+  color: rgba(0, 212, 255, 0.95);
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.55);
 }
 
 .lx-star-empty {
-  color: rgba(255, 215, 0, 0.3);
-  font-size: 0.9rem;
+  color: rgba(238, 244, 255, 0.25);
 }
 
 /* ===== REVIEW CARD ===== */
@@ -1077,7 +1316,7 @@ h3,
   display: flex;
   gap: 1rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding-block: 0.5rem;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
 }
@@ -1141,7 +1380,7 @@ h3,
   position: absolute;
   top: 0;
   bottom: 8px;
-  width: 25px;
+  width: 50px;
   pointer-events: none;
   z-index: 1;
 }
@@ -1570,6 +1809,134 @@ h3,
 .lx-multiselect-item.is-checked {
   background: linear-gradient(135deg, rgba(0, 217, 255, 0.18), rgba(157, 78, 221, 0.18));
   box-shadow: inset 3px 0 0 var(--lx-cyan); /* ✅ “border-left” senza allargare */
+}
+
+/* ===== NAV SEARCH (TYPEAHEAD) ===== */
+.lx-navsearch {
+  position: relative;
+  flex: 1 1 auto;
+  max-width: 420px;
+  width: 100%;
+}
+
+.lx-navsearch-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  z-index: 2100;
+
+  overflow: hidden;
+  border-radius: 14px;
+
+  background:
+    radial-gradient(420px 160px at 20% 0%, rgba(0, 217, 255, 0.14), transparent 60%),
+    radial-gradient(420px 160px at 80% 0%, rgba(157, 78, 221, 0.14), transparent 60%), rgba(18, 18, 26, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+}
+
+.lx-navsearch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lx-navsearch-title {
+  font-weight: 800;
+  color: rgba(238, 244, 255, 0.92);
+  letter-spacing: 0.02em;
+}
+
+.lx-navsearch-meta {
+  font-size: 0.8rem;
+  color: rgba(238, 244, 255, 0.65);
+}
+
+.lx-navsearch-list {
+  max-height: 340px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.lx-navsearch-list::-webkit-scrollbar {
+  width: 8px;
+}
+.lx-navsearch-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+.lx-navsearch-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--lx-cyan), var(--lx-purple));
+  border-radius: 999px;
+}
+
+.lx-navsearch-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  padding: 0.65rem 0.85rem;
+  background: transparent;
+  border: 0;
+  text-align: left;
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+
+  transition: background 0.18s ease;
+}
+
+.lx-navsearch-item:hover {
+  background: rgba(0, 217, 255, 0.08);
+}
+
+.lx-navsearch-cover {
+  width: 42px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  flex: 0 0 auto;
+}
+
+.lx-navsearch-info {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.lx-navsearch-name {
+  font-weight: 800;
+  color: rgba(238, 244, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lx-navsearch-sub {
+  font-size: 0.78rem;
+  color: rgba(238, 244, 255, 0.62);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lx-navsearch-chevron {
+  color: rgba(238, 244, 255, 0.5);
+  flex: 0 0 auto;
+}
+
+.lx-navsearch-empty {
+  padding: 1rem 0.85rem;
+  color: rgba(238, 244, 255, 0.7);
+}
+
+.lx-navsearch-footer {
+  padding: 0.75rem 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* ===== FOOTER ===== */

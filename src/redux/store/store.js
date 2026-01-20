@@ -6,6 +6,7 @@ import { persistReducer, persistStore } from "redux-persist";
 import homePublicReducer from "../reducer/homePublicReducer";
 import genresPlatformsReducer from "../reducer/genresPlatformsReducer";
 import libraryReducer from "../reducer/libraryReducer";
+import navSearchReducer from "../reducer/navSearchReducer";
 
 const persistConfig = {
   key: "root",
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   homePublic: homePublicReducer,
   selectGame: genresPlatformsReducer,
   libraryGames: libraryReducer,
+  navSearch: navSearchReducer,
 });
 
 const persisterReducer = persistReducer(persistConfig, rootReducer);

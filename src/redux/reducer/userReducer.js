@@ -4,6 +4,7 @@ const initialState = {
   loading: false,
   error: null,
   userDetails: null,
+  loaded: false,
 };
 
 export default function userDataReducer(state = initialState, action) {
@@ -19,6 +20,7 @@ export default function userDataReducer(state = initialState, action) {
         ...state,
         loading: false,
         userDetails: action.payload,
+        loaded: true,
       };
     case USER_DATA_ERROR:
       return {

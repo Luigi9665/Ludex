@@ -42,7 +42,12 @@ html {
   scroll-behavior: smooth;
 }
 
-#root {
+.lx-main {
+  min-height: 100vh;
+}
+
+/* compensazione altezza navbar SOLO dove serve */
+.lx-main-with-nav {
   padding-top: calc(var(--lx-navbar-h) + 20px);
 }
 
@@ -121,6 +126,24 @@ body::after {
     linear-gradient(270deg, rgba(157, 78, 221, 0.12), rgba(157, 78, 221, 0.04), transparent 72%),
     repeating-linear-gradient(180deg, rgba(157, 78, 221, 0.08) 0px, rgba(157, 78, 221, 0.08) 1px, transparent 1px, transparent 20px);
   mask-image: linear-gradient(to left, black 0%, transparent 75%);
+}
+
+/* ===== TEMA DINAMICO PER PAGINA DETTAGLIO GIOCO ===== */
+
+/* Quando siamo sulla pagina dettaglio */
+body.lx-body-game-detail {
+  background:
+    radial-gradient(1300px 900px at 0% 0%, rgba(56, 189, 248, 0.35), transparent 60%),
+    radial-gradient(1300px 900px at 100% 0%, rgba(129, 140, 248, 0.35), transparent 60%), radial-gradient(1200px 800px at 50% 120%, #020617, #020617);
+  background-attachment: fixed;
+  background-color: #020617;
+  box-shadow: none;
+}
+
+body.lx-body-game-detail::before,
+body.lx-body-game-detail::after {
+  opacity: 0.15;
+  filter: blur(1px);
 }
 
 /* Mobile: ancora più leggero */
@@ -1272,8 +1295,11 @@ h3,
 }
 
 /* ===== SECTIONS ===== */
+/* le sezioni sotto appoggiano al background, non lo sostituiscono */
 .lx-section {
-  padding: 3rem 0;
+  position: relative;
+  padding-block: 2.5rem;
+  background: transparent;
 }
 
 .lx-section-title {
@@ -1306,51 +1332,52 @@ h3,
   text-shadow: 0 0 10px var(--lx-purple-glow);
 }
 
-/* ===== CAROUSEL GAMES ===== */
+/* ===== CAROUSEL BASE (Embla) ===== */
+
 .lx-carousel-wrapper {
   position: relative;
   margin-top: 0.5rem;
 }
 
+/* viewport controllato da Embla */
+.lx-carousel-viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+/* track gestito da Embla (usa transform) */
 .lx-carousel-track {
   display: flex;
   gap: 1rem;
-  overflow-x: auto;
-  padding-block: 0.5rem;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
 }
 
-.lx-carousel-track::-webkit-scrollbar {
-  height: 6px;
-}
-
-.lx-carousel-track::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.8);
-}
-
-.lx-carousel-track::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.6);
-  border-radius: 4px;
-}
-
+/* slide "fissa" (es. Library personalizzata) */
 .lx-carousel-item {
-  flex: 0 0 220px;
-  scroll-snap-align: start;
+  flex: 0 0 260px;
+  max-width: 260px;
+}
+
+/* slide responsive che mostra fino a 4 card (Trending, Latest, TopReviewers) */
+.lx-carousel-item--auto {
+  flex: 0 0 80%;
+  max-width: 80%;
 }
 
 @media (min-width: 576px) {
-  .lx-carousel-item {
-    flex-basis: 240px;
+  .lx-carousel-item--auto {
+    flex: 0 0 50%;
+    max-width: 50%;
   }
 }
 
-@media (min-width: 992px) {
-  .lx-carousel-item {
-    flex-basis: 260px;
+@media (min-width: 1200px) {
+  .lx-carousel-item--auto {
+    flex: 0 0 25%;
+    max-width: 25%; /* 👉 4 card visibili */
   }
 }
 
+/* frecce come le avevi */
 .lx-carousel-nav {
   display: inline-flex;
   gap: 0.5rem;
@@ -1376,6 +1403,7 @@ h3,
   color: var(--lx-cyan);
 }
 
+/* fade laterali puoi tenere le tue */
 .lx-carousel-fade {
   position: absolute;
   top: 0;
@@ -1437,10 +1465,7 @@ h3,
   color: var(--lx-text-secondary);
 }
 
-/* ===== LATEST REVIEWS (carousel cards) ===== */
-.lx-carousel-track--reviews {
-  padding-bottom: 0.75rem;
-}
+/* ===== LATEST REVIEWS  ===== */
 
 .lx-review-item {
   flex: 0 0 320px;
@@ -1937,6 +1962,475 @@ h3,
 .lx-navsearch-footer {
   padding: 0.75rem 0.85rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+/* ===== MODAL PER AGGIUNGERE UN GAME ALL'USERGAME ===== */
+/* piccolo bottone per "Aggiungi" nella card */
+.lx-btn-soft-sm {
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(0, 217, 255, 0.55);
+  color: rgba(215, 248, 255, 0.95);
+  backdrop-filter: blur(10px);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.lx-btn-soft-sm:hover {
+  background: rgba(0, 217, 255, 0.12);
+  border-color: rgba(157, 78, 221, 0.7);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(0, 217, 255, 0.25);
+}
+
+/* ===== MODALE GLASS ===== */
+
+/* chip numeri rating */
+.lx-rating-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(230, 238, 255, 0.9);
+  padding: 0.25rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.lx-rating-chip.is-active {
+  background: radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.35), rgba(157, 78, 221, 0.35));
+  border-color: rgba(0, 217, 255, 0.85);
+  color: #fff;
+  box-shadow:
+    0 0 10px rgba(0, 217, 255, 0.35),
+    0 0 14px rgba(157, 78, 221, 0.28);
+}
+
+.lx-modal-steps {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.lx-step-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 12, 24, 0.7);
+  font-size: 0.7rem;
+  color: rgba(238, 244, 255, 0.7);
+}
+
+.lx-step-chip.is-active {
+  border-color: rgba(0, 217, 255, 0.75);
+  background: radial-gradient(380px 140px at 0% 0%, rgba(0, 217, 255, 0.22), transparent 60%), rgba(10, 12, 24, 0.9);
+  color: rgba(238, 244, 255, 0.95);
+}
+
+.lx-step-index {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 217, 255, 0.18);
+}
+
+.lx-step-chip.is-active .lx-step-index {
+  background: rgba(0, 217, 255, 0.85);
+  color: #020308;
+}
+
+.lx-step-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ===== BOTTONE ADD SULLA CARD – SOLO “+” FINCHÉ NON HOVERI ===== */
+/* Bottone + in alto a destra sulla cover */
+.lx-card-add-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+
+  background: rgba(10, 12, 24, 0.86);
+  border: 1px solid rgba(0, 217, 255, 0.7);
+  color: rgba(238, 244, 255, 0.95);
+
+  cursor: pointer;
+  overflow: hidden; /* 👈 importantissimo per evitare glitch */
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.lx-card-add-icon {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+/* testo nascosto di default, ma l'area del bottone resta la stessa */
+.lx-card-add-label {
+  white-space: nowrap;
+  opacity: 0;
+  max-width: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.22s ease,
+    max-width 0.22s ease,
+    transform 0.22s ease;
+}
+
+/* hover: solo il contenuto interno cambia, non la hit-area */
+.lx-card-add-btn:hover {
+  background: rgba(10, 20, 40, 0.95);
+  border-color: rgba(0, 217, 255, 1);
+  box-shadow: 0 0 14px rgba(0, 217, 255, 0.45);
+}
+
+.lx-card-add-btn:hover .lx-card-add-label {
+  opacity: 1;
+  max-width: 180px;
+  transform: translateX(0);
+}
+
+/* Pill "Nella tua libreria" */
+.lx-card-inlibrary-pill {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  background: rgba(34, 197, 94, 0.16);
+  border: 1px solid rgba(34, 197, 94, 0.8);
+  color: rgba(187, 247, 208, 0.96);
+  backdrop-filter: blur(10px);
+}
+
+/* ===== RATING STELLE NEL MODAL ===== */
+
+.lx-rating-stars-row {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.lx-rating-star-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.02);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.18s ease-out,
+    border-color 0.18s ease-out,
+    transform 0.12s ease-out;
+}
+
+.lx-rating-star-btn i {
+  color: rgba(0, 217, 255, 0.95);
+  text-shadow: 0 0 10px rgba(0, 217, 255, 0.6);
+  font-size: 0.95rem;
+}
+
+.lx-rating-star-btn:hover {
+  background: rgba(0, 217, 255, 0.12);
+  border-color: rgba(0, 217, 255, 0.7);
+  transform: translateY(-1px);
+}
+
+/* ===== PROGRESS BAR LUDex ===== */
+
+.lx-progress-bar-shell {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.lx-progress-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(0, 217, 255, 0.9), rgba(157, 78, 221, 0.95), rgba(255, 200, 120, 0.9));
+  transition: width 0.18s ease-out;
+}
+
+/* range personalizzato (webkit) */
+.lx-progress-range::-webkit-slider-thumb {
+  background: #fff;
+  border: 2px solid rgba(0, 217, 255, 0.9);
+  box-shadow: 0 0 8px rgba(0, 217, 255, 0.6);
+}
+
+/* ===== MODAL BACKDROP ===== */
+
+.lx-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(800px 600px at 10% 0%, rgba(0, 217, 255, 0.16), transparent 60%),
+    radial-gradient(800px 600px at 90% 100%, rgba(157, 78, 221, 0.18), transparent 60%), rgba(2, 4, 10, 0.75);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 80px;
+  padding-inline: 12px;
+  z-index: 2000;
+}
+
+.lx-modal-panel {
+  width: 100%;
+  max-width: 460px;
+  border-radius: 18px;
+  padding: 1.3rem 1.4rem;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75);
+  animation: lx-modal-in 0.22s ease-out;
+}
+
+@keyframes lx-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+/* ===== HERO DETTAGLIO GIOCO ===== */
+/* meta row sotto l’hero */
+.lx-game-detail-meta {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+}
+
+.lx-related-wrapper {
+  background: transparent;
+}
+
+.lx-game-detail-hero {
+  position: relative;
+  padding-top: 3.5rem; /* spazio sotto la navbar */
+  padding-bottom: 3rem;
+  overflow: hidden;
+}
+
+/* layer blur della cover che riempie tutta la larghezza */
+.lx-game-detail-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.lx-game-detail-hero-bg img {
+  width: 100%;
+  height: 120%;
+  object-fit: cover;
+  transform: scale(1.1);
+  filter: blur(36px) saturate(1.15);
+  opacity: 0.45;
+}
+
+/* overlay scuro per leggibilità, bordi che sfumano verso il body */
+.lx-game-detail-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 0, rgba(15, 23, 42, 0.4), transparent 65%), linear-gradient(180deg, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95));
+}
+
+/* contenuto sopra al blur */
+.lx-game-detail-hero > .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* card cover */
+.lx-game-detail-cover {
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+
+.lx-game-detail-cover img {
+  width: 100%;
+  display: block;
+  border-radius: inherit;
+}
+
+/* titoli + testi */
+.lx-game-detail-title {
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 700;
+}
+
+.lx-game-detail-year {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.lx-game-detail-sub {
+  margin-top: 0.35rem;
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.lx-game-detail-description {
+  max-width: 60rem;
+  color: rgba(226, 232, 240, 0.86);
+}
+.lx-game-detail-description p {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+/* pill generi/pattaforme */
+.lx-pill {
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.82rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.75);
+  color: rgba(226, 232, 240, 0.9);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lx-pill-genre {
+  border-color: rgba(168, 85, 247, 0.7);
+  color: #e9d5ff;
+}
+
+.lx-pill-platform {
+  border-color: rgba(56, 189, 248, 0.7);
+  color: #bae6fd;
+}
+
+.lx-pill:hover {
+  border-color: rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+/* descrizione */
+.lx-game-detail-description {
+  max-width: 700px;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.lx-game-detail-description p {
+  margin: 0;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+/* ===== SEZIONE GIOCATORI ===== */
+
+.lx-game-players-section {
+  padding: 2.5rem 0 1rem;
+}
+
+.lx-game-players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.lx-player-card {
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.lx-player-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lx-player-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 0%, #38bdf8, #4f46e5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: white;
+}
+
+.lx-player-username-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #e5e7eb;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lx-player-username-btn:hover {
+  color: var(--lx-cyan);
+}
+
+.lx-player-status {
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.95);
+}
+.lx-player-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.lx-player-rating-value {
+  font-weight: 600;
+  color: rgba(251, 191, 36, 0.95);
+}
+
+.lx-player-rating-empty {
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.lx-player-footer {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: rgba(148, 163, 184, 0.85);
 }
 
 /* ===== FOOTER ===== */

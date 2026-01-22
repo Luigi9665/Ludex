@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import StarRating from "../StarRating";
 import { useRevealOnScroll } from "../../hooks/useRevealOnScroll";
 
-const GameCard = ({ game }) => {
+const GameCard = ({ game, enableAddButton = false, onAddClick, alreadyInLibrary = false }) => {
   const { ref, visible } = useRevealOnScroll();
 
   const statusColors = {
@@ -11,7 +11,7 @@ const GameCard = ({ game }) => {
     Backlog: "lx-badge-gray",
   };
 
-  const platforms = Array.isArray(game.platform) ? game.platform.slice(0, 2).join(" •") : game.platform || "";
+  const platforms = Array.isArray(game.platform) ? game.platform.slice(0, 2).join(" • ") : game.platform || "";
 
   const genres = Array.isArray(game.genre) ? game.genre.join(" • ") : game.genre || "";
 
@@ -33,14 +33,37 @@ const GameCard = ({ game }) => {
   }
 
   const showRating = hasAggregate || hasUserRating;
+  const hasUserStatus = !!game.status;
+
+  const handleAddClick = () => {
+    if (onAddClick) onAddClick(game);
+  };
 
   return (
-    <div ref={ref} className={`lx-game-card lx-glow-card lx-reveal ${visible ? "lx-reveal-visible" : ""}`}>
-      <div className="lx-game-card lx-glow-card">
-        {/* COVER + STATUS */}
+    <div ref={ref} className={`lx-glow-card lx-reveal ${visible ? "lx-reveal-visible" : ""}`}>
+      <div className="lx-game-card">
+        {/* COVER + STATUS + ADD BTN */}
         <div className="lx-game-cover">
           <img src={game.coverUrl} alt={game.title} loading="lazy" decoding="async" />
-          {game.status && <span className={`lx-badge ${statusColors[game.status] || ""}`}>{game.status}</span>}
+
+          {hasUserStatus && <span className={`lx-badge ${statusColors[game.status] || ""}`}>{game.status}</span>}
+
+          {/* ADD / ALREADY IN LIBRARY */}
+          {enableAddButton && (
+            <>
+              {!alreadyInLibrary ? (
+                <button type="button" className="lx-card-add-btn" onClick={handleAddClick} aria-label="Aggiungi alla tua libreria">
+                  <i className="bi bi-plus-lg lx-card-add-icon" />
+                  <span className="lx-card-add-label">Aggiungi alla libreria</span>
+                </button>
+              ) : (
+                <span className="lx-card-inlibrary-pill">
+                  <i className="bi bi-check2-circle me-1" />
+                  Nella tua libreria
+                </span>
+              )}
+            </>
+          )}
         </div>
 
         {/* INFO */}
@@ -70,6 +93,7 @@ const GameCard = ({ game }) => {
             </div>
           )}
 
+          {/* DETTAGLI */}
           <Link to={`/game/${game.gameId}`} className="btn lx-btn-outline w-100 mt-3">
             Dettagli
           </Link>

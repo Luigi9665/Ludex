@@ -1,6 +1,9 @@
 import { jwtDecode } from "jwt-decode";
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch";
 import {
+  GAME_DETAIL_ERROR,
+  GAME_DETAIL_REQUEST,
+  GAME_DETAIL_SUCCESS,
   GENRES_ERROR,
   GENRES_REQUEST,
   GENRES_SUCCESS,
@@ -105,7 +108,7 @@ export const loadUserDetails = (userId) => {
     dispatch({ type: USER_DATA_REQUEST });
 
     try {
-      const response = await apiFetch(`/api/Users/GetUtenteById?id=${userId}`, { method: "GET" });
+      const response = await apiFetch(`/api/Users/MyProfile?id=${userId}`, { method: "GET" });
 
       if (!response.ok) {
         throw new Error("Impossibile caricare i dati");
@@ -386,6 +389,51 @@ export const loadNavSearchPreview = ({ title, pageSize = 20 }) => {
       dispatch({
         type: NAVSEARCH_ERROR,
         payload: error?.message || "Errore ricerca, riprova",
+      });
+    }
+  };
+};
+
+//metodo per richiamare i dettagli di un gioco per il suo profilo
+export const loadGameDetail = (gameId) => {
+  return async (dispatch) => {
+    dispatch({ type: GAME_DETAIL_REQUEST });
+
+    try {
+      const res = await apiFetch(`/api/Games/${gameId}`, { method: "GET" });
+
+      if (!res.ok) {
+        throw new Error("Impossibile caricare i dettagli del gioco.");
+      }
+
+      const game = await safeJson(res);
+
+      let related = [];
+      if (Array.isArray(game.genre) && game.genre.length > 0) {
+        const mainGenre = game.genre[0];
+
+        try {
+          const relRes = await apiFetch(`/api/Games/search?Genres=${mainGenre}`, { method: "GET" });
+
+          if (relRes.ok) {
+            const relData = await safeJson(relRes);
+            const items = Array.isArray(relData?.items) ? relData.items : [];
+
+            related = items.filter((g) => g.gameId !== game.gameId);
+          }
+        } catch {
+          // silenzioso: related rimane []
+        }
+      }
+
+      dispatch({
+        type: GAME_DETAIL_SUCCESS,
+        payload: { game, related },
+      });
+    } catch (err) {
+      dispatch({
+        type: GAME_DETAIL_ERROR,
+        payload: err?.message || "Errore imprevisto durante il caricamento.",
       });
     }
   };

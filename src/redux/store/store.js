@@ -7,6 +7,7 @@ import homePublicReducer from "../reducer/homePublicReducer";
 import genresPlatformsReducer from "../reducer/genresPlatformsReducer";
 import libraryReducer from "../reducer/libraryReducer";
 import navSearchReducer from "../reducer/navSearchReducer";
+import gameDetailReducer from "../reducer/gameDetailReducer";
 
 const persistConfig = {
   key: "root",
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   selectGame: genresPlatformsReducer,
   libraryGames: libraryReducer,
   navSearch: navSearchReducer,
+  gameDetail: gameDetailReducer,
 });
 
 const persisterReducer = persistReducer(persistConfig, rootReducer);

@@ -5,12 +5,15 @@ import LxLoader from "../LxLoader";
 import LibraryFilters from "../Library/LibraryFilters";
 import LibraryGrid from "../Library/LibraryGrid";
 import LibraryPagination from "../Library/LibraryPagination";
-import { loadLibraryPage, searchLibraryGames } from "../../redux/action";
+import { loadLibraryPage, loadUserDetails, searchLibraryGames } from "../../redux/action";
 import { useLocation } from "react-router";
+import AddToLibraryModal from "./AddToLibraryModal";
 
 const LibraryPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated ?? false);
 
   const library = useSelector((state) => state.libraryGames);
 
@@ -80,6 +83,33 @@ const LibraryPage = () => {
     }
   };
 
+  //gestione modale per inserimento di un game al UserGames
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [addOpen, setAddOpen] = useState(false);
+
+  const handleOpenAdd = (game) => {
+    if (!isAuthenticated) {
+      alert("Effettua il login o registrati per aggiungere giochi alla tua libreria.");
+      return;
+    }
+    setSelectedGame(game);
+    setAddOpen(true);
+  };
+
+  const handleCloseAdd = () => {
+    setAddOpen(false);
+    setSelectedGame(null);
+  };
+
+  const authUser = useSelector((state) => state.auth.user);
+
+  const handleSaved = () => {
+    dispatch(loadLibraryPage(1));
+    if (authUser?.userId) {
+      dispatch(loadUserDetails(authUser.userId));
+    }
+  };
+
   return (
     <section className="lx-section">
       <div className="container-fluid">
@@ -119,7 +149,7 @@ const LibraryPage = () => {
 
             {!loading && !error && (
               <>
-                <LibraryGrid games={items} />
+                <LibraryGrid games={items} enableAddButton={true} onAddClick={handleOpenAdd} />
 
                 {totalPages > 0 && (
                   <LibraryPagination page={page} pageSize={pageSize} totalItems={totalItems} totalPages={totalPages} onPageChange={handleChangePage} />
@@ -128,6 +158,8 @@ const LibraryPage = () => {
             )}
           </div>
         </div>
+
+        <AddToLibraryModal game={selectedGame} open={addOpen} onClose={handleCloseAdd} onSaved={handleSaved} />
       </div>
     </section>
   );

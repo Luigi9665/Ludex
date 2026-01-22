@@ -7,16 +7,14 @@ import HomePublicArea from "../components/HomePage/HomePublicArea";
 const HomePage = () => {
   const dispatch = useDispatch();
 
-  // QUI: assicurati che sia davvero state.auth.user
   const authUser = useSelector((state) => state.auth.user);
-  // se nel tuo reducer hai isAuthenticated, usa quello:
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated ?? false);
 
   // fallback nel caso non ci sia isAuthenticated
   const isLogged = isAuthenticated || !!authUser?.userId;
 
   // dati privati utente
-  const { userDetails, loading } = useSelector((state) => state.userData);
+  const { userDetails, loading, loaded } = useSelector((state) => state.userData);
 
   // dati pubblici home
   const homePublic = useSelector((state) => state.homePublic) || {};
@@ -41,10 +39,10 @@ const HomePage = () => {
 
   // load dati utente solo se loggato
   useEffect(() => {
-    if (authUser?.userId) {
+    if (authUser?.userId && !loaded) {
       dispatch(loadUserDetails(authUser.userId));
     }
-  }, [authUser?.userId, dispatch]);
+  }, [authUser?.userId, loaded, dispatch]);
 
   // load sezioni pubbliche
   useEffect(() => {

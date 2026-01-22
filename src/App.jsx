@@ -7,6 +7,7 @@ import AdminCreateGamePage from "./pages/admin/AdminCreateGamePage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import LibraryPage from "./components/Library/LibraryPage";
+import GameDetailPage from "./pages/GameDetailPage";
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path="/home" element={<HomePage />} />
         <Route path="/library" element={<LibraryPage />} />
+        {/* nuova pagina dettaglio */}
+        <Route path="/game/:gameId" element={<GameDetailPage />} />
       </Route>
 
       <Route path="/admin/games/new" element={<AdminCreateGamePage />} />

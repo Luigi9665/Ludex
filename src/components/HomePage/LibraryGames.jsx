@@ -1,9 +1,13 @@
-import { useRef } from "react";
 import { Link } from "react-router";
+import useEmblaCarousel from "embla-carousel-react";
 import GameCard from "./GameCard";
 
 const LibraryGames = ({ games }) => {
-  const trackRef = useRef(null);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    containScroll: "trimSnaps",
+    dragFree: false,
+  });
 
   if (!games || games.length === 0) {
     return (
@@ -20,16 +24,12 @@ const LibraryGames = ({ games }) => {
     );
   }
 
-  const scrollByAmount = (direction) => {
-    if (!trackRef.current) return;
-    const container = trackRef.current;
-    const cardWidth = container.firstChild?.getBoundingClientRect().width || 260;
-    const offset = direction === "left" ? -cardWidth * 1.2 : cardWidth * 1.2;
+  const scrollPrev = () => {
+    if (emblaApi) emblaApi.scrollPrev();
+  };
 
-    container.scrollBy({
-      left: offset,
-      behavior: "smooth",
-    });
+  const scrollNext = () => {
+    if (emblaApi) emblaApi.scrollNext();
   };
 
   return (
@@ -42,10 +42,10 @@ const LibraryGames = ({ games }) => {
               Vedi tutti →
             </Link>
             <div className="lx-carousel-nav d-none d-md-flex">
-              <button type="button" className="lx-carousel-arrow" onClick={() => scrollByAmount("left")} aria-label="Scorri a sinistra">
+              <button type="button" className="lx-carousel-arrow" onClick={scrollPrev} aria-label="Scorri a sinistra">
                 <i className="bi bi-chevron-left" />
               </button>
-              <button type="button" className="lx-carousel-arrow" onClick={() => scrollByAmount("right")} aria-label="Scorri a destra">
+              <button type="button" className="lx-carousel-arrow" onClick={scrollNext} aria-label="Scorri a destra">
                 <i className="bi bi-chevron-right" />
               </button>
             </div>
@@ -56,16 +56,17 @@ const LibraryGames = ({ games }) => {
           <div className="lx-carousel-fade lx-carousel-fade-left" />
           <div className="lx-carousel-fade lx-carousel-fade-right" />
 
-          <div className="lx-carousel-track" ref={trackRef}>
-            {games.map((game) => (
-              <div key={game.gameId} className="lx-carousel-item">
-                <GameCard game={game} />
-              </div>
-            ))}
+          <div className="lx-carousel-viewport" ref={emblaRef}>
+            <div className="lx-carousel-track">
+              {games.map((game) => (
+                <div key={game.gameId} className="lx-carousel-item">
+                  <GameCard game={game} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Link visibile su mobile sotto al carousel */}
         <div className="mt-3 d-md-none text-center">
           <Link to="/library" className="lx-link">
             Vedi tutta la libreria →

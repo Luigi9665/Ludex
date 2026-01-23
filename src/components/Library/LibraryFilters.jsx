@@ -1,4 +1,3 @@
-// src/components/library/LibraryFilters.jsx
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loadGenres, loadPlatforms } from "../../redux/action";

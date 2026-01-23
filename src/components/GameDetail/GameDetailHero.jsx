@@ -1,4 +1,4 @@
-function GameDetailHero({
+const GameDetailHero = ({
   title,
   description,
   coverUrl,
@@ -9,82 +9,86 @@ function GameDetailHero({
   onAddClick,
   onGenreClick,
   onPlatformClick,
-}) {
+}) => {
   const releaseYear = releaseDate ? new Date(releaseDate).getFullYear() : null;
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "TBA";
+    const d = new Date(dateString);
+    return d.toLocaleDateString("it-IT", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const handleAddClick = () => {
+    if (alreadyInLibrary) return;
+    onAddClick?.();
+  };
+
   return (
-    <section className="lx-game-detail-hero">
+    <section className="lx-hero lx-hero--game-detail">
       {/* background blur della cover */}
-      <div className="lx-game-detail-hero-bg">
-        <img src={coverUrl} alt={title} />
-        <div className="lx-game-detail-hero-overlay" />
-      </div>
+      <div className="lx-hero-bg-blur" style={coverUrl ? { backgroundImage: `url(${coverUrl})` } : {}} />
 
-      <div className="container position-relative">
-        <div className="row g-4 align-items-start">
-          {/* COVER */}
-          <div className="col-12 col-md-4 col-lg-3">
-            <div className="lx-game-detail-cover lx-glow-card">
-              <img src={coverUrl} alt={title} />
-            </div>
+      {/* overlay per leggibilità */}
+      <div className="lx-hero-overlay" />
+
+      {/* contenuto */}
+      <div className="lx-hero-content">
+        {/* COVER */}
+        <div className="lx-hero-cover">{coverUrl && <img src={coverUrl} alt={title} className="lx-cover-image" loading="lazy" decoding="async" />}</div>
+
+        {/* INFO */}
+        <div className="lx-hero-info">
+          <h1 className="lx-hero-title">
+            {title}
+            {releaseYear && <span> ({releaseYear})</span>}
+          </h1>
+
+          {/* meta riga: data + piattaforme */}
+          <div className="lx-hero-meta">
+            {releaseDate && <span className="lx-meta-item">{formatDate(releaseDate)}</span>}
+            {platforms.length > 0 && <span className="lx-meta-item">{platforms.join(" • ")}</span>}
           </div>
 
-          {/* INFO PRINCIPALI */}
-          <div className="col-12 col-md-8 col-lg-9">
-            <div className="d-flex flex-column gap-3">
-              {/* titolo + piattaforme */}
-              <div>
-                <h1 className="lx-game-detail-title">
-                  {title}
-                  {releaseYear && <span className="lx-game-detail-year"> ({releaseYear})</span>}
-                </h1>
+          {/* GENRE / PLATFORM pills */}
+          <div className="lx-hero-genres">
+            {genres.map((g) => (
+              <button key={g} type="button" className="lx-genre-tag" onClick={() => onGenreClick?.(g)}>
+                {g}
+              </button>
+            ))}
 
-                {platforms.length > 0 && <p className="lx-game-detail-sub">Disponibile su {platforms.join(" • ")}</p>}
-              </div>
-
-              {/* PILL GENERE / PIATTAFORME */}
-              <div className="d-flex flex-wrap gap-2">
-                {genres.map((g) => (
-                  <button key={g} type="button" className="lx-pill lx-pill-genre" onClick={() => onGenreClick && onGenreClick(g)}>
-                    {g}
-                  </button>
-                ))}
-
-                {platforms.map((p) => (
-                  <button key={p} type="button" className="lx-pill lx-pill-platform" onClick={() => onPlatformClick && onPlatformClick(p)}>
-                    {p}
-                  </button>
-                ))}
-              </div>
-
-              {/* CTA */}
-              <div className="d-flex flex-wrap align-items-center gap-2 mt-1">
-                {!alreadyInLibrary ? (
-                  <button type="button" className="btn lx-btn-primary" onClick={onAddClick}>
-                    <i className="bi bi-plus-circle me-2" />
-                    Aggiungi alla tua libreria
-                  </button>
-                ) : (
-                  <span className="lx-card-inlibrary-pill">
-                    <i className="bi bi-check2-circle me-1" />
-                    Nella tua libreria
-                  </span>
-                )}
-              </div>
-
-              {/* DESCRIZIONE */}
-              {description && (
-                <div className="lx-game-detail-description mt-3">
-                  <h2 className="lx-section-subtitle">Descrizione</h2>
-                  <p>{description}</p>
-                </div>
-              )}
-            </div>
+            {platforms.map((p) => (
+              <button key={p} type="button" className="lx-genre-tag lx-genre-tag--platform" onClick={() => onPlatformClick?.(p)}>
+                {p}
+              </button>
+            ))}
           </div>
+
+          {/* DESCRIZIONE */}
+          {description && <p className="lx-hero-description">{description}</p>}
+
+          {/* CTA */}
+          {alreadyInLibrary ? (
+            <button type="button" className="lx-btn-add-library lx-btn-add-library--disabled" disabled>
+              <i className="bi bi-check2-circle lx-btn-icon" />
+              Nella tua libreria
+            </button>
+          ) : (
+            <button type="button" className="lx-btn-add-library" onClick={handleAddClick}>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="lx-btn-icon">
+                <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              Aggiungi alla libreria
+            </button>
+          )}
         </div>
       </div>
     </section>
   );
-}
+};
 
 export default GameDetailHero;

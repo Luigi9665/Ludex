@@ -1,4 +1,3 @@
-// src/hooks/useHideOnScroll.js
 import { useEffect, useRef, useState } from "react";
 
 /**

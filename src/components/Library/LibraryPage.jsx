@@ -1,51 +1,74 @@
-// src/pages/LibraryPage.jsx
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router";
+
 import LxLoader from "../LxLoader";
 import LibraryFilters from "../Library/LibraryFilters";
 import LibraryGrid from "../Library/LibraryGrid";
 import LibraryPagination from "../Library/LibraryPagination";
-import { loadLibraryPage, loadUserDetails, searchLibraryGames } from "../../redux/action";
-import { useLocation } from "react-router";
 import AddToLibraryModal from "./AddToLibraryModal";
+
+import { loadLibraryPage, loadUserDetails, searchLibraryGames } from "../../redux/action";
 
 const LibraryPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
 
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated ?? false);
+  // --- AUTH ---
+  const authState = useSelector((state) => state.auth || {});
+  const isAuthenticated = authState.isAuthenticated ?? false;
+  const authUser = authState.user;
 
+  // --- LIBRARY STATE ---
   const library = useSelector((state) => state.libraryGames);
-
   const { items, loading, error, page, pageSize, totalItems, totalPages, filters, mode } = library;
 
-  const params = new URLSearchParams(location.search);
-  const titleFromUrl = params.get("Title") || "";
+  // --- PARAMETRI URL ---
+  const searchParams = new URLSearchParams(location.search);
 
-  // stato locale per i filtri (così non spari request a ogni click di checkbox)
+  // accetto sia ?Title= che ?title=
+  const titleFromUrl = searchParams.get("Title") || searchParams.get("title") || "";
+
+  // da GameDetailPage: /library?genre=Action&platform=PC
+  const genreFromUrl = searchParams.get("genre") || "";
+  const platformFromUrl = searchParams.get("platform") || "";
+
+  // --- FILTRI UI LOCALI ---
+  // li uso solo per gestire l'interfaccia; le query effettive le mando io quando voglio
   const [searchText, setSearchText] = useState(filters.search || "");
   const [selectedGenres, setSelectedGenres] = useState(filters.genres || []);
   const [selectedPlatforms, setSelectedPlatforms] = useState(filters.platforms || []);
 
-  // primo load → catalogo completo
+  // quando cambiano i parametri nell’URL, sincronizzo la UI dei filtri
   useEffect(() => {
-    if (titleFromUrl.trim().length >= 2) {
-      // modalità search
+    setSearchText(titleFromUrl || "");
+    setSelectedGenres(genreFromUrl ? [genreFromUrl] : []);
+    setSelectedPlatforms(platformFromUrl ? [platformFromUrl] : []);
+  }, [titleFromUrl, genreFromUrl, platformFromUrl]);
+
+  // primo load / cambio query string → decido se usare search o catalogo base
+  useEffect(() => {
+    const hasTitle = titleFromUrl.trim().length >= 2;
+    const hasGenre = !!genreFromUrl;
+    const hasPlatform = !!platformFromUrl;
+
+    if (hasTitle || hasGenre || hasPlatform) {
+      // arrivo con filtri da URL: faccio una search con quei valori
       dispatch(
         searchLibraryGames({
           page: 1,
           search: titleFromUrl,
-          genres: [],
-          platforms: [],
+          genres: hasGenre ? [genreFromUrl] : [],
+          platforms: hasPlatform ? [platformFromUrl] : [],
         }),
       );
     } else {
-      // modalità catalogo base
-      if (!items || items.length === 0) {
-        dispatch(loadLibraryPage(1));
-      }
+      // nessun filtro da URL: carico il catalogo base (paginato)
+      dispatch(loadLibraryPage(1));
     }
-  }, [titleFromUrl, dispatch]);
+  }, [titleFromUrl, genreFromUrl, platformFromUrl, dispatch]);
+
+  // --- AZIONI FILTRI ---
 
   const handleApplyFilters = () => {
     dispatch(
@@ -69,9 +92,10 @@ const LibraryPage = () => {
     if (newPage < 1 || newPage > totalPages) return;
 
     if (mode === "all") {
+      // lista completa
       dispatch(loadLibraryPage(newPage));
     } else {
-      // usa i filtri che sono salvati nello store
+      // modalità search: uso i filtri salvati nello store
       dispatch(
         searchLibraryGames({
           page: newPage,
@@ -83,7 +107,7 @@ const LibraryPage = () => {
     }
   };
 
-  //gestione modale per inserimento di un game al UserGames
+  // --- MODALE "AGGIUNGI ALLA MIA LIBRERIA" ---
   const [selectedGame, setSelectedGame] = useState(null);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -101,10 +125,10 @@ const LibraryPage = () => {
     setSelectedGame(null);
   };
 
-  const authUser = useSelector((state) => state.auth.user);
-
   const handleSaved = () => {
+    // dopo aver aggiunto / modificato un gioco nella mia libreria
     dispatch(loadLibraryPage(1));
+
     if (authUser?.userId) {
       dispatch(loadUserDetails(authUser.userId));
     }
@@ -113,9 +137,10 @@ const LibraryPage = () => {
   return (
     <section className="lx-section">
       <div className="container-fluid">
+        {/* HEADER */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1 className="lx-section-title">
-            <i className="bi bi-collection-play me-2"></i>
+            <i className="bi bi-collection-play me-2" />
             Libreria giochi
           </h1>
           <span className="text-muted small">{mode === "search" ? "Risultati filtrati" : "Catalogo completo"}</span>

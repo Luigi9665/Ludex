@@ -19,16 +19,19 @@ const MyNavbar = ({ user }) => {
   const location = useLocation();
   const isHome = location.pathname === "/home";
 
-  // l’hook non sa niente di isOpen, gestisce solo lo scroll
   const rawHidden = useHideOnScroll();
-
-  // se il menu mobile è aperto, forziamo sempre visibile
   const navHidden = isOpen ? false : rawHidden;
 
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const library = useSelector((state) => state.libraryGames);
   const navigate = useNavigate();
+
+  // 🔹 ogni cambio route → chiudo menu mobile + dropdown utente
+  useEffect(() => {
+    setIsOpen(false);
+    setShowUserMenu(false);
+  }, [location.pathname]);
 
   // ===== HEALTH CHECK DB =====
   useEffect(() => {
@@ -67,7 +70,6 @@ const MyNavbar = ({ user }) => {
     navigate("/auth", { replace: true });
   };
 
-  // ===== (OPZIONALE) PREFETCH LIBRARY AL CLICK =====
   const handleLibraryClick = () => {
     if (!library?.items || library.items.length === 0) {
       dispatch(loadLibraryPage(1));

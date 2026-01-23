@@ -1,0 +1,432 @@
+/* =========================================================
+   ===============  LAYOUT BASE PAGINA PROFILO =============
+   ========================================================= */
+
+.lx-profile-page {
+  position: relative;
+}
+
+.lx-profile-page .container {
+  max-width: 1320px;
+}
+
+/* =================== HERO PROFILO ====================== */
+
+.lx-profile-hero {
+  border-radius: 1.5rem;
+  padding: 1.75rem 2rem;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  margin-bottom: 2rem;
+}
+
+.lx-profile-hero-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.lx-profile-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.lx-profile-avatar-wrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 0%, #0ea5e9, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lx-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lx-profile-username {
+  font-size: clamp(1.6rem, 2.1vw, 2rem);
+  font-weight: 700;
+}
+
+.lx-profile-badge-own {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid #22c55e;
+  color: #bbf7d0;
+  background: rgba(22, 163, 74, 0.15);
+}
+
+.lx-profile-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.95rem;
+  color: var(--lx-text-secondary);
+}
+
+/* ==================== STATS ===================== */
+
+.lx-profile-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.lx-profile-stat {
+  min-width: 100px;
+  text-align: right;
+}
+
+.lx-profile-stat-number {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.lx-profile-stat-label {
+  font-size: 0.75rem;
+  color: var(--lx-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 768px) {
+  .lx-profile-hero-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .lx-profile-hero-stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* =========================================================
+   ============  CARD CONTENITORE LIBRERIA =================
+   ========================================================= */
+
+.lx-profile-games-card {
+  margin-top: 1.5rem;
+  padding: 1.5rem 1.75rem 2rem;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* Header libreria */
+
+.lx-profile-games-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.lx-profile-total-count,
+.lx-profile-games-subtitle {
+  font-size: 0.9rem;
+  color: var(--lx-text-secondary, #9ca3af);
+}
+
+.lx-profile-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+/* ===================== TABS ====================== */
+
+.lx-profile-tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.lx-profile-tab {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.9);
+  color: rgba(226, 232, 240, 0.8);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.18s ease;
+}
+
+.lx-profile-tab:hover {
+  border-color: rgba(148, 163, 184, 0.7);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.lx-profile-tab--active {
+  border-color: rgba(59, 130, 246, 0.9);
+  background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.18), transparent 70%);
+  color: #e0f2fe;
+}
+
+.lx-profile-tab-count {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  font-size: 0.75rem;
+}
+
+/* =========================================================
+   ================== GRIGLIA GIOCHI ======================
+   ========================================================= */
+
+.lx-profile-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+/* ================== CARD GIOCO ========================= */
+
+.lx-profile-game-card {
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.1), transparent 60%), rgba(15, 23, 42, 0.98);
+  border-radius: 16px;
+  border: 1px solid rgba(30, 64, 175, 0.6);
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.6);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  min-height: 0;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.lx-profile-game-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.9);
+  border-color: rgba(56, 189, 248, 0.8);
+}
+
+/* =========== COVER ============= */
+
+.lx-profile-game-cover {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 0%, rgba(15, 23, 42, 0.9), #020617);
+}
+
+.lx-profile-game-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 0.25s ease;
+}
+
+.lx-profile-game-card:hover .lx-profile-game-cover img {
+  transform: scale(1.05);
+}
+
+/* =========== ICON BUTTONS ============= */
+
+.lx-profile-game-actions {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: flex;
+  gap: 0.4rem;
+  z-index: 3;
+}
+
+.lx-btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+/* =========== BODY CARD ============= */
+
+.lx-profile-game-body {
+  padding: 0.85rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+}
+
+.lx-profile-game-headline {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.lx-profile-game-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+/* =========================================================
+   =============== META: status + piattaforme ===============
+   ========================================================= */
+
+.lx-profile-game-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.lx-profile-status-select {
+  min-width: 130px;
+}
+
+.lx-profile-game-platforms {
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.95);
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ============= STATUS PILL ============= */
+
+.lx-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  background: rgba(148, 163, 184, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  color: #0f172a;
+}
+
+.lx-status-pill-sm {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.lx-status-icon {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+/* ============= RATING + PROGRESS ============= */
+
+.lx-profile-game-middle {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.lx-profile-game-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.lx-profile-rating-value {
+  font-size: 0.8rem;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.lx-profile-game-progress {
+  flex: 1;
+}
+
+/* Progress bar */
+
+.lx-profile-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lx-profile-progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  overflow: hidden;
+}
+
+.lx-profile-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.lx-profile-progress-label {
+  font-size: 0.75rem;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+/* ============= REVIEW ============= */
+
+.lx-profile-game-review {
+  margin-top: 0.5rem;
+}
+
+.lx-profile-review-text {
+  font-size: 0.85rem;
+  color: rgba(209, 213, 219, 0.95);
+}
+
+.lx-profile-review-textarea {
+  font-size: 0.85rem;
+}
+
+.lx-profile-review-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.95);
+}
+
+/* ============= RESPONSIVE ============= */
+
+@media (max-width: 991.98px) {
+  .lx-profile-games-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .lx-profile-header-right {
+    width: 100%;
+    align-items: flex-start;
+  }
+  .lx-profile-tab-bar {
+    justify-content: flex-start;
+  }
+  .lx-profile-search-wrapper {
+    width: 100%;
+  }
+}

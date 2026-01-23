@@ -40,7 +40,11 @@ const HomePage = () => {
   // load dati utente solo se loggato
   useEffect(() => {
     if (authUser?.userId && !loaded) {
-      dispatch(loadUserDetails(authUser.userId));
+      dispatch(
+        loadUserDetails(authUser.userId, {
+          publicProfile: true,
+        }),
+      );
     }
   }, [authUser?.userId, loaded, dispatch]);
 

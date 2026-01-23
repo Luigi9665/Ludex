@@ -103,12 +103,16 @@ export const logoutAction = () => {
 };
 
 //azione per prelevare dal db i dettagli di un giocatore
-export const loadUserDetails = (userId) => {
+export const loadUserDetails = (userId, { publicProfile = false } = {}) => {
   return async (dispatch) => {
     dispatch({ type: USER_DATA_REQUEST });
 
     try {
-      const response = await apiFetch(`/api/Users/MyProfile?id=${userId}`, { method: "GET" });
+      const url = publicProfile
+        ? `/api/Users/GetUtenteById?id=${userId}` // profilo di un altro (solo dati pubblici)
+        : `/api/Users/MyProfile?id=${userId}`; // mio profilo (include review private, progress ecc.)
+
+      const response = await apiFetch(url, { method: "GET" });
 
       if (!response.ok) {
         throw new Error("Impossibile caricare i dati");

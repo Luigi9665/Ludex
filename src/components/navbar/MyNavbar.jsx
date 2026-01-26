@@ -6,7 +6,7 @@ import avatarAdmin from "../../assets/avatarAdmin.png";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutAction } from "../../redux/action";
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch";
-import { safeJson } from "../../apiFetch Autenticate/safeJson,js";
+import { safeJson } from "../../apiFetch Autenticate/safeJson.js";
 import NavSearch from "./NavSearch";
 import { loadLibraryPage } from "../../redux/action";
 import { useHideOnScroll } from "../../hooks/useHideOnScroll";
@@ -29,6 +29,7 @@ const MyNavbar = ({ user }) => {
 
   // 🔹 ogni cambio route → chiudo menu mobile + dropdown utente
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
     setShowUserMenu(false);
   }, [location.pathname]);
@@ -43,7 +44,12 @@ const MyNavbar = ({ user }) => {
       setHealth("loading");
 
       try {
-        const res = await apiFetch("/api/Health", { method: "GET" });
+        const res = await apiFetch("/api/Health");
+
+        if (res.status === 401) {
+          return;
+        }
+
         const data = await safeJson(res);
 
         const ok = data?.status === "Healthy" && data?.database === "OK";
@@ -96,7 +102,7 @@ const MyNavbar = ({ user }) => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className={`collapse navbar-collapse ${isOpen ? "bg-dark text-center py-3 show" : ""}`}>
+        <div className={`collapse navbar-collapse ${isOpen ? "bg-dark text-center p-3 show" : ""}`}>
           <div className="w-100 d-flex flex-column flex-lg-row align-items-lg-center gap-2">
             {/* SEARCH CENTRALE */}
             <div className="flex-grow-1 d-flex justify-content-center justify-content-lg-center mb-2 mb-lg-0">

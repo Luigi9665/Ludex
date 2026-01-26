@@ -1,9 +1,11 @@
+// src/pages/ProfilePage.jsx
+
 import { useCallback, useEffect, useMemo } from "react";
 import { useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 
 import LxLoader from "../components/LxLoader";
-import { loadUserDetails } from "../redux/action";
+import { loadUserDetails, loadPatchUsergame, loadDeleteUsergame } from "../redux/action";
 import ProfileHeader from "../components/Profile/ProfileHeader";
 import ProfileGameSection from "../components/Profile/ProfileGameSection";
 import "../styles/ProfilePage.css";
@@ -62,68 +64,20 @@ const ProfilePage = () => {
     return { total, completed, playing, avgRating };
   }, [visibleGames]);
 
-  // PATCH UserGame
+  // PATCH UserGame (usa thunk)
   const handleUpdateUserGame = useCallback(
-    async (userGameId, patch) => {
-      try {
-        const baseUrl = import.meta.env.VITE_API_BASE_URL;
-        const res = await fetch(`${baseUrl}/api/UserGames/UpdateUserGame/${userGameId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: authUser?.token ? `Bearer ${authUser.token}` : "",
-          },
-          body: JSON.stringify(patch),
-        });
-
-        if (!res.ok) {
-          throw new Error("Errore durante l'aggiornamento del gioco");
-        }
-
-        if (effectiveUserId) {
-          dispatch(
-            loadUserDetails(effectiveUserId, {
-              publicProfile: !isMe,
-            }),
-          );
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Non sono riuscito ad aggiornare il gioco, riprova più tardi.");
-      }
+    (userGameId, patch) => {
+      return dispatch(loadPatchUsergame(userGameId, patch, isMe));
     },
-    [authUser, dispatch, effectiveUserId, isMe],
+    [dispatch, isMe],
   );
 
-  // DELETE UserGame
+  // DELETE UserGame (usa thunk)
   const handleDeleteUserGame = useCallback(
-    async (userGameId) => {
-      try {
-        const baseUrl = import.meta.env.VITE_API_BASE_URL;
-        const res = await fetch(`${baseUrl}/api/UserGames/DeleteUserGame/${userGameId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: authUser?.token ? `Bearer ${authUser.token}` : "",
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error("Errore durante la cancellazione del gioco");
-        }
-
-        if (effectiveUserId) {
-          dispatch(
-            loadUserDetails(effectiveUserId, {
-              publicProfile: !isMe,
-            }),
-          );
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Non sono riuscito a rimuovere il gioco, riprova più tardi.");
-      }
+    (userGameId) => {
+      return dispatch(loadDeleteUsergame(userGameId, isMe));
     },
-    [authUser, dispatch, effectiveUserId, isMe],
+    [dispatch, isMe],
   );
 
   // ================= RENDER STATE =================

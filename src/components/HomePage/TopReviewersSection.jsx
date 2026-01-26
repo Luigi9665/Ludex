@@ -1,6 +1,7 @@
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import LxLoader from "../LxLoader";
+import { useNavigate } from "react-router";
 
 const TopReviewersSection = ({ loading, error, users }) => {
   const items = users ?? [];
@@ -25,6 +26,13 @@ const TopReviewersSection = ({ loading, error, users }) => {
 
   const scrollNext = () => {
     if (emblaApi) emblaApi.scrollNext();
+  };
+
+  const navigate = useNavigate();
+
+  const handleUserClick = (userId) => {
+    if (!userId) return;
+    navigate(`/profile/${userId}`);
   };
 
   if (loading) {
@@ -81,7 +89,10 @@ const TopReviewersSection = ({ loading, error, users }) => {
                       <div className={`lx-rank-badge ${idx < 3 ? "lx-rank-badge--top" : ""}`}>#{idx + 1}</div>
 
                       <div className="flex-grow-1">
-                        <div className="lx-topper-name">@{u.username}</div>
+                        {/* <div className="lx-topper-name">@{u.username}</div> */}
+                        <button type="button" className="lx-player-username-btn" onClick={() => handleUserClick(u.userid)}>
+                          @{u.username}
+                        </button>
                         <div className="lx-topper-sub text-white-50 small">Recensioni pubbliche</div>
                       </div>
 

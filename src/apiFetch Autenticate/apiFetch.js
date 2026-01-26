@@ -1,6 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import { store } from "../redux/store/store";
-import { safeJson } from "./safeJson,js";
+import { safeJson } from "./safeJson.js";
 import { LOGIN_SUCCESS, LOGOUT, USER_DATA_CLEAR } from "../redux/authTypes";
 
 export const apiFetch = async (URL, options = {}) => {
@@ -10,24 +10,38 @@ export const apiFetch = async (URL, options = {}) => {
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
+  // nuovo flag per skip auth/refresh
+  const { skipAuth, ...fetchOptions } = options;
+
   const doFetch = (token) => {
     const headers = {
-      ...(options.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(fetchOptions.headers || {}),
+      ...(token && !skipAuth ? { Authorization: `Bearer ${token}` } : {}),
     };
 
     return fetch(`${baseUrl}${URL}`, {
-      ...options,
+      ...fetchOptions,
       headers,
     });
   };
+
+  // 🔹 chiamata completamente pubblica: niente token, niente refresh
+  if (skipAuth) {
+    return doFetch(null);
+  }
+
+  // 🔹 se non ho proprio nessun token → faccio UNA chiamata senza Authorization e basta
+  if (!accessToken && !refreshToken) {
+    const res = await doFetch(null);
+    return res;
+  }
 
   // 1) prima chiamata con accessToken attuale
   let res = await doFetch(accessToken);
 
   if (res.status !== 401) return res;
 
-  // 2) se 401 e non ho refreshToken → sessione veramente morta
+  // 2) se 401 e non ho refreshToken → sessione finita
   if (!refreshToken) {
     store.dispatch({ type: LOGOUT });
     store.dispatch({ type: USER_DATA_CLEAR });

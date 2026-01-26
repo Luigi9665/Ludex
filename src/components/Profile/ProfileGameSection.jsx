@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Gamepad2 } from "lucide-react";
 import ProfileGameCard from "./ProfileGameCard";
+import ProfileGameEditOverlay from "./ProfileGameEditOverlay";
 import { STATUS_CONFIG, STATUS_ORDER } from "../../config/profileStatusConfig";
 
 const ProfileGameSection = ({ games, isMe, onUpdate, onDelete }) => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
+  const [editingGame, setEditingGame] = useState(null);
 
-  const PAGE_SIZE = 12; // quanti giochi per pagina nel profilo
+  const PAGE_SIZE = 12;
 
-  // filtro completo (tab + search)
   const filteredGames = useMemo(() => {
     let result = games;
 
@@ -28,7 +29,6 @@ const ProfileGameSection = ({ games, isMe, onUpdate, onDelete }) => {
 
   const totalPages = Math.max(1, Math.ceil(filteredGames.length / PAGE_SIZE));
 
-  // reset pagina quando cambio tab o search
   useEffect(() => {
     setPage(1);
   }, [activeTab, searchText]);
@@ -41,6 +41,15 @@ const ProfileGameSection = ({ games, isMe, onUpdate, onDelete }) => {
   const handleChangePage = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
     setPage(newPage);
+  };
+
+  const handleStartEdit = (game) => {
+    if (!isMe) return;
+    setEditingGame(game);
+  };
+
+  const handleCloseEdit = () => {
+    setEditingGame(null);
   };
 
   return (
@@ -100,7 +109,7 @@ const ProfileGameSection = ({ games, isMe, onUpdate, onDelete }) => {
         <>
           <div className="lx-profile-games-grid">
             {pagedGames.map((g) => (
-              <ProfileGameCard key={g.userGameId ?? g.gameId} game={g} isMe={isMe} onUpdate={onUpdate} onDelete={onDelete} />
+              <ProfileGameCard key={g.userGameId ?? g.gameId} game={g} isMe={isMe} onEdit={handleStartEdit} onDelete={onDelete} />
             ))}
           </div>
 
@@ -131,6 +140,9 @@ const ProfileGameSection = ({ games, isMe, onUpdate, onDelete }) => {
           )}
         </>
       )}
+
+      {/* ========= OVERLAY EDIT ========= */}
+      {editingGame && <ProfileGameEditOverlay game={editingGame} isMe={isMe} onUpdate={onUpdate} onDelete={onDelete} onClose={handleCloseEdit} />}
     </div>
   );
 };

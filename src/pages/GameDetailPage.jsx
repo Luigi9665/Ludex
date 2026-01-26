@@ -8,7 +8,7 @@ import GameDetailHero from "../components/GameDetail/GameDetailHero";
 import GameDetailMeta from "../components/GameDetail/GameDetailMeta";
 import GamePlayersSection from "../components/GameDetail/GamePlayersSection";
 import GameRelatedSection from "../components/GameDetail/GameRelatedSection";
-import { loadGameDetail } from "../redux/action";
+import { loadGameDetail, loadUserDetails } from "../redux/action";
 
 const GameDetailPage = () => {
   const { gameId } = useParams();
@@ -40,8 +40,23 @@ const GameDetailPage = () => {
   }, [authUser, navigate]);
 
   const handleModalSaved = useCallback(() => {
+    // chiudi il modal
     setModalOpen(false);
-  }, []);
+
+    // ricarica DETTAGLI gioco (per aggiornare userGames del gioco, ecc.)
+    if (gameId) {
+      dispatch(loadGameDetail(gameId));
+    }
+
+    // ricarica i dati utente (per aggiornare userDetails.games → alreadyInLibrary)
+    if (authUser?.userId) {
+      dispatch(
+        loadUserDetails(authUser.userId, {
+          publicProfile: false,
+        }),
+      );
+    }
+  }, [dispatch, gameId, authUser]);
 
   const handleGenreClick = useCallback(
     (genre) => {

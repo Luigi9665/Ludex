@@ -22,22 +22,22 @@ const ProfileHeader = ({ username, stats, isMe }) => {
 
         {/* Statistiche */}
         <div className="lx-profile-hero-stats">
-          <div className="lx-profile-stat">
+          <div className="lx-profile-stat text-center">
             <Gamepad2 className="lx-profile-stat-icon" size={22} />
             <div className="lx-profile-stat-number">{stats.total}</div>
             <div className="lx-profile-stat-label">Giochi</div>
           </div>
-          <div className="lx-profile-stat">
+          <div className="lx-profile-stat text-center">
             <Trophy className="lx-profile-stat-icon" size={22} />
             <div className="lx-profile-stat-number">{stats.completed}</div>
             <div className="lx-profile-stat-label">Completati</div>
           </div>
-          <div className="lx-profile-stat">
+          <div className="lx-profile-stat text-center">
             <TrendingUp className="lx-profile-stat-icon" size={22} />
             <div className="lx-profile-stat-number">{stats.playing}</div>
             <div className="lx-profile-stat-label">In corso</div>
           </div>
-          <div className="lx-profile-stat">
+          <div className="lx-profile-stat text-center">
             <StarIcon className="lx-profile-stat-icon" size={22} />
             <div className="lx-profile-stat-number">{stats.avgRating}</div>
             <div className="lx-profile-stat-label">Rating medio</div>

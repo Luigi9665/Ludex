@@ -75,7 +75,7 @@ const Email = ({ baseUrl, email, confirmEmail, setEmail, setConfirmEmail, setIsE
 
         {showEmailFormatError && <div className="invalid-feedback">Inserisci un’email valida.</div>}
 
-        {showEmailTakenError && <div className="invalid-feedback">Email già in uso.</div>}
+        {showEmailTakenError && <div className="invalid-feedback">Email non valida.</div>}
 
         {emailServerError && <div className="text-warning small mt-1">{emailServerError}</div>}
 

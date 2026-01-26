@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch.js";
+import { useToast } from "../ui/ToastProvider";
 
 const statusOptions = [
   { labelEn: "Backlog", labelIt: "Da giocare", value: 0 },
@@ -13,26 +14,25 @@ const COMPLETED_STATUS = 4;
 const BACKLOG_STATUS = 0;
 
 const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
+  const { addToast } = useToast();
+
   const [status, setStatus] = useState(BACKLOG_STATUS);
   const [progress, setProgress] = useState(0);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
   const [isReviewPublic, setIsReviewPublic] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
   const [step, setStep] = useState(1); // 1 = stato, 2 = dettagli
 
   // Reset dei campi ogni volta che apri il modal su un gioco
   useEffect(() => {
     if (open && game) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus(BACKLOG_STATUS);
       setProgress(0);
       setRating(0);
       setReview("");
       setIsReviewPublic(true);
-      setErrorMsg("");
-      setSuccessMsg("");
       setSubmitting(false);
       setStep(1);
     }
@@ -60,26 +60,42 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
     if (value === COMPLETED_STATUS) {
       setProgress(100);
     }
+    // se torna a Backlog → progress 0, rating 0, review privata
+    if (value === BACKLOG_STATUS) {
+      setProgress(0);
+      setRating(0);
+      setIsReviewPublic(false);
+    }
+  };
+
+  const handleRatingClick = (value) => {
+    setRating((prev) => (prev === value ? 0 : value));
   };
 
   // funzione che fa davvero la POST
   const saveUserGame = async () => {
-    setErrorMsg("");
-    setSuccessMsg("");
     setSubmitting(true);
 
     try {
-      const effectiveProgress = status === BACKLOG_STATUS ? 0 : Number(progress);
+      const trimmedReview = (review ?? "").trim();
 
-      const effectiveRating = status === BACKLOG_STATUS ? 0 : rating || 0; // adegua se il backend non accetta null
+      // Regole minime di dominio lato client:
+      // - se non è Backlog e la review è pubblica → almeno 20 caratteri
+      if (status !== BACKLOG_STATUS && isReviewPublic && trimmedReview.length < 20) {
+        addToast("Per rendere pubblica la recensione servono almeno 20 caratteri.", "error");
+        setSubmitting(false);
+        return;
+      }
+
+      const effectiveProgress = status === BACKLOG_STATUS ? 0 : Number(progress);
+      const effectiveRating = status === BACKLOG_STATUS ? 0 : rating || 0;
 
       const payload = {
         gameId: game.gameId,
         status,
         progress: effectiveProgress,
         rating: effectiveRating,
-        review: status === BACKLOG_STATUS ? null : review?.trim() || null,
-        // backlog: forziamo comunque false per stare allineati al dominio
+        review: status === BACKLOG_STATUS ? null : trimmedReview.length > 0 ? trimmedReview : null,
         isReviewPublic: status === BACKLOG_STATUS ? false : isReviewPublic,
       };
 
@@ -91,32 +107,42 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
 
       if (!res.ok) {
         let msg = "Impossibile aggiungere il gioco alla libreria.";
+
         try {
           const data = await res.json();
-          if (data?.message) msg = data.message;
-        } catch (parseErr) {
-          console.error("Errore nel parsing della risposta errore", parseErr);
+          if (data?.message) {
+            msg = data.message;
+          } else if (res.status === 409) {
+            msg = "Hai già questo gioco nella tua libreria.";
+          }
+        } catch {
+          // fallback al msg di default
         }
-        throw new Error(msg);
+
+        addToast(msg, "error");
+        setSubmitting(false);
+        return;
       }
 
-      setSuccessMsg("Gioco aggiunto alla tua libreria!");
-      if (onSaved) onSaved(game.gameId);
+      // Successo
+      addToast("Gioco aggiunto alla tua libreria!", "success");
 
-      setTimeout(() => {
-        setSubmitting(false);
-        setSuccessMsg("");
-        onClose();
-      }, 600);
-    } catch (err) {
+      if (typeof onSaved === "function") {
+        onSaved(game.gameId);
+      }
+
       setSubmitting(false);
-      setErrorMsg(err.message || "Errore imprevisto durante il salvataggio.");
+      onClose();
+    } catch (err) {
+      addToast(err?.message || "Errore imprevisto durante il salvataggio del gioco.", "error");
+      setSubmitting(false);
     }
   };
 
   // submit del form (gestisce i 2 step)
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
 
     // STEP 1: scelta stato (+ flag pubblico)
     if (step === 1) {
@@ -139,10 +165,6 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
     }
   };
 
-  const handleRatingClick = (value) => {
-    setRating((prev) => (prev === value ? 0 : value));
-  };
-
   return (
     <div className="lx-modal-backdrop">
       <div className="lx-modal-panel lx-glass">
@@ -152,7 +174,7 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
             <h5 className="mb-1">Aggiungi alla tua libreria</h5>
             <p className="mb-0 small text-white-50">{game.title}</p>
           </div>
-          <button type="button" className="btn-close btn-close-white" aria-label="Chiudi" onClick={onClose} />
+          <button type="button" className="btn-close btn-close-white" aria-label="Chiudi" onClick={onClose} disabled={submitting} />
         </div>
 
         {/* MINI STEPPER */}
@@ -173,7 +195,7 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
             <>
               <div>
                 <label className="form-label lx-field-label">Stato del gioco</label>
-                <select className="form-select lx-field-control" value={status} onChange={handleStatusChange}>
+                <select className="form-select lx-field-control" value={status} onChange={handleStatusChange} disabled={submitting}>
                   {statusOptions.map((s) => (
                     <option key={s.value} value={s.value}>
                       {s.labelEn} ({s.labelIt})
@@ -191,7 +213,7 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
                     className="form-check-input mt-1"
                     checked={status === BACKLOG_STATUS ? false : isReviewPublic}
                     onChange={(e) => setIsReviewPublic(e.target.checked)}
-                    disabled={status === BACKLOG_STATUS}
+                    disabled={status === BACKLOG_STATUS || submitting}
                   />
                   <span>
                     Rendi pubblica la recensione quando la inserirai.
@@ -201,9 +223,6 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
                   </span>
                 </label>
               </div>
-
-              {errorMsg && <div className="alert alert-danger py-2 mb-0">{errorMsg}</div>}
-              {successMsg && <div className="alert alert-success py-2 mb-0">{successMsg}</div>}
 
               <div className="d-flex justify-content-end gap-2 mt-2">
                 <button type="button" className="btn btn-sm lx-btn-outline" onClick={onClose} disabled={submitting}>
@@ -236,7 +255,7 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
                   className="form-range lx-progress-range"
                   value={progress}
                   onChange={(e) => setProgress(Number(e.target.value))}
-                  disabled={status === COMPLETED_STATUS}
+                  disabled={status === COMPLETED_STATUS || submitting}
                 />
                 {status === COMPLETED_STATUS && <small className="text-white-50 small">Stato completato: progress bloccato al 100%.</small>}
               </div>
@@ -249,7 +268,7 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
                 </label>
                 <div className="lx-rating-stars-row">
                   {[1, 2, 3, 4, 5].map((v) => (
-                    <button key={v} type="button" className="lx-rating-star-btn" onClick={() => handleRatingClick(v)}>
+                    <button key={v} type="button" className="lx-rating-star-btn" onClick={() => handleRatingClick(v)} disabled={submitting}>
                       <i className={`bi ${rating >= v ? "bi-star-fill" : "bi-star"}`} />
                     </button>
                   ))}
@@ -265,12 +284,10 @@ const AddToLibraryModal = ({ game, open, onClose, onSaved }) => {
                   placeholder="Scrivi una breve recensione (facoltativa)..."
                   value={review}
                   onChange={(e) => setReview(e.target.value)}
+                  disabled={submitting}
                 />
                 <small className="text-white-50 small d-block mt-1">Se scegli di renderla pubblica, il dominio richiede almeno 20 caratteri.</small>
               </div>
-
-              {errorMsg && <div className="alert alert-danger py-2 mb-0">{errorMsg}</div>}
-              {successMsg && <div className="alert alert-success py-2 mb-0">{successMsg}</div>}
 
               <div className="d-flex justify-content-end gap-2 mt-2">
                 <button type="button" className="btn btn-sm lx-btn-outline" onClick={() => setStep(1)} disabled={submitting}>

@@ -41,6 +41,7 @@ const LibraryPage = () => {
 
   // quando cambiano i parametri nell’URL, sincronizzo la UI dei filtri
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchText(titleFromUrl || "");
     setSelectedGenres(genreFromUrl ? [genreFromUrl] : []);
     setSelectedPlatforms(platformFromUrl ? [platformFromUrl] : []);

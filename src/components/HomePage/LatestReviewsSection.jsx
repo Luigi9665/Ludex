@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import StarRating from "../StarRating";
@@ -28,6 +28,13 @@ const LatestReviewsSection = ({ loading, error, reviews }) => {
 
   const scrollNext = () => {
     if (emblaApi) emblaApi.scrollNext();
+  };
+
+  const navigate = useNavigate();
+
+  const handleUserClick = (userId) => {
+    if (!userId) return;
+    navigate(`/profile/${userId}`);
   };
 
   if (loading) {
@@ -85,7 +92,9 @@ const LatestReviewsSection = ({ loading, error, reviews }) => {
                       <div className="flex-grow-1">
                         <div className="lx-review-title">{r.title}</div>
                         <div className="lx-review-meta">
-                          <span className="lx-review-user">@{r.username}</span>
+                          <button type="button" className="lx-player-username-btn" onClick={() => handleUserClick(r.userId)}>
+                            @{r.username}
+                          </button>
                           <span className="lx-dot">•</span>
                           <span className="lx-review-status">{String(r.status)}</span>
                         </div>

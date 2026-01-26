@@ -1,4 +1,4 @@
-// import { useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import StarRating from "../StarRating";
 
 const GamePlayersSection = ({ userGames = [] }) => {
@@ -10,14 +10,13 @@ const GamePlayersSection = ({ userGames = [] }) => {
     4: "Completato",
   };
 
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   if (!userGames.length) return null;
 
   const handleUserClick = (userId) => {
     if (!userId) return;
-    // quando avrai la pagina profilo:
-    // navigate(`/profile/${userId}`);
+    navigate(`/profile/${userId}`);
   };
 
   const truncateReview = (text, max = 220) => {

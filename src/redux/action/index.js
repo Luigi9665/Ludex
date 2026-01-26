@@ -1,6 +1,9 @@
 import { jwtDecode } from "jwt-decode";
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch";
 import {
+  DELETE_USER_GAME_FAIL,
+  DELETE_USER_GAME_REQUEST,
+  DELETE_USER_GAME_SUCCESS,
   GAME_DETAIL_ERROR,
   GAME_DETAIL_REQUEST,
   GAME_DETAIL_SUCCESS,
@@ -31,11 +34,15 @@ import {
   TRENDING_ERROR,
   TRENDING_REQUEST,
   TRENDING_SUCCESS,
+  UPDATE_USER_GAME_FAIL,
+  UPDATE_USER_GAME_REQUEST,
+  UPDATE_USER_GAME_SUCCESS,
   USER_DATA_CLEAR,
   USER_DATA_ERROR,
   USER_DATA_REQUEST,
   USER_DATA_SUCCESS,
 } from "../authTypes";
+import { STATUS_TO_ENUM } from "../../utils/statusMapper";
 
 const safeJson = async (res) => {
   try {
@@ -113,6 +120,10 @@ export const loadUserDetails = (userId, { publicProfile = false } = {}) => {
         : `/api/Users/MyProfile?id=${userId}`; // mio profilo (include review private, progress ecc.)
 
       const response = await apiFetch(url, { method: "GET" });
+
+      if (response.status === 401) {
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("Impossibile caricare i dati");
@@ -439,6 +450,118 @@ export const loadGameDetail = (gameId) => {
         type: GAME_DETAIL_ERROR,
         payload: err?.message || "Errore imprevisto durante il caricamento.",
       });
+    }
+  };
+};
+
+// helper per convertire string → enum
+const mapStatusToEnum = (status) => {
+  if (status === null || status === undefined) return null;
+  if (typeof status === "number") return status;
+
+  const mapped = STATUS_TO_ENUM[status];
+
+  return typeof mapped === "number" ? mapped : null;
+};
+
+//metodo per la patch usergame
+export const loadPatchUsergame = (userGameId, patch, isMe) => {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const authUser = state.auth.user;
+    const effectiveUserId = state.userData.userDetails?.userId ?? authUser?.userId ?? null;
+
+    dispatch({ type: UPDATE_USER_GAME_REQUEST });
+
+    try {
+      const statusEnum = mapStatusToEnum(patch.status);
+
+      const payload = {
+        status: statusEnum,
+        progress: patch.progress,
+        rating: patch.rating,
+        review: patch.review,
+        isReviewPublic: patch.isReviewPublic,
+      };
+
+      const res = await apiFetch(`/api/UserGames/UpdateUserGame/${userGameId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await safeJson(res);
+
+      if (!res.ok) {
+        console.error("[loadPatchUsergame] API error", data);
+
+        let apiMsg;
+
+        if (typeof data === "string") {
+          apiMsg = data;
+        } else {
+          apiMsg = data?.errors?.request?.[0] || data?.errors?.status?.[0] || data?.title || "Impossibile modificare i dettagli del gioco.";
+        }
+
+        throw new Error(apiMsg);
+      }
+
+      dispatch({ type: UPDATE_USER_GAME_SUCCESS });
+
+      if (effectiveUserId) {
+        dispatch(
+          loadUserDetails(effectiveUserId, {
+            publicProfile: !isMe,
+          }),
+        );
+      }
+    } catch (error) {
+      console.error("[loadPatchUsergame] exception", error);
+
+      dispatch({
+        type: UPDATE_USER_GAME_FAIL,
+        payload: error?.message || "Errore imprevisto durante il caricamento.",
+      });
+
+      throw error;
+    }
+  };
+};
+
+//metodo per la delete usergame
+export const loadDeleteUsergame = (userGameId, isMe) => {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const authUser = state.auth.user;
+    const effectiveUserId = state.userData.userDetails?.userId ?? authUser?.userId ?? null;
+
+    dispatch({ type: DELETE_USER_GAME_REQUEST });
+    try {
+      const res = await apiFetch(`/api/UserGames/DeleteUserGame/${userGameId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Impossibile eliminare il gioco nella libreria.");
+      }
+
+      await safeJson(res);
+
+      dispatch({ type: DELETE_USER_GAME_SUCCESS });
+
+      if (effectiveUserId) {
+        dispatch(
+          loadUserDetails(effectiveUserId, {
+            publicProfile: !isMe,
+          }),
+        );
+      }
+    } catch (error) {
+      dispatch({
+        type: DELETE_USER_GAME_FAIL,
+        payload: error?.message || "Errore imprevisto durante il caricamento.",
+      });
+      throw error;
     }
   };
 };

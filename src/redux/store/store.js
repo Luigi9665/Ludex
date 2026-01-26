@@ -8,6 +8,7 @@ import genresPlatformsReducer from "../reducer/genresPlatformsReducer";
 import libraryReducer from "../reducer/libraryReducer";
 import navSearchReducer from "../reducer/navSearchReducer";
 import gameDetailReducer from "../reducer/gameDetailReducer";
+import patchDeleteReducer from "../reducer/patchDeleteReducer.js";
 
 const persistConfig = {
   key: "root",
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
   libraryGames: libraryReducer,
   navSearch: navSearchReducer,
   gameDetail: gameDetailReducer,
+  modifiedUsergame: patchDeleteReducer,
 });
 
 const persisterReducer = persistReducer(persistConfig, rootReducer);

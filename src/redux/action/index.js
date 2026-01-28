@@ -7,6 +7,9 @@ import {
   GAME_DETAIL_ERROR,
   GAME_DETAIL_REQUEST,
   GAME_DETAIL_SUCCESS,
+  METADATA_REQUEST,
+  METADATA_SUCCESS,
+  METADATA_ERROR,
   GENRES_ERROR,
   GENRES_REQUEST,
   GENRES_SUCCESS,
@@ -41,6 +44,9 @@ import {
   USER_DATA_ERROR,
   USER_DATA_REQUEST,
   USER_DATA_SUCCESS,
+  ADMIN_GAMES_REQUEST,
+  ADMIN_GAMES_SUCCESS,
+  ADMIN_GAMES_ERROR,
 } from "../authTypes";
 import { STATUS_TO_ENUM } from "../../utils/statusMapper";
 
@@ -272,6 +278,116 @@ export const loadPlatforms = () => {
       dispatch({
         type: PLATFORMS_ERROR,
         payload: error?.message || "Errore piattaforme",
+      });
+    }
+  };
+};
+
+// Nota per me futuro:
+// questa thunk carica in PARALLELO: focuses, moods, difficulties e tags
+// dal controller MetadataController (/api/Metadata/...)
+// e le mette in state.selectGame.metadata
+export const loadGameMetadata = () => {
+  return async (dispatch) => {
+    dispatch({ type: METADATA_REQUEST });
+
+    try {
+      const [fRes, mRes, dRes, tRes] = await Promise.all([
+        apiFetch("/api/Metadata/focuses"),
+        apiFetch("/api/Metadata/moods"),
+        apiFetch("/api/Metadata/difficulties"),
+        apiFetch("/api/Metadata/tags"),
+      ]);
+
+      if (!fRes.ok || !mRes.ok || !dRes.ok || !tRes.ok) {
+        throw new Error("Errore nel caricamento dei metadata");
+      }
+
+      const [focuses, moods, difficulties, tags] = await Promise.all([safeJson(fRes), safeJson(mRes), safeJson(dRes), safeJson(tRes)]);
+
+      dispatch({
+        type: METADATA_SUCCESS,
+        payload: { focuses, moods, difficulties, tags },
+      });
+    } catch (err) {
+      dispatch({
+        type: METADATA_ERROR,
+        payload: err?.message || "Errore caricamento metadata",
+      });
+    }
+  };
+};
+
+// Nota per me futuro:
+// questa chiamata prende la lista paginata "generica" dei giochi admin
+// → usa /api/Games/admin/list
+export const loadAdminGames = (page = 1, pageSize = 20) => {
+  return async (dispatch) => {
+    dispatch({ type: ADMIN_GAMES_REQUEST });
+
+    try {
+      const res = await apiFetch(`/api/Games/admin/list?page=${page}&pageSize=${pageSize}`);
+
+      if (!res.ok) {
+        throw new Error("Impossibile caricare la lista giochi admin.");
+      }
+
+      const data = await safeJson(res);
+      // mi aspetto che il backend usi PagedResultDto:
+      // {
+      //   items: [...],
+      //   page: 1,
+      //   pageSize: 20,
+      //   totalItems: 123
+      // }
+      dispatch({
+        type: ADMIN_GAMES_SUCCESS,
+        payload: {
+          ...data,
+          searchTerm: "", // nessuna ricerca nella list "base"
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: ADMIN_GAMES_ERROR,
+        payload: error?.message || "Errore durante il caricamento dei giochi admin.",
+      });
+    }
+  };
+};
+
+// Nota per me futuro:
+// questa è la versione con filtro testo.
+// usa /api/Games/admin/search?title=...&page=...&pageSize=...
+export const searchAdminGames = (title = "", page = 1, pageSize = 20) => {
+  return async (dispatch) => {
+    dispatch({ type: ADMIN_GAMES_REQUEST });
+
+    try {
+      const params = new URLSearchParams();
+      if (title) params.append("title", title);
+      params.append("page", String(page));
+      params.append("pageSize", String(pageSize));
+
+      const res = await apiFetch(`/api/Games/admin/search?${params.toString()}`);
+
+      if (!res.ok) {
+        throw new Error("Impossibile cercare giochi (admin).");
+      }
+
+      const data = await safeJson(res);
+
+      dispatch({
+        type: ADMIN_GAMES_SUCCESS,
+        payload: {
+          ...data,
+          searchTerm: title,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: ADMIN_GAMES_ERROR,
+        payload: error?.message || "Errore durante la ricerca dei giochi nell'area admin.",
       });
     }
   };

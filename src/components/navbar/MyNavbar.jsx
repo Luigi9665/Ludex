@@ -10,6 +10,7 @@ import { safeJson } from "../../apiFetch Autenticate/safeJson.js";
 import NavSearch from "./NavSearch";
 import { loadLibraryPage } from "../../redux/action";
 import { useHideOnScroll } from "../../hooks/useHideOnScroll";
+import { useToast } from "../ui/ToastProvider"; // 👈 toast globale
 
 const MyNavbar = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +20,9 @@ const MyNavbar = ({ user }) => {
   const location = useLocation();
   const isHome = location.pathname === "/home";
 
+  // hook custom per far sparire la navbar in scroll down e riapparire in scroll up
   const rawHidden = useHideOnScroll();
+  // se il menu mobile è aperto, forzo nav visibile
   const navHidden = isOpen ? false : rawHidden;
 
   const dispatch = useDispatch();
@@ -27,18 +30,23 @@ const MyNavbar = ({ user }) => {
   const library = useSelector((state) => state.libraryGames);
   const navigate = useNavigate();
 
-  // 🔹 ogni cambio route → chiudo menu mobile + dropdown utente
+  const { addToast } = useToast();
+
+  // Ogni volta che cambio route:
+  // - chiudo il menu mobile
+  // - chiudo il dropdown utente
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
     setShowUserMenu(false);
   }, [location.pathname]);
 
-  // ===== HEALTH CHECK DB =====
+  // ===== Health check DB (solo per ADMIN) =====
   useEffect(() => {
     let cancelled = false;
 
     const fetchHealth = async () => {
+      // se non sono admin, non chiedo niente
       if (user?.role !== "Admin") return;
 
       setHealth("loading");
@@ -46,6 +54,7 @@ const MyNavbar = ({ user }) => {
       try {
         const res = await apiFetch("/api/Health");
 
+        // se il backend risponde 401, ci pensa apiFetch (refresh/logout), qui non faccio altro
         if (res.status === 401) {
           return;
         }
@@ -60,8 +69,10 @@ const MyNavbar = ({ user }) => {
       }
     };
 
+    // prima chiamata alla mount
     fetchHealth();
 
+    // richiama ogni 60s se la tab è visibile
     const id = setInterval(() => {
       if (document.visibilityState === "visible") fetchHealth();
     }, 60000);
@@ -77,18 +88,42 @@ const MyNavbar = ({ user }) => {
   };
 
   const handleLibraryClick = () => {
+    // piccolo "lazy load": se non ho ancora i giochi in store per la library, chiamo la pagina 1
     if (!library?.items || library.items.length === 0) {
       dispatch(loadLibraryPage(1));
     }
   };
 
+  // ===== Toast per logout forzato (sessione scaduta / reset password) =====
+  useEffect(() => {
+    // Se l'utente risulta autenticato, non mostro alcun messaggio di logout.
+    if (isAuthenticated) return;
+
+    // Se NON è autenticato, controllo se apiFetch ha lasciato il "motivo" in localStorage.
+    try {
+      const reason = localStorage.getItem("lx_logout_reason");
+      if (reason) {
+        // Mostro il toast una sola volta
+        addToast(reason, "warning");
+        localStorage.removeItem("lx_logout_reason");
+
+        // Nota: NON faccio navigate("/auth").
+        // La scelta di andare alla pagina di login la lascio all'utente.
+      }
+    } catch {
+      // se localStorage non è accessibile non succede niente
+    }
+  }, [isAuthenticated, addToast]);
+
   return (
     <nav className={`navbar navbar-expand-lg navbar-dark lx-navbar ${navHidden ? "lx-nav-hidden" : "lx-nav-shown"} ${isHome ? "lx-nav-home" : "lx-nav-wide"}`}>
       <div className="container-fluid">
+        {/* LOGO */}
         <Link className="navbar-brand d-flex align-items-center" to="/home">
           <img src={LogoLudexPng} style={{ width: "90px", height: "40px", objectFit: "contain" }} alt="Ludex logo" />
         </Link>
 
+        {/* BADGE ADMIN + HEALTH DB */}
         {user?.role === "Admin" && <span className="lx-badge-admin ms-2">ADMIN</span>}
 
         {user?.role === "Admin" && (
@@ -98,10 +133,12 @@ const MyNavbar = ({ user }) => {
           </span>
         )}
 
+        {/* BURGER MENU (mobile) */}
         <button className="navbar-toggler border-0" type="button" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
 
+        {/* CONTENUTO COLLAPSABILE */}
         <div className={`collapse navbar-collapse ${isOpen ? "bg-dark text-center p-3 show" : ""}`}>
           <div className="w-100 d-flex flex-column flex-lg-row align-items-lg-center gap-2">
             {/* SEARCH CENTRALE */}
@@ -134,6 +171,7 @@ const MyNavbar = ({ user }) => {
                 </li>
               </ul>
 
+              {/* AREA UTENTE / LOGIN */}
               {isAuthenticated ? (
                 <div className="dropdown lx-user-dropdown ms-lg-3 text-center text-lg-start">
                   <button className="btn p-0 border-0 bg-transparent" onClick={() => setShowUserMenu(!showUserMenu)} aria-label="User menu">
@@ -148,10 +186,17 @@ const MyNavbar = ({ user }) => {
                         <i className="bi bi-gear me-2"></i>Settings
                       </Link>
                       {user?.role === "Admin" && (
-                        <Link to="/admin/games/new" className="dropdown-item">
-                          <i className="bi bi-plus-circle me-2" />
-                          Nuovo gioco
-                        </Link>
+                        <>
+                          <Link to="/admin/games" className="dropdown-item">
+                            <i className="bi bi-controller me-2" />
+                            Gestisci giochi
+                          </Link>
+
+                          <Link to="/admin/games/new" className="dropdown-item">
+                            <i className="bi bi-plus-circle me-2" />
+                            Nuovo gioco
+                          </Link>
+                        </>
                       )}
                       <hr className="dropdown-divider" />
                       <button className="dropdown-item text-danger" onClick={() => dispatch(logoutAction())}>

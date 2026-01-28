@@ -1,59 +1,70 @@
-// src/components/admin/GameCreateForm.jsx
-import { useMemo, useState } from "react";
+// src/pages/admin/GameEditForm.jsx
+import { useEffect, useState } from "react";
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch";
+import { safeJson } from "../../apiFetch Autenticate/safeJson";
 
-// Nota per me futuro:
-// questo è lo shape del form di creazione admin.
-// L’ho allineato ai nuovi campi del backend (focus, mood, difficulty, free, tagIds, isPublished).
-const initialForm = {
-  title: "",
-  description: "",
-  releaseDate: "",
-  coverUrl: "",
-  platformIds: [],
-  genreIds: [],
-
-  // metadata per il sistema di raccomandazione
-  primaryFocusId: "",
-  primaryMoodId: "",
-  difficultyId: "",
-  isMultiplayer: false,
-  isCoop: false,
-  isFreeGame: false,
-
-  tagIds: [],
-
-  // gestione pubblicazione (IsDeleted invertito)
-  isPublished: true,
+// utility che uso anche nel create form
+const toggleIdInArray = (currentArray, id) => {
+  const idStr = String(id);
+  if (currentArray.includes(idStr)) {
+    return currentArray.filter((x) => x !== idStr);
+  }
+  return [...currentArray, idStr];
 };
 
-const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags }) => {
-  const [form, setForm] = useState(initialForm);
+// Nota per me futuro:
+// questo form è pensato SOLO per l'edit admin.
+// Riceve un "game" già pronto dal backend con tutti gli id (platform, genre, tag, ecc.)
+// e i lookup per generi/piattaforme/focus/mood/difficulty/tags.
+
+const GameEditForm = ({ game, genres, platforms, focuses, moods, difficulties, tags, onSaved }) => {
+  // stato interno del form (parto dal dto `game`)
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    releaseDate: "",
+    coverUrl: "",
+    platformIds: [],
+    genreIds: [],
+    primaryFocusId: "",
+    primaryMoodId: "",
+    difficultyId: "",
+    averageLengthHours: "",
+    isMultiplayer: false,
+    isCoop: false,
+    freeGame: false,
+    isDeleted: false,
+    tagIds: [],
+  });
+
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [coverWarning, setCoverWarning] = useState("");
 
-  // --- utilità per tenere il codice leggibile tra qualche mese ---
-  const toggleIdInArray = (currentArray, id) => {
-    const idStr = String(id);
-    if (currentArray.includes(idStr)) {
-      return currentArray.filter((x) => x !== idStr);
-    }
-    return [...currentArray, idStr];
-  };
+  // quando arriva/ cambia il game → sincronizzo lo stato
+  useEffect(() => {
+    if (!game) return;
 
-  // raggruppo i tag per category per UI più pulita
-  const groupedTags = useMemo(() => {
-    const groups = {};
-    (tags || []).forEach((t) => {
-      const cat = t.category || "OTHER";
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(t);
+    setForm({
+      title: game.title ?? "",
+      description: game.description ?? "",
+      // mi aspetto che la data arrivi come "yyyy-MM-dd" o ISO → prendo solo la parte data
+      releaseDate: game.releaseDate ? String(game.releaseDate).substring(0, 10) : "",
+      coverUrl: game.coverUrl ?? "",
+      platformIds: (game.platformIds || []).map((x) => String(x)),
+      genreIds: (game.genreIds || []).map((x) => String(x)),
+      primaryFocusId: game.primaryFocusId ? String(game.primaryFocusId) : "",
+      primaryMoodId: game.primaryMoodId ? String(game.primaryMoodId) : "",
+      difficultyId: game.difficultyId ? String(game.difficultyId) : "",
+      averageLengthHours: game.averageLengthHours != null ? String(game.averageLengthHours) : "",
+      isMultiplayer: !!game.isMultiplayer,
+      isCoop: !!game.isCoop,
+      freeGame: !!game.freeGame,
+      isDeleted: !!game.isDeleted,
+      tagIds: (game.tagIds || []).map((x) => String(x)),
     });
-    // ordino le categorie in modo stabile
-    return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [tags]);
+  }, [game]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -124,8 +135,14 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
     if (!form.platformIds.length) return "Seleziona almeno una piattaforma.";
     if (!form.genreIds.length) return "Seleziona almeno un genere.";
 
-    // NB: focus/mood/difficulty/tag non li rendo obbligatori:
-    // meglio avere il gioco nel catalogo e arricchirlo dopo.
+    // durata media opzionale, ma se presente deve essere numero valido
+    if (form.averageLengthHours) {
+      const n = Number(form.averageLengthHours);
+      if (Number.isNaN(n) || n < 0) {
+        return "La durata media deve essere un numero positivo.";
+      }
+    }
+
     return null;
   };
 
@@ -141,66 +158,97 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
     }
 
     setSubmitting(true);
+
     try {
-      // Nota per me futuro:
-      // Qui preparo il payload allineato al GameCreateDto esteso.
+      // preparo il payload per UpdateGameDto
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
-        platformIds: form.platformIds.map((id) => Number(id)),
-        genreIds: form.genreIds.map((id) => Number(id)),
         releaseDate: form.releaseDate, // yyyy-MM-dd
         coverUrl: form.coverUrl.trim(),
+        platformIds: form.platformIds.map((id) => Number(id)),
+        genreIds: form.genreIds.map((id) => Number(id)),
 
         primaryFocusId: form.primaryFocusId ? Number(form.primaryFocusId) : null,
         primaryMoodId: form.primaryMoodId ? Number(form.primaryMoodId) : null,
         difficultyId: form.difficultyId ? Number(form.difficultyId) : null,
+        averageLengthHours: form.averageLengthHours ? Number(form.averageLengthHours) : null,
 
         isMultiplayer: form.isMultiplayer,
         isCoop: form.isCoop,
-        isFreeGame: form.isFreeGame,
+        freeGame: form.freeGame,
+
+        isDeleted: form.isDeleted,
 
         tagIds: form.tagIds.map((id) => Number(id)),
-
-        isPublished: form.isPublished,
       };
 
-      const res = await apiFetch("/api/Games/create", {
-        method: "POST",
+      const res = await apiFetch(`/api/Games/${game.gameId}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
+      if (res.status === 404) {
+        throw new Error("Gioco non trovato (404).");
+      }
+
       if (!res.ok) {
-        let errMsg = "Impossibile creare il gioco. Riprova.";
+        let msg = "Impossibile aggiornare il gioco.";
         try {
-          const body = await res.json();
-          if (body?.message) errMsg = body.message;
+          const body = await safeJson(res);
+          if (body?.message) msg = body.message;
         } catch {
           // ignore
         }
-        throw new Error(errMsg);
+        throw new Error(msg);
       }
 
-      setSuccessMsg("Gioco creato con successo!");
-      setForm(initialForm);
+      setSuccessMsg("Gioco aggiornato con successo.");
+      if (onSaved) {
+        // piccola pausa mentale: se domani voglio NON navigare subito,
+        // posso togliere questo onSaved o gestire un toast globale
+        onSaved();
+      }
     } catch (err) {
-      setErrorMsg(err.message || "Errore imprevisto durante il salvataggio.");
+      setErrorMsg(err?.message || "Errore imprevisto durante l'aggiornamento.");
     } finally {
       setSubmitting(false);
     }
   };
 
+  // utile per la preview
   const currentPlatforms = platforms.filter((p) => form.platformIds.includes(String(p.platformId ?? p.id)));
   const currentGenres = genres.filter((g) => form.genreIds.includes(String(g.genreId ?? g.id)));
-  const currentTags = tags.filter((t) => form.tagIds.includes(String(t.id)));
+
+  // raggruppo i tag per categoria per velocizzare la vita all'admin
+  const groupedTags = tags.reduce((acc, tag) => {
+    const cat = tag.category || "OTHER";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(tag);
+    return acc;
+  }, {});
+
+  const categoryOrder = ["GENRE", "FEATURE", "STRUCTURE", "EXPERIENCE", "SOCIAL", "SETTING", "AESTHETIC", "CAMERA", "OTHER"];
+
+  const categoryLabels = {
+    GENRE: "Generi / Sottogeneri",
+    FEATURE: "Feature di gameplay",
+    STRUCTURE: "Struttura",
+    EXPERIENCE: "Esperienza",
+    SOCIAL: "Social / Multiplayer",
+    SETTING: "Ambientazione",
+    AESTHETIC: "Stile visivo",
+    CAMERA: "Camera",
+    OTHER: "Altro",
+  };
 
   return (
     <form className="row gx-4 gy-4 lx-admin-form" onSubmit={handleSubmit}>
       {/* COLONNA SINISTRA: campi principali + metadata */}
       <div className="col-12 col-lg-7">
         <div className="row g-3">
-          {/* --- campi base --- */}
+          {/* titolo + data */}
           <div className="col-12 col-md-8">
             <label className="form-label lx-field-label">Titolo</label>
             <input
@@ -218,6 +266,7 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
             <input type="date" name="releaseDate" className="form-control lx-field-control" value={form.releaseDate} onChange={handleChange} />
           </div>
 
+          {/* descrizione */}
           <div className="col-12">
             <label className="form-label lx-field-label">Descrizione</label>
             <textarea
@@ -230,6 +279,7 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
             />
           </div>
 
+          {/* cover */}
           <div className="col-12">
             <label className="form-label lx-field-label">Cover URL</label>
             <input
@@ -240,32 +290,13 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
               onChange={handleCoverChange}
               placeholder="https://..."
             />
-            <small className="lx-field-hint">Usa un link diretto a un'immagine (JPG / PNG / WebP).</small>
+            <small className="lx-field-hint">Usa un link diretto a un&apos;immagine (JPG / PNG / WebP).</small>
             {coverWarning && <div className="text-warning small mt-1">{coverWarning}</div>}
           </div>
 
-          {/* --- pubblicazione --- */}
-          <div className="col-12">
-            <div className="form-check form-switch">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="isPublishedSwitch"
-                name="isPublished"
-                checked={form.isPublished}
-                onChange={handleCheckboxChange}
-              />
-              <label className="form-check-label lx-field-label ms-2" htmlFor="isPublishedSwitch">
-                Pubblica subito il gioco
-              </label>
-            </div>
-            <small className="lx-field-hint">Se disattivato, il gioco sarà in bozza (IsDeleted = true) e non comparirà nel catalogo pubblico.</small>
-          </div>
-
-          {/* --- piattaforme --- */}
+          {/* piattaforme */}
           <div className="col-12 col-md-6">
             <label className="form-label lx-field-label">Piattaforme</label>
-
             <div className="lx-multiselect-list">
               {platforms.map((p) => {
                 const id = p.platformId ?? p.id;
@@ -280,14 +311,11 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
                 );
               })}
             </div>
-
-            <small className="lx-field-hint">Clicca per aggiungere o rimuovere una piattaforma.</small>
           </div>
 
-          {/* --- generi --- */}
+          {/* generi */}
           <div className="col-12 col-md-6">
             <label className="form-label lx-field-label">Generi</label>
-
             <div className="lx-multiselect-list">
               {genres.map((g) => {
                 const id = g.genreId ?? g.id;
@@ -302,20 +330,13 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
                 );
               })}
             </div>
-
-            <small className="lx-field-hint">Puoi scegliere più generi (azione, RPG, roguelike…)</small>
           </div>
 
-          {/* --- meta per il sistema di consigli --- */}
-          <div className="col-12">
-            <hr className="text-white-10" />
-            <h5 className="lx-section-subtitle mb-3">Meta per consigli (facoltativi ma consigliati)</h5>
-          </div>
-
+          {/* riga metadata base: focus / mood / difficoltà */}
           <div className="col-12 col-md-4">
             <label className="form-label lx-field-label">Focus principale</label>
             <select name="primaryFocusId" className="form-select lx-field-control" value={form.primaryFocusId} onChange={handleChange}>
-              <option value="">- Nessuno -</option>
+              <option value="">(Nessuno)</option>
               {focuses.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name}
@@ -327,7 +348,7 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
           <div className="col-12 col-md-4">
             <label className="form-label lx-field-label">Mood principale</label>
             <select name="primaryMoodId" className="form-select lx-field-control" value={form.primaryMoodId} onChange={handleChange}>
-              <option value="">- Nessuno -</option>
+              <option value="">(Nessuno)</option>
               {moods.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name}
@@ -339,7 +360,7 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
           <div className="col-12 col-md-4">
             <label className="form-label lx-field-label">Difficoltà</label>
             <select name="difficultyId" className="form-select lx-field-control" value={form.difficultyId} onChange={handleChange}>
-              <option value="">- Nessuna -</option>
+              <option value="">(Nessuna / variabile)</option>
               {difficulties.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.name}
@@ -348,67 +369,86 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
             </select>
           </div>
 
+          {/* durata + flag vari */}
           <div className="col-12 col-md-4">
+            <label className="form-label lx-field-label">Durata media (ore)</label>
+            <input
+              type="number"
+              name="averageLengthHours"
+              className="form-control lx-field-control"
+              value={form.averageLengthHours}
+              onChange={handleChange}
+              min="0"
+            />
+            <small className="lx-field-hint">Opzionale. Serve per i consigli (short/long game).</small>
+          </div>
+
+          <div className="col-12 col-md-4 d-flex flex-column justify-content-end">
             <div className="form-check">
               <input
                 className="form-check-input"
-                type="checkbox"
                 id="isMultiplayer"
+                type="checkbox"
                 name="isMultiplayer"
                 checked={form.isMultiplayer}
                 onChange={handleCheckboxChange}
               />
-              <label className="form-check-label lx-field-label ms-2" htmlFor="isMultiplayer">
-                Multiplayer
+              <label className="form-check-label text-white-50" htmlFor="isMultiplayer">
+                Ha modalità multiplayer
+              </label>
+            </div>
+            <div className="form-check mt-1">
+              <input className="form-check-input" id="isCoop" type="checkbox" name="isCoop" checked={form.isCoop} onChange={handleCheckboxChange} />
+              <label className="form-check-label text-white-50" htmlFor="isCoop">
+                Ha modalità co-op
               </label>
             </div>
           </div>
 
-          <div className="col-12 col-md-4">
+          <div className="col-12 col-md-4 d-flex flex-column justify-content-end">
             <div className="form-check">
-              <input className="form-check-input" type="checkbox" id="isCoop" name="isCoop" checked={form.isCoop} onChange={handleCheckboxChange} />
-              <label className="form-check-label lx-field-label ms-2" htmlFor="isCoop">
-                Co-op
+              <input className="form-check-input" id="freeGame" type="checkbox" name="freeGame" checked={form.freeGame} onChange={handleCheckboxChange} />
+              <label className="form-check-label text-white-50" htmlFor="freeGame">
+                Gioco gratuito (Free to play)
+              </label>
+            </div>
+
+            <div className="form-check mt-1">
+              <input className="form-check-input" id="isDeleted" type="checkbox" name="isDeleted" checked={form.isDeleted} onChange={handleCheckboxChange} />
+              <label className="form-check-label text-white-50" htmlFor="isDeleted">
+                Nascondi dal catalogo pubblico
               </label>
             </div>
           </div>
 
-          <div className="col-12 col-md-4">
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox" id="isFreeGame" name="isFreeGame" checked={form.isFreeGame} onChange={handleCheckboxChange} />
-              <label className="form-check-label lx-field-label ms-2" htmlFor="isFreeGame">
-                Free to play
-              </label>
-            </div>
-          </div>
-
-          {/* --- TAG --- */}
+          {/* TAGS: raggruppati per categoria */}
           <div className="col-12">
-            <hr className="text-white-10" />
-            <h5 className="lx-section-subtitle mb-3">Tag (per affinare ancora i consigli)</h5>
+            <label className="form-label lx-field-label">Tag</label>
+            <div className="lx-tags-groups">
+              {categoryOrder.map((catKey) => {
+                const group = groupedTags[catKey];
+                if (!group || group.length === 0) return null;
 
-            {groupedTags.length === 0 && <p className="text-white-50 small">Nessun tag disponibile. Controlla i seeding lato backend.</p>}
-
-            {groupedTags.map(([category, tagList]) => (
-              <div key={category} className="mb-3">
-                <div className="text-uppercase text-white-50 small mb-1">{category}</div>
-                <div className="lx-multiselect-list">
-                  {tagList.map((t) => {
-                    const idStr = String(t.id);
-                    const checked = form.tagIds.includes(idStr);
-
-                    return (
-                      <label key={t.id} className={`lx-multiselect-item ${checked ? "is-checked" : ""}`}>
-                        <input type="checkbox" className="form-check-input me-2" checked={checked} onChange={() => handleToggleTag(t.id)} />
-                        <span>{t.displayName}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            <small className="lx-field-hint">Non esagerare: meglio pochi tag molto significativi che 20 generici.</small>
+                return (
+                  <div key={catKey} className="mb-2">
+                    <div className="text-white-50 small mb-1">{categoryLabels[catKey] || catKey}</div>
+                    <div className="lx-multiselect-list lx-tags-list">
+                      {group.map((t) => {
+                        const idStr = String(t.id);
+                        const checked = form.tagIds.includes(idStr);
+                        return (
+                          <label key={t.id} className={`lx-multiselect-item lx-tag-item ${checked ? "is-checked" : ""}`}>
+                            <input type="checkbox" className="form-check-input me-2" checked={checked} onChange={() => handleToggleTag(t.id)} />
+                            <span>{t.displayName}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <small className="lx-field-hint">I tag guidano il motore &quot;Trova il gioco giusto&quot;. Meglio pochi ma significativi.</small>
           </div>
         </div>
 
@@ -420,11 +460,9 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
 
         {/* BOTTONI */}
         <div className="d-flex gap-2 mt-2">
-          <button type="button" className="btn lx-btn-outline" onClick={() => setForm(initialForm)} disabled={submitting}>
-            Reset
-          </button>
+          {/* per ora niente reset che rimette i valori originali: sarebbe un po' più complesso */}
           <button type="submit" className="btn lx-btn-primary" disabled={submitting}>
-            {submitting ? "Salvataggio..." : "Crea gioco"}
+            {submitting ? "Salvataggio..." : "Salva modifiche"}
           </button>
         </div>
       </div>
@@ -464,7 +502,7 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
                 )}
               </div>
 
-              <div className="lx-genre-row mb-1">
+              <div className="lx-genre-row">
                 {currentGenres.length > 0 ? (
                   currentGenres.map((g) => (
                     <span key={g.genreId ?? g.id} className="lx-genre-pill me-1">
@@ -475,17 +513,6 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
                   <span className="text-white-50 small">Aggiungi uno o più generi</span>
                 )}
               </div>
-
-              {currentTags.length > 0 && (
-                <div className="d-flex flex-wrap gap-1 mt-1">
-                  {currentTags.slice(0, 6).map((t) => (
-                    <span key={t.id} className="badge bg-dark border border-secondary text-uppercase small">
-                      {t.displayName}
-                    </span>
-                  ))}
-                  {currentTags.length > 6 && <span className="text-white-50 small">+{currentTags.length - 6} altri tag</span>}
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -494,4 +521,4 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
   );
 };
 
-export default GameCreateForm;
+export default GameEditForm;

@@ -25,7 +25,7 @@ export default function MainLayout() {
       <footer className="lx-footer mt-5">
         <div className="container">
           <div className="text-center py-4">
-            <p className="mb-0 text-white-50">© 2026 Ludex - La tua libreria gaming</p>
+            <p className="mb-0 text-white-50">© 2026 Ludex - La tua libreria gaming V1</p>
           </div>
         </div>
       </footer>

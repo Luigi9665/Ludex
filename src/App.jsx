@@ -9,6 +9,8 @@ import NotFoundPage from "./pages/NotFoundPage";
 import LibraryPage from "./components/Library/LibraryPage";
 import GameDetailPage from "./pages/GameDetailPage";
 import ProfilePage from "./pages/ProfilePage";
+import AdminGameListPage from "./pages/admin/AdminGameListPage";
+import AdminEditGamePage from "./pages/admin/AdminEditGamePage";
 
 function App() {
   return (
@@ -27,7 +29,9 @@ function App() {
         <Route path="/profile/:userId" element={<ProfilePage />} />
       </Route>
 
+      <Route path="/admin/games" element={<AdminGameListPage />} />
       <Route path="/admin/games/new" element={<AdminCreateGamePage />} />
+      <Route path="/admin/games/:id/edit" element={<AdminEditGamePage />} />
 
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
 

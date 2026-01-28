@@ -3,6 +3,17 @@ import { store } from "../redux/store/store";
 import { safeJson } from "./safeJson.js";
 import { LOGIN_SUCCESS, LOGOUT, USER_DATA_CLEAR } from "../redux/authTypes";
 
+/**
+ * Wrapper generale per tutte le chiamate HTTP dell'app.
+ *
+ * Nota per il me-del-futuro:
+ * - Qui gestisco:
+ *   - aggiunta automatica del Bearer token
+ *   - tentativo di refresh quando il backend risponde 401
+ *   - logout forzato + messaggio in localStorage quando il refresh fallisce
+ * - Se voglio una chiamata *completamente pubblica* (senza token e senza refresh)
+ *   passo { skipAuth: true } come opzione.
+ */
 export const apiFetch = async (URL, options = {}) => {
   const state = store.getState();
   const accessToken = state.auth.accessToken;
@@ -10,9 +21,13 @@ export const apiFetch = async (URL, options = {}) => {
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  // nuovo flag per skip auth/refresh
+  // estraggo il flag custom "skipAuth" (non fa parte delle opzioni native di fetch)
   const { skipAuth, ...fetchOptions } = options;
 
+  /**
+   * Funzione interna che esegue davvero la fetch.
+   * Se gli passo un token, aggiunge l'header Authorization.
+   */
   const doFetch = (token) => {
     const headers = {
       ...(fetchOptions.headers || {}),
@@ -25,46 +40,79 @@ export const apiFetch = async (URL, options = {}) => {
     });
   };
 
-  // 🔹 chiamata completamente pubblica: niente token, niente refresh
+  // 1) Chiamata completamente pubblica: niente token, niente refresh.
   if (skipAuth) {
     return doFetch(null);
   }
 
-  // 🔹 se non ho proprio nessun token → faccio UNA chiamata senza Authorization e basta
+  // 2) Non ho né accessToken né refreshToken → provo una sola chiamata senza Authorization.
   if (!accessToken && !refreshToken) {
     const res = await doFetch(null);
     return res;
   }
 
-  // 1) prima chiamata con accessToken attuale
+  // 3) Ho almeno un token → prima provo con l'accessToken corrente.
   let res = await doFetch(accessToken);
 
+  // Se NON è 401, tutto ok, ritorno la response così com'è.
   if (res.status !== 401) return res;
 
-  // 2) se 401 e non ho refreshToken → sessione finita
-  if (!refreshToken) {
-    store.dispatch({ type: LOGOUT });
-    store.dispatch({ type: USER_DATA_CLEAR });
+  // 4) Se è 401 ma sto chiamando uno degli endpoint di auth,
+  // non provo a fare un refresh per evitare loop strani.
+  const urlStr = `${baseUrl}${URL}`;
+  const isAuthEndpoint =
+    urlStr.includes("/api/Auth/login") ||
+    urlStr.includes("/api/Auth/refresh") ||
+    urlStr.includes("/api/Auth/register") ||
+    urlStr.includes("/api/Auth/forgot-password") ||
+    urlStr.includes("/api/Auth/reset-password");
+
+  if (isAuthEndpoint) {
     return res;
   }
 
-  // 3) provo il refresh
+  // 5) Se è 401 e NON ho un refreshToken → la sessione è andata.
+  if (!refreshToken) {
+    store.dispatch({ type: LOGOUT });
+    store.dispatch({ type: USER_DATA_CLEAR });
+
+    // Salvo un messaggio di "motivo logout" da leggere poi nella navbar
+    try {
+      localStorage.setItem("lx_logout_reason", "La tua sessione è scaduta. Effettua di nuovo il login.");
+    } catch {
+      // Se localStorage non è disponibile, amen.
+    }
+
+    // Ritorno comunque la response originale 401 (così il chiamante può decidere cosa fare).
+    return res;
+  }
+
+  // 6) Provo il refresh con il refreshToken salvato nel Redux.
   const refreshRes = await fetch(`${baseUrl}/api/Auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken }),
   });
 
+  // Se il refresh NON va a buon fine → logout totale + motivo in localStorage.
+  // Questo è il caso tipico dopo reset password o revoca manuale token.
   if (!refreshRes.ok) {
-    // refresh fallito → logout e ritorno la vecchia 401
     store.dispatch({ type: LOGOUT });
     store.dispatch({ type: USER_DATA_CLEAR });
+
+    try {
+      localStorage.setItem("lx_logout_reason", "Sei stato disconnesso perché il tuo accesso non è più valido (sessione scaduta o password reimpostata).");
+    } catch {
+      // ignore
+    }
+
+    // Ritorno la vecchia 401 che aveva fatto scattare il refresh.
     return res;
   }
 
+  // 7) Refresh OK → aggiorno i token in Redux, ricostruendo l'utente dai claims.
   const newTokens = await safeJson(refreshRes);
 
-  // ricostruisco user come nel login
   const claims = jwtDecode(newTokens.accessToken);
   const user = {
     userId: claims.sub || claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
@@ -81,7 +129,7 @@ export const apiFetch = async (URL, options = {}) => {
     },
   });
 
-  // 4) rifaccio la chiamata con il nuovo accessToken
+  // 8) Rifaccio la chiamata originale con il nuovo accessToken.
   res = await doFetch(newTokens.accessToken);
   return res;
 };

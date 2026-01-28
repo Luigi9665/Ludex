@@ -144,7 +144,7 @@ const LibraryPage = () => {
             <i className="bi bi-collection-play me-2" />
             Libreria giochi
           </h1>
-          <span className="text-muted small">{mode === "search" ? "Risultati filtrati" : "Catalogo completo"}</span>
+          <span className="text-white-50 small">{mode === "search" ? "Risultati filtrati" : "Catalogo completo"}</span>
         </div>
 
         <div className="row">

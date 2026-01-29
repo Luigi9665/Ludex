@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router";
 import "./App.css";
+import "./styles/AdminFormStyles.css";
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import MainLayout from "./layouts/MainLayout";

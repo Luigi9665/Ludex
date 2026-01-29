@@ -1,168 +1,163 @@
-// src/components/admin/GameCreateForm.jsx
-import { useMemo, useState } from "react";
+// src/pages/admin/GameCreateForm.jsx
+import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch";
+import { safeJson } from "../../apiFetch Autenticate/safeJson";
 
-// Nota per me futuro:
-// questo è lo shape del form di creazione admin.
-// L’ho allineato ai nuovi campi del backend (focus, mood, difficulty, free, tagIds, isPublished).
-const initialForm = {
-  title: "",
-  description: "",
-  releaseDate: "",
-  coverUrl: "",
-  platformIds: [],
-  genreIds: [],
+import AdminGameFormStepper from "./AdminGameFormStepper";
+import GameBaseFields from "./GameBaseFields";
+import GamePlatformGenreSelector from "./GamePlatformGenreSelector";
+import GameMetadataBasic from "./GameMetadataBasic";
+import GameTagSelector from "./GameTagSelector";
+import GamePreviewCard from "./GamePreviewCard";
+import GameFormButtons from "./GameFormButtons";
+import GameFormMessages from "./GameFormMessages";
 
-  // metadata per il sistema di raccomandazione
-  primaryFocusId: "",
-  primaryMoodId: "",
-  difficultyId: "",
-  isMultiplayer: false,
-  isCoop: false,
-  isFreeGame: false,
-
-  tagIds: [],
-
-  // gestione pubblicazione (IsDeleted invertito)
-  isPublished: true,
-};
-
+/**
+ * Form creazione gioco (multi-step)
+ *
+ * Props:
+ * - genres: array dal backend (con genreId o id)
+ * - platforms: array dal backend (con platformId o id)
+ * - focuses, moods, difficulties, tags: array metadata
+ */
 const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags }) => {
-  const [form, setForm] = useState(initialForm);
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
-  const [coverWarning, setCoverWarning] = useState("");
+  const navigate = useNavigate();
 
-  // --- utilità per tenere il codice leggibile tra qualche mese ---
-  const toggleIdInArray = (currentArray, id) => {
-    const idStr = String(id);
-    if (currentArray.includes(idStr)) {
-      return currentArray.filter((x) => x !== idStr);
-    }
-    return [...currentArray, idStr];
-  };
+  // Normalizzo id/name per piattaforme & generi
+  const normalizedPlatforms = useMemo(
+    () =>
+      (platforms || []).map((p) => ({
+        id: p.platformId ?? p.id,
+        name: p.name,
+      })),
+    [platforms],
+  );
 
-  // raggruppo i tag per category per UI più pulita
-  const groupedTags = useMemo(() => {
-    const groups = {};
-    (tags || []).forEach((t) => {
-      const cat = t.category || "OTHER";
-      if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(t);
-    });
-    // ordino le categorie in modo stabile
-    return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [tags]);
+  const normalizedGenres = useMemo(
+    () =>
+      (genres || []).map((g) => ({
+        id: g.genreId ?? g.id,
+        name: g.name,
+      })),
+    [genres],
+  );
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  // Stato form
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    releaseDate: "",
+    coverUrl: "",
+    platformIds: [],
+    genreIds: [],
+    primaryFocusId: null,
+    primaryMoodId: null,
+    difficultyId: null,
+    averageLengthHours: null,
+    isMultiplayer: false,
+    isCoop: false,
+    freeGame: false,
+    isDeleted: false,
+    tagIds: [],
+  });
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // Stato UI
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: checked,
-    }));
-  };
+  const totalSteps = 3;
 
-  const handleCoverChange = (e) => {
-    const value = e.target.value;
-    setForm((prev) => ({ ...prev, coverUrl: value }));
+  const validateStep = (step) => {
+    const newErrors = {};
 
-    setCoverWarning("");
-
-    const trimmed = value.trim();
-    if (!/^https?:\/\//i.test(trimmed)) return;
-
-    const img = new Image();
-    img.onload = () => {
-      if (img.naturalWidth > 2000 || img.naturalHeight > 2000) {
-        setCoverWarning("Attenzione: la cover sembra molto grande (risoluzione elevata). Meglio usare una versione ridotta.");
+    if (step === 1) {
+      if (!form.title.trim()) newErrors.title = "Il titolo è obbligatorio";
+      if (!form.releaseDate) {
+        newErrors.releaseDate = "La data di rilascio è obbligatoria";
       }
-    };
-    img.onerror = () => {
-      setCoverWarning("Impossibile caricare l'immagine da questo URL.");
-    };
-    img.src = trimmed;
+    }
+
+    if (step === 2) {
+      if (!form.platformIds.length) {
+        newErrors.platformIds = "Seleziona almeno una piattaforma";
+      }
+      if (!form.genreIds.length) {
+        newErrors.genreIds = "Seleziona almeno un genere";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleTogglePlatform = (id) => {
-    setForm((prev) => ({
-      ...prev,
-      platformIds: toggleIdInArray(prev.platformIds, id),
-    }));
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep((s) => s - 1);
+      setErrors({});
+    }
   };
 
-  const handleToggleGenre = (id) => {
-    setForm((prev) => ({
-      ...prev,
-      genreIds: toggleIdInArray(prev.genreIds, id),
-    }));
-  };
-
-  const handleToggleTag = (id) => {
-    setForm((prev) => ({
-      ...prev,
-      tagIds: toggleIdInArray(prev.tagIds, id),
-    }));
-  };
-
-  const validate = () => {
-    if (!form.title.trim()) return "Il titolo è obbligatorio.";
-    if (!form.description.trim()) return "La descrizione è obbligatoria.";
-    if (!form.releaseDate) return "La data di uscita è obbligatoria.";
-    if (!form.coverUrl.trim()) return "La cover è obbligatoria.";
-    if (!/^https?:\/\//i.test(form.coverUrl.trim())) return "La cover deve essere un URL valido (http/https).";
-
-    if (!form.platformIds.length) return "Seleziona almeno una piattaforma.";
-    if (!form.genreIds.length) return "Seleziona almeno un genere.";
-
-    // NB: focus/mood/difficulty/tag non li rendo obbligatori:
-    // meglio avere il gioco nel catalogo e arricchirlo dopo.
-    return null;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMsg("");
-    setSuccessMsg("");
-
-    const validationError = validate();
-    if (validationError) {
-      setErrorMsg(validationError);
+  const handleNext = () => {
+    if (!validateStep(currentStep)) {
+      setErrorMessage("Completa tutti i campi obbligatori prima di proseguire.");
       return;
     }
 
-    setSubmitting(true);
+    if (!completedSteps.includes(currentStep)) {
+      setCompletedSteps((prev) => [...prev, currentStep]);
+    }
+
+    setCurrentStep((s) => s + 1);
+    setErrors({});
+    setErrorMessage("");
+  };
+
+  const handleStepClick = (step) => {
+    if (step <= currentStep) {
+      setCurrentStep(step);
+      setErrors({});
+    }
+  };
+
+  const handleDismissMessages = () => {
+    setSuccessMessage("");
+    setErrorMessage("");
+  };
+
+  const handleSave = async () => {
+    // Validazione globale step 1+2
+    const ok1 = validateStep(1);
+    const ok2 = validateStep(2);
+    if (!ok1 || !ok2) {
+      setErrorMessage("Ci sono errori nel form. Controlla gli step precedenti.");
+      return;
+    }
+
     try {
-      // Nota per me futuro:
-      // Qui preparo il payload allineato al GameCreateDto esteso.
+      setSaving(true);
+      setErrorMessage("");
+
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
-        platformIds: form.platformIds.map((id) => Number(id)),
-        genreIds: form.genreIds.map((id) => Number(id)),
         releaseDate: form.releaseDate, // yyyy-MM-dd
         coverUrl: form.coverUrl.trim(),
-
-        primaryFocusId: form.primaryFocusId ? Number(form.primaryFocusId) : null,
-        primaryMoodId: form.primaryMoodId ? Number(form.primaryMoodId) : null,
-        difficultyId: form.difficultyId ? Number(form.difficultyId) : null,
-
+        platformIds: form.platformIds,
+        genreIds: form.genreIds,
+        primaryFocusId: form.primaryFocusId,
+        primaryMoodId: form.primaryMoodId,
+        difficultyId: form.difficultyId,
+        averageLengthHours: form.averageLengthHours,
         isMultiplayer: form.isMultiplayer,
         isCoop: form.isCoop,
-        isFreeGame: form.isFreeGame,
-
-        tagIds: form.tagIds.map((id) => Number(id)),
-
-        isPublished: form.isPublished,
+        freeGame: form.freeGame,
+        isDeleted: form.isDeleted,
+        tagIds: form.tagIds,
       };
 
       const res = await apiFetch("/api/Games/create", {
@@ -171,326 +166,83 @@ const GameCreateForm = ({ genres, platforms, focuses, moods, difficulties, tags 
         body: JSON.stringify(payload),
       });
 
+      const body = await safeJson(res);
+
       if (!res.ok) {
-        let errMsg = "Impossibile creare il gioco. Riprova.";
-        try {
-          const body = await res.json();
-          if (body?.message) errMsg = body.message;
-        } catch {
-          // ignore
-        }
-        throw new Error(errMsg);
+        throw new Error(body?.message || "Errore nella creazione del gioco.");
       }
 
-      setSuccessMsg("Gioco creato con successo!");
-      setForm(initialForm);
+      setSuccessMessage("Gioco creato con successo!");
+
+      setTimeout(() => {
+        navigate("/admin/games");
+      }, 1500);
     } catch (err) {
-      setErrorMsg(err.message || "Errore imprevisto durante il salvataggio.");
+      setErrorMessage(err?.message || "Errore imprevisto durante la creazione del gioco.");
     } finally {
-      setSubmitting(false);
+      setSaving(false);
     }
   };
 
-  const currentPlatforms = platforms.filter((p) => form.platformIds.includes(String(p.platformId ?? p.id)));
-  const currentGenres = genres.filter((g) => form.genreIds.includes(String(g.genreId ?? g.id)));
-  const currentTags = tags.filter((t) => form.tagIds.includes(String(t.id)));
-
   return (
-    <form className="row gx-4 gy-4 lx-admin-form" onSubmit={handleSubmit}>
-      {/* COLONNA SINISTRA: campi principali + metadata */}
-      <div className="col-12 col-lg-7">
-        <div className="row g-3">
-          {/* --- campi base --- */}
-          <div className="col-12 col-md-8">
-            <label className="form-label lx-field-label">Titolo</label>
-            <input
-              type="text"
-              name="title"
-              className="form-control lx-field-control"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="Es. ARC Raiders"
-            />
-          </div>
+    <div className="container-fluid px-0">
+      {/* Toast bar in basso a destra per success/error */}
+      <GameFormMessages successMessage={successMessage} errorMessage={errorMessage} onDismiss={handleDismissMessages} variant="toast" />
 
-          <div className="col-12 col-md-4">
-            <label className="form-label lx-field-label">Data di uscita</label>
-            <input type="date" name="releaseDate" className="form-control lx-field-control" value={form.releaseDate} onChange={handleChange} />
-          </div>
-
-          <div className="col-12">
-            <label className="form-label lx-field-label">Descrizione</label>
-            <textarea
-              name="description"
-              rows={4}
-              className="form-control lx-field-control"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Descrivi brevemente il gioco..."
-            />
-          </div>
-
-          <div className="col-12">
-            <label className="form-label lx-field-label">Cover URL</label>
-            <input
-              type="url"
-              name="coverUrl"
-              className="form-control lx-field-control"
-              value={form.coverUrl}
-              onChange={handleCoverChange}
-              placeholder="https://..."
-            />
-            <small className="lx-field-hint">Usa un link diretto a un'immagine (JPG / PNG / WebP).</small>
-            {coverWarning && <div className="text-warning small mt-1">{coverWarning}</div>}
-          </div>
-
-          {/* --- pubblicazione --- */}
-          <div className="col-12">
-            <div className="form-check form-switch">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="isPublishedSwitch"
-                name="isPublished"
-                checked={form.isPublished}
-                onChange={handleCheckboxChange}
-              />
-              <label className="form-check-label lx-field-label ms-2" htmlFor="isPublishedSwitch">
-                Pubblica subito il gioco
-              </label>
-            </div>
-            <small className="lx-field-hint">Se disattivato, il gioco sarà in bozza (IsDeleted = true) e non comparirà nel catalogo pubblico.</small>
-          </div>
-
-          {/* --- piattaforme --- */}
-          <div className="col-12 col-md-6">
-            <label className="form-label lx-field-label">Piattaforme</label>
-
-            <div className="lx-multiselect-list">
-              {platforms.map((p) => {
-                const id = p.platformId ?? p.id;
-                const idStr = String(id);
-                const checked = form.platformIds.includes(idStr);
-
-                return (
-                  <label key={id} className={`lx-multiselect-item ${checked ? "is-checked" : ""}`}>
-                    <input type="checkbox" className="form-check-input me-2" checked={checked} onChange={() => handleTogglePlatform(id)} />
-                    <span>{p.name}</span>
-                  </label>
-                );
-              })}
-            </div>
-
-            <small className="lx-field-hint">Clicca per aggiungere o rimuovere una piattaforma.</small>
-          </div>
-
-          {/* --- generi --- */}
-          <div className="col-12 col-md-6">
-            <label className="form-label lx-field-label">Generi</label>
-
-            <div className="lx-multiselect-list">
-              {genres.map((g) => {
-                const id = g.genreId ?? g.id;
-                const idStr = String(id);
-                const checked = form.genreIds.includes(idStr);
-
-                return (
-                  <label key={id} className={`lx-multiselect-item ${checked ? "is-checked" : ""}`}>
-                    <input type="checkbox" className="form-check-input me-2" checked={checked} onChange={() => handleToggleGenre(id)} />
-                    <span>{g.name}</span>
-                  </label>
-                );
-              })}
-            </div>
-
-            <small className="lx-field-hint">Puoi scegliere più generi (azione, RPG, roguelike…)</small>
-          </div>
-
-          {/* --- meta per il sistema di consigli --- */}
-          <div className="col-12">
-            <hr className="text-white-10" />
-            <h5 className="lx-section-subtitle mb-3">Meta per consigli (facoltativi ma consigliati)</h5>
-          </div>
-
-          <div className="col-12 col-md-4">
-            <label className="form-label lx-field-label">Focus principale</label>
-            <select name="primaryFocusId" className="form-select lx-field-control" value={form.primaryFocusId} onChange={handleChange}>
-              <option value="">- Nessuno -</option>
-              {focuses.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="col-12 col-md-4">
-            <label className="form-label lx-field-label">Mood principale</label>
-            <select name="primaryMoodId" className="form-select lx-field-control" value={form.primaryMoodId} onChange={handleChange}>
-              <option value="">- Nessuno -</option>
-              {moods.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="col-12 col-md-4">
-            <label className="form-label lx-field-label">Difficoltà</label>
-            <select name="difficultyId" className="form-select lx-field-control" value={form.difficultyId} onChange={handleChange}>
-              <option value="">- Nessuna -</option>
-              {difficulties.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="col-12 col-md-4">
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="isMultiplayer"
-                name="isMultiplayer"
-                checked={form.isMultiplayer}
-                onChange={handleCheckboxChange}
-              />
-              <label className="form-check-label lx-field-label ms-2" htmlFor="isMultiplayer">
-                Multiplayer
-              </label>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-4">
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox" id="isCoop" name="isCoop" checked={form.isCoop} onChange={handleCheckboxChange} />
-              <label className="form-check-label lx-field-label ms-2" htmlFor="isCoop">
-                Co-op
-              </label>
-            </div>
-          </div>
-
-          <div className="col-12 col-md-4">
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox" id="isFreeGame" name="isFreeGame" checked={form.isFreeGame} onChange={handleCheckboxChange} />
-              <label className="form-check-label lx-field-label ms-2" htmlFor="isFreeGame">
-                Free to play
-              </label>
-            </div>
-          </div>
-
-          {/* --- TAG --- */}
-          <div className="col-12">
-            <hr className="text-white-10" />
-            <h5 className="lx-section-subtitle mb-3">Tag (per affinare ancora i consigli)</h5>
-
-            {groupedTags.length === 0 && <p className="text-white-50 small">Nessun tag disponibile. Controlla i seeding lato backend.</p>}
-
-            {groupedTags.map(([category, tagList]) => (
-              <div key={category} className="mb-3">
-                <div className="text-uppercase text-white-50 small mb-1">{category}</div>
-                <div className="lx-multiselect-list">
-                  {tagList.map((t) => {
-                    const idStr = String(t.id);
-                    const checked = form.tagIds.includes(idStr);
-
-                    return (
-                      <label key={t.id} className={`lx-multiselect-item ${checked ? "is-checked" : ""}`}>
-                        <input type="checkbox" className="form-check-input me-2" checked={checked} onChange={() => handleToggleTag(t.id)} />
-                        <span>{t.displayName}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            <small className="lx-field-hint">Non esagerare: meglio pochi tag molto significativi che 20 generici.</small>
-          </div>
-        </div>
-
-        {/* MESSAGGI */}
-        <div className="mt-3">
-          {errorMsg && <div className="alert alert-danger py-2 mb-2">{errorMsg}</div>}
-          {successMsg && <div className="alert alert-success py-2 mb-2">{successMsg}</div>}
-        </div>
-
-        {/* BOTTONI */}
-        <div className="d-flex gap-2 mt-2">
-          <button type="button" className="btn lx-btn-outline" onClick={() => setForm(initialForm)} disabled={submitting}>
-            Reset
-          </button>
-          <button type="submit" className="btn lx-btn-primary" disabled={submitting}>
-            {submitting ? "Salvataggio..." : "Crea gioco"}
-          </button>
-        </div>
+      <div className="mb-3">
+        <AdminGameFormStepper currentStep={currentStep} completedSteps={completedSteps} onStepClick={handleStepClick} />
       </div>
 
-      {/* COLONNA DESTRA: preview */}
-      <div className="col-12 col-lg-5">
-        <div className="lx-admin-preview-header d-flex justify-content-between align-items-center mb-2">
-          <span className="text-white-50 small">Preview gioco</span>
-          <span className="badge bg-transparent text-uppercase lx-admin-preview-badge">Live</span>
-        </div>
+      <div className="row gap-4">
+        <div className="col-lg-8 mb-4">
+          {currentStep === 1 && <GameBaseFields form={form} onChange={setForm} errors={errors} />}
 
-        <div className="lx-glow-card lx-admin-preview-card">
-          <div className="lx-game-card">
-            <div className="lx-game-cover">
-              {form.coverUrl ? (
-                <img src={form.coverUrl} alt={form.title || "Cover preview"} />
-              ) : (
-                <div className="lx-admin-cover-placeholder">
-                  <i className="bi bi-image mb-2"></i>
-                  <span className="small text-muted">Incolla un URL per vedere la cover</span>
-                </div>
-              )}
-            </div>
+          {currentStep === 2 && (
+            <GamePlatformGenreSelector
+              platforms={normalizedPlatforms}
+              genres={normalizedGenres}
+              selectedPlatformIds={form.platformIds}
+              selectedGenreIds={form.genreIds}
+              onPlatformsChange={(ids) => setForm((prev) => ({ ...prev, platformIds: ids }))}
+              onGenresChange={(ids) => setForm((prev) => ({ ...prev, genreIds: ids }))}
+              errors={errors}
+            />
+          )}
 
-            <div className="lx-game-info">
-              <h5 className="lx-game-title">{form.title || "Titolo del gioco"}</h5>
-
-              <div className="d-flex flex-wrap gap-1 mb-1">
-                {currentPlatforms.length > 0 ? (
-                  currentPlatforms.map((p) => (
-                    <span key={p.platformId ?? p.id} className="lx-genre-pill">
-                      {p.name}
-                    </span>
-                  ))
-                ) : (
-                  <span className="lx-platform text-white-50">Nessuna piattaforma selezionata</span>
-                )}
+          {currentStep === 3 && (
+            <>
+              <GameMetadataBasic focuses={focuses || []} moods={moods || []} difficulties={difficulties || []} form={form} onChange={setForm} />
+              <div className="mt-3">
+                <GameTagSelector tags={tags || []} selectedTagIds={form.tagIds} onChange={(ids) => setForm((prev) => ({ ...prev, tagIds: ids }))} />
               </div>
+            </>
+          )}
 
-              <div className="lx-genre-row mb-1">
-                {currentGenres.length > 0 ? (
-                  currentGenres.map((g) => (
-                    <span key={g.genreId ?? g.id} className="lx-genre-pill me-1">
-                      {g.name}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-white-50 small">Aggiungi uno o più generi</span>
-                )}
-              </div>
-
-              {currentTags.length > 0 && (
-                <div className="d-flex flex-wrap gap-1 mt-1">
-                  {currentTags.slice(0, 6).map((t) => (
-                    <span key={t.id} className="badge bg-dark border border-secondary text-uppercase small">
-                      {t.displayName}
-                    </span>
-                  ))}
-                  {currentTags.length > 6 && <span className="text-white-50 small">+{currentTags.length - 6} altri tag</span>}
-                </div>
-              )}
-            </div>
+          <div className="mt-3">
+            <GameFormButtons
+              currentStep={currentStep}
+              totalSteps={totalSteps}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              onSave={handleSave}
+              isSaving={saving}
+            />
           </div>
         </div>
+
+        <div className="col-lg-3">
+          <GamePreviewCard
+            form={form}
+            platforms={normalizedPlatforms}
+            genres={normalizedGenres}
+            focuses={focuses || []}
+            moods={moods || []}
+            difficulties={difficulties || []}
+            currentStep={currentStep}
+          />
+        </div>
       </div>
-    </form>
+    </div>
   );
 };
 

@@ -54,7 +54,7 @@ const AdminCreateGamePage = () => {
 
   return (
     <section className="lx-section">
-      <div className="container">
+      <div className="container-fluid">
         <div className="d-flex justify-content-between align-items-start mb-4">
           <div>
             <div className="d-flex align-items-center gap-2 mb-2">
@@ -69,6 +69,12 @@ const AdminCreateGamePage = () => {
           </div>
 
           <div className="d-none d-md-flex gap-2">
+            {/* Vai alla home */}
+            <button type="button" className="btn lx-btn-outline" onClick={() => navigate("/")}>
+              <i className="bi bi-house me-1" />
+              Vai alla home
+            </button>
+
             <button type="button" className="btn lx-btn-outline" onClick={() => navigate(-1)}>
               <i className="bi bi-arrow-left me-1" />
               Torna indietro
@@ -81,7 +87,8 @@ const AdminCreateGamePage = () => {
           </div>
         </div>
 
-        <div className="lx-glass p-4 p-md-5 lx-admin-card">
+        {/* Card principale admin, resa più compatta via CSS (.lx-admin-card) */}
+        <div className="lx-glass lx-admin-card">
           {loading && <LxLoader message="Carico generi, piattaforme e metadata..." />}
 
           {!loading && error && (

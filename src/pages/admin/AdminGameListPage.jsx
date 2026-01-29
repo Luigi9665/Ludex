@@ -74,7 +74,7 @@ const AdminGameListPage = () => {
 
   return (
     <section className="lx-section">
-      <div className="container">
+      <div className="container-fluid">
         {/* HEADER */}
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
           <div>

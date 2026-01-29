@@ -1,4 +1,3 @@
-// src/pages/admin/AdminEditGamePage.jsx
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
@@ -29,6 +28,7 @@ const AdminEditGamePage = () => {
         },
       },
   );
+
   // stato locale per il dettaglio del gioco da editare
   const [game, setGame] = useState(null);
   const [loadingGame, setLoadingGame] = useState(true);
@@ -76,26 +76,6 @@ const AdminEditGamePage = () => {
 
         const data = await safeJson(res);
 
-        // Nota per me futuro:
-        // mi aspetto un dto tipo:
-        // {
-        //   gameId,
-        //   title,
-        //   description,
-        //   releaseDate,
-        //   coverUrl,
-        //   platformIds: number[],
-        //   genreIds: number[],
-        //   primaryFocusId: number|null,
-        //   primaryMoodId: number|null,
-        //   difficultyId: number|null,
-        //   averageLengthHours: number|null,
-        //   isMultiplayer: bool,
-        //   isCoop: bool,
-        //   freeGame: bool,
-        //   isDeleted: bool,
-        //   tagIds: number[]
-        // }
         if (!cancelled) {
           setGame(data);
         }
@@ -125,13 +105,12 @@ const AdminEditGamePage = () => {
 
   // callback quando il salvataggio va a buon fine
   const handleSaved = () => {
-    // per ora torno alla lista admin giochi
     navigate("/admin/games");
   };
 
   return (
     <section className="lx-section">
-      <div className="container">
+      <div className="container-fluid">
         {/* HEADER */}
         <div className="d-flex justify-content-between align-items-start mb-4">
           <div>
@@ -145,13 +124,29 @@ const AdminEditGamePage = () => {
             <p className="text-white-50 small mb-0">Aggiorna le informazioni di questo titolo, inclusi metadata per i consigli.</p>
           </div>
 
-          <button type="button" className="btn lx-btn-outline d-none d-md-inline-flex align-items-center" onClick={() => navigate(-1)}>
-            <i className="bi bi-arrow-left me-1" />
-            Torna indietro
-          </button>
+          <div className="d-none d-md-flex gap-2">
+            {/* Vai alla home */}
+            <button type="button" className="btn lx-btn-outline" onClick={() => navigate("/")}>
+              <i className="bi bi-house me-1" />
+              Vai alla home
+            </button>
+
+            {/* Torna indietro */}
+            <button type="button" className="btn lx-btn-outline" onClick={() => navigate(-1)}>
+              <i className="bi bi-arrow-left me-1" />
+              Torna indietro
+            </button>
+
+            {/* Vai alla gestione giochi */}
+            <button type="button" className="btn lx-btn-primary" onClick={() => navigate("/admin/games")}>
+              <i className="bi bi-controller me-1" />
+              Vai alla gestione giochi
+            </button>
+          </div>
         </div>
 
-        <div className="lx-glass p-4 p-md-5 lx-admin-card">
+        {/* Card principale compatta */}
+        <div className="lx-glass lx-admin-card">
           {(loadingGame || loadingMeta) && <LxLoader message="Carico dati gioco e metadata..." />}
 
           {!loadingGame && errorGame && <div className="alert alert-danger mb-0">{errorGame}</div>}

@@ -1,0 +1,989 @@
+/**
+ * Ludex Admin Form Styles
+ *
+ * Nota per me futuro:
+ * - Tutte le classi custom iniziano con "lx-" (Ludex)
+ * - Stile dark, glassmorphism, moderno e compatto
+ * - Responsive-first approach
+ * - Compatibile con Bootstrap 5
+ */
+
+/* ========================================
+   STEPPER
+   ======================================== */
+
+.lx-form-stepper {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.lx-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.lx-step-clickable {
+  cursor: pointer;
+}
+
+.lx-step-clickable:hover .lx-step-circle {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(99, 179, 237, 0.4);
+}
+
+.lx-step-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.lx-step-inactive .lx-step-circle {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.lx-step-active .lx-step-circle {
+  background: linear-gradient(135deg, #63b3ed, #4299e1);
+  color: white;
+  border-color: #63b3ed;
+  box-shadow: 0 0 20px rgba(99, 179, 237, 0.5);
+}
+
+.lx-step-completed .lx-step-circle {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+  border-color: #48bb78;
+}
+
+.lx-step-content {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.3s ease;
+}
+
+.lx-step-active .lx-step-content {
+  color: #63b3ed;
+  font-weight: 500;
+}
+
+.lx-step-completed .lx-step-content {
+  color: #48bb78;
+}
+
+.lx-step-connector {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 1rem;
+  align-self: center;
+  margin-top: -40px;
+  transition: background 0.3s ease;
+}
+
+.lx-connector-completed {
+  background: linear-gradient(90deg, #48bb78, #38a169);
+}
+
+/* Mobile stepper */
+@media (max-width: 767px) {
+  .lx-step-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .lx-step-connector {
+    margin: 0 0.5rem;
+    margin-top: -32px;
+  }
+}
+
+/* ========================================
+   SECTIONS & GLASS EFFECT
+   ======================================== */
+
+.lx-section {
+  margin-bottom: 1.5rem;
+}
+
+.lx-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+/* Card principale admin (create/edit) più compatta */
+.lx-admin-card {
+  padding: 1.25rem 1.25rem !important;
+}
+
+/* su viewport medi/grandi un filo più larga ma sempre compatta */
+@media (min-width: 768px) {
+  .lx-admin-card {
+    padding: 1.5rem 2rem !important;
+  }
+}
+
+/* dentro la card admin, sezioni e bottoni meno "spessi" */
+.lx-admin-card .lx-section {
+  margin-bottom: 1.1rem;
+}
+
+.lx-admin-card .lx-glass {
+  padding: 1rem 1.25rem;
+}
+
+.lx-admin-card .lx-form-buttons {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+}
+
+/* ========================================
+   TOAST MESSAGES (success / error)
+   ======================================== */
+
+.lx-toast-container {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 1080;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lx-toast {
+  min-width: 260px;
+  max-width: 360px;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.7);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.lx-toast-success {
+  background: rgba(56, 161, 105, 0.2);
+  border-color: rgba(56, 161, 105, 0.55);
+  color: #c6f6d5;
+}
+
+.lx-toast-error {
+  background: rgba(220, 38, 38, 0.22);
+  border-color: rgba(248, 113, 113, 0.7);
+  color: #fed7d7;
+}
+
+.lx-toast-close {
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 0;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ========================================
+   MULTISELECT (Platforms & Genres)
+   ======================================== */
+
+.lx-multiselect-list {
+  display: flex;
+  flex-direction: column; /* colonne verticali */
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.lx-multiselect-item {
+  padding: 0.8rem 1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lx-multiselect-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 179, 237, 0.5);
+  background: rgba(99, 179, 237, 0.1);
+}
+
+.lx-multiselect-item.lx-item-selected {
+  background: linear-gradient(135deg, rgba(99, 179, 237, 0.3), rgba(66, 153, 225, 0.3));
+  border-color: #63b3ed;
+  color: white;
+  font-weight: 500;
+}
+
+.lx-multiselect-item.lx-item-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.lx-multiselect-item.lx-item-disabled:hover {
+  transform: none;
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.lx-genre-pill {
+  background: linear-gradient(135deg, rgba(159, 122, 234, 0.2), rgba(124, 58, 237, 0.2));
+  border-color: rgba(159, 122, 234, 0.3);
+}
+
+.lx-genre-pill.lx-item-selected {
+  background: linear-gradient(135deg, rgba(159, 122, 234, 0.4), rgba(124, 58, 237, 0.4));
+  border-color: #9f7aea;
+}
+
+/* ========================================
+   METADATA CARDS (Focus, Mood, Difficulty)
+   ======================================== */
+
+.lx-section .lx-metadata-grid {
+  padding-top: 0.25rem;
+}
+
+.lx-metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem; /* spazio sufficiente per non far toccare le card */
+}
+
+.lx-metadata-card {
+  aspect-ratio: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 1rem;
+}
+
+.lx-metadata-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(99, 179, 237, 0.5);
+  background: rgba(99, 179, 237, 0.1);
+  box-shadow: 0 4px 16px rgba(99, 179, 237, 0.2);
+}
+
+.lx-metadata-card.lx-card-selected {
+  background: linear-gradient(135deg, rgba(99, 179, 237, 0.25), rgba(66, 153, 225, 0.25));
+  border-color: #63b3ed;
+  box-shadow: 0 0 20px rgba(99, 179, 237, 0.4);
+}
+
+.lx-card-icon {
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.3s ease;
+}
+
+.lx-metadata-card.lx-card-selected .lx-card-icon {
+  color: #63b3ed;
+}
+
+.lx-card-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-weight: 500;
+}
+
+.lx-metadata-card.lx-card-selected .lx-card-label {
+  color: white;
+  font-weight: 600;
+}
+
+/* ========================================
+   METADATA SECONDARY (Duration + Flags)
+   ======================================== */
+
+.lx-metadata-secondary {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* wrapper + label sopra gli switch */
+
+.lx-flag-wrapper {
+  text-align: center;
+}
+
+.lx-flag-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.lx-toggle-switch {
+  display: flex;
+  justify-content: center;
+}
+
+.lx-toggle-switch .form-check-input {
+  width: 2.5rem;
+  height: 1.25rem;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.lx-toggle-switch .form-check-input:checked {
+  background-color: #63b3ed;
+  border-color: #63b3ed;
+}
+
+/* la label interna viene usata solo per accessibilità, quindi nessun override visuale */
+
+.lx-toggle-switch .form-check-label {
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ========================================
+   TAG SELECTOR
+   ======================================== */
+
+.lx-tag-selected-bar {
+  background: rgba(99, 179, 237, 0.08);
+  border: 1px solid rgba(99, 179, 237, 0.2);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.lx-tag-empty {
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.lx-tag-pill-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lx-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.lx-tag-pill.lx-tag-selected {
+  background: linear-gradient(135deg, rgba(99, 179, 237, 0.3), rgba(66, 153, 225, 0.3));
+  border-color: #63b3ed;
+  color: white;
+}
+
+.lx-tag-remove {
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+}
+
+.lx-tag-remove:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Search bar */
+.lx-search-bar {
+  position: relative;
+}
+
+.lx-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+.lx-search-input {
+  padding-left: 2.75rem;
+  padding-right: 2.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.lx-search-input:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #63b3ed;
+  box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25);
+  color: white;
+}
+
+.lx-search-clear {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
+}
+
+.lx-search-clear:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Category tabs */
+.lx-tag-category-tabs {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lx-tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.lx-tab-item {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid transparent;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lx-tab-item:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px 8px 0 0;
+}
+
+.lx-tab-item.lx-tab-active {
+  color: #63b3ed;
+  border-bottom-color: #63b3ed;
+  font-weight: 500;
+}
+
+.lx-tab-badge {
+  background: rgba(99, 179, 237, 0.3);
+  color: white;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Tag list */
+.lx-tag-list-container {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+  scrollbar-width: thin;
+}
+
+.lx-tag-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lx-tag-chip {
+  position: relative;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.lx-tag-chip:hover {
+  transform: scale(1.05);
+  border-color: rgba(99, 179, 237, 0.5);
+  background: rgba(99, 179, 237, 0.1);
+}
+
+.lx-tag-chip.lx-tag-chip-selected {
+  background: linear-gradient(135deg, rgba(99, 179, 237, 0.3), rgba(66, 153, 225, 0.3));
+  border-color: #63b3ed;
+  color: white;
+  font-weight: 500;
+}
+
+.lx-tag-check {
+  font-size: 0.9rem;
+}
+
+.lx-tag-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  max-width: 200px;
+  z-index: 1000;
+  margin-bottom: 0.5rem;
+  pointer-events: none;
+}
+
+.lx-tag-chip:hover .lx-tag-tooltip {
+  display: block;
+}
+
+.lx-tag-empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ========================================
+   PREVIEW CARD
+   ======================================== */
+
+.lx-preview-card {
+  top: 20px;
+  margin-bottom: 2rem;
+}
+
+.lx-preview-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lx-preview-content {
+  padding: 1.25rem;
+}
+
+.lx-preview-cover {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  position: relative;
+}
+
+.lx-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lx-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.lx-preview-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.lx-preview-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.lx-platform-pill {
+  padding: 0.25rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.lx-pill-more {
+  background: rgba(99, 179, 237, 0.2);
+  border-color: #63b3ed;
+  font-weight: 600;
+}
+
+.lx-genre-preview {
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+}
+
+.lx-preview-metadata {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lx-metadata-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.lx-metadata-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.lx-preview-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.lx-badge-info {
+  background: rgba(99, 179, 237, 0.3);
+}
+
+.lx-badge-success {
+  background: rgba(72, 187, 120, 0.3);
+}
+
+.lx-badge-warning {
+  background: rgba(237, 137, 54, 0.3);
+}
+
+/* ========================================
+   COVER PREVIEW (in BaseFields)
+   ======================================== */
+
+.lx-cover-preview {
+  width: 150px;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.lx-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lx-cover-skeleton,
+.lx-cover-error {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.lx-form-buttons {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 2rem;
+}
+
+.lx-btn-back,
+.lx-btn-next,
+.lx-btn-save {
+  padding: 0.75rem 2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.lx-btn-next,
+.lx-btn-save {
+  box-shadow: 0 4px 12px rgba(99, 179, 237, 0.3);
+}
+
+.lx-btn-next:hover,
+.lx-btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 179, 237, 0.4);
+}
+
+/* ========================================
+   ALERTS & MESSAGES
+   ======================================== */
+
+.lx-alert-success,
+.lx-alert-error {
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.lx-alert-success {
+  background: rgba(72, 187, 120, 0.15);
+  border-color: rgba(72, 187, 120, 0.3);
+}
+
+.lx-alert-error {
+  background: rgba(245, 101, 101, 0.15);
+  border-color: rgba(245, 101, 101, 0.3);
+}
+
+/* Scroll interno per liste piattaforme / generi */
+.lx-platforms-list,
+.lx-genres-list {
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-inline: 0.25rem;
+}
+
+/* Scrollbar carina per platforms/genres */
+.lx-platforms-list::-webkit-scrollbar,
+.lx-genres-list::-webkit-scrollbar {
+  width: 6px;
+}
+.lx-platforms-list::-webkit-scrollbar-track,
+.lx-genres-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+.lx-platforms-list::-webkit-scrollbar-thumb,
+.lx-genres-list::-webkit-scrollbar-thumb {
+  background: rgba(99, 179, 237, 0.3);
+  border-radius: 10px;
+}
+.lx-platforms-list::-webkit-scrollbar-thumb:hover,
+.lx-genres-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 179, 237, 0.5);
+}
+
+/* TABLE */
+/* Wrapper glass per la tabella admin */
+.lx-admin-table-wrapper {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: radial-gradient(circle at top left, rgba(99, 179, 237, 0.12), transparent 55%), rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* Tabella dark usando le variabili di Bootstrap */
+.lx-admin-table {
+  width: 100%;
+  /* override delle CSS vars della .table */
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: rgba(15, 23, 42, 0.9);
+  --bs-table-striped-color: rgba(255, 255, 255, 0.9);
+  --bs-table-hover-bg: rgba(30, 64, 175, 0.6);
+  --bs-table-hover-color: rgba(255, 255, 255, 1);
+  --bs-table-border-color: rgba(51, 65, 85, 0.9);
+  --bs-table-color: rgba(255, 255, 255, 0.9);
+
+  background-color: transparent !important;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* header */
+.lx-admin-table thead tr {
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 64, 175, 0.95)) !important;
+}
+
+.lx-admin-table thead th {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.5) !important;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(226, 232, 240, 0.95) !important;
+  padding-block: 0.75rem !important;
+}
+
+/* celle body: più alte & testo un po’ più grande */
+.lx-admin-table tbody td {
+  padding-block: 0.7rem !important;
+  font-size: 0.9rem;
+}
+
+/* Placeholder quando manca la cover */
+.lx-admin-cover-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(148, 163, 184, 0.9);
+  font-size: 1rem;
+}
+
+/* Badges di stato */
+.lx-badge-live {
+  background: rgba(56, 161, 105, 0.25);
+  color: #9ae6b4;
+  border-radius: 999px;
+  padding-inline: 0.75rem;
+}
+
+.lx-badge-muted {
+  background: rgba(75, 85, 99, 0.35);
+  color: #e5e7eb;
+  border-radius: 999px;
+  padding-inline: 0.75rem;
+}
+
+/* Pulsante azione outline coerente col tema */
+.lx-btn-outline {
+  border-radius: 999px;
+  border: 1px solid rgba(99, 179, 237, 0.7);
+  background: transparent;
+  color: rgba(226, 232, 240, 0.9);
+  padding-inline: 0.6rem;
+  padding-block: 0.3rem;
+}
+
+.lx-btn-outline:hover {
+  background: rgba(99, 179, 237, 0.16);
+  border-color: #63b3ed;
+  color: #ffffff;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 991px) {
+  .lx-preview-card {
+    position: relative !important;
+    top: 0 !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .lx-form-buttons {
+    padding: 1rem;
+  }
+
+  .lx-btn-back,
+  .lx-btn-next,
+  .lx-btn-save {
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* ========================================
+   SCROLLBAR CUSTOM
+   ======================================== */
+
+.lx-tag-list-container::-webkit-scrollbar,
+.lx-tabs-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.lx-tag-list-container::-webkit-scrollbar-track,
+.lx-tabs-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.lx-tag-list-container::-webkit-scrollbar-thumb,
+.lx-tabs-container::-webkit-scrollbar-thumb {
+  background: rgba(99, 179, 237, 0.3);
+  border-radius: 10px;
+}
+
+.lx-tag-list-container::-webkit-scrollbar-thumb:hover,
+.lx-tabs-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 179, 237, 0.5);
+}

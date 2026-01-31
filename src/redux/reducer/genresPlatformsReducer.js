@@ -1,4 +1,3 @@
-// redux/reducer/genresPlatformsReducer.js
 import {
   GENRES_ERROR,
   GENRES_REQUEST,

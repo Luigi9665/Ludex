@@ -47,6 +47,24 @@ import {
   ADMIN_GAMES_REQUEST,
   ADMIN_GAMES_SUCCESS,
   ADMIN_GAMES_ERROR,
+  QUESTIONNAIRE_REQUEST,
+  QUESTIONNAIRE_SUCCESS,
+  QUESTIONNAIRE_ERROR,
+  QUESTIONNAIRE_TOGGLE_OPTION,
+  QUESTIONNAIRE_NEXT_STEP,
+  QUESTIONNAIRE_PREV_STEP,
+  QUESTIONNAIRE_SET_SUBMITTING,
+  QUESTIONNAIRE_SET_COMPLETED,
+  QUESTIONNAIRE_SET_SUBMIT_ERROR,
+  QUESTIONNAIRE_RESET,
+  RECOMMENDATIONS_REQUEST,
+  RECOMMENDATIONS_SUCCESS,
+  RECOMMENDATIONS_ERROR,
+  RECOMMENDATIONS_LOAD_MORE,
+  RECOMMENDATIONS_RESET,
+  QUESTIONNAIRE_STATUS_REQUEST,
+  QUESTIONNAIRE_STATUS_SUCCESS,
+  QUESTIONNAIRE_STATUS_ERROR,
 } from "../authTypes";
 import { STATUS_TO_ENUM } from "../../utils/statusMapper";
 
@@ -57,6 +75,34 @@ const safeJson = async (res) => {
     return null;
   }
 };
+
+// ===============
+// ACTION SEMPLICI
+// ===============
+export const toggleQuestionnaireOption = (questionId, optionId, isMultipleChoice) => ({
+  type: QUESTIONNAIRE_TOGGLE_OPTION,
+  payload: { questionId, optionId, isMultipleChoice },
+});
+
+export const goToNextQuestionnaireStep = () => ({
+  type: QUESTIONNAIRE_NEXT_STEP,
+});
+
+export const goToPrevQuestionnaireStep = () => ({
+  type: QUESTIONNAIRE_PREV_STEP,
+});
+
+export const resetQuestionnaire = () => ({
+  type: QUESTIONNAIRE_RESET,
+});
+
+export const loadMoreRecommendations = () => ({
+  type: RECOMMENDATIONS_LOAD_MORE,
+});
+
+export const resetRecommendations = () => ({
+  type: RECOMMENDATIONS_RESET,
+});
 
 const mapUserFromClaims = (c) => ({
   userId: c.sub || c["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
@@ -678,6 +724,170 @@ export const loadDeleteUsergame = (userGameId, isMe) => {
         payload: error?.message || "Errore imprevisto durante il caricamento.",
       });
       throw error;
+    }
+  };
+};
+
+// ===============
+// THUNK: LOAD DOMANDE
+// ===============
+export const loadQuestionnaire = () => {
+  return async (dispatch) => {
+    //resetto sempre lo stato del questionario prima di iniziare
+    dispatch({ type: QUESTIONNAIRE_RESET });
+
+    dispatch({ type: QUESTIONNAIRE_REQUEST });
+
+    try {
+      const res = await apiFetch("/api/Questionnaire");
+
+      if (!res.ok) {
+        throw new Error("Impossibile caricare il questionario.");
+      }
+
+      const data = await safeJson(res);
+      // data deve essere un array di domande:
+      // [
+      //   {
+      //     id,
+      //     code,
+      //     textIt,
+      //     isMultipleChoice,
+      //     options: [{ id, textIt }, ...]
+      //   },
+      // ]
+      dispatch({
+        type: QUESTIONNAIRE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: QUESTIONNAIRE_ERROR,
+        payload: error?.message || "Errore durante il caricamento del questionario.",
+      });
+    }
+  };
+};
+
+// ===============
+// THUNK: SUBMIT QUESTIONARIO
+// ===============
+
+// Nota per me futuro:
+// - Qui leggo dal state tutte le risposte (answersByQuestionId),
+//   faccio il flatten in un array di optionId,
+//   e chiamo il backend su /api/Recommendation/questionnaire.
+
+export const submitQuestionnaire = () => {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const questionnaire = state.questionnaire;
+
+    // Flatten di tutti gli optionId
+    const selectedOptionIds = Object.values(questionnaire.answersByQuestionId).flat();
+
+    if (!selectedOptionIds || selectedOptionIds.length === 0) {
+      dispatch({
+        type: QUESTIONNAIRE_SET_SUBMIT_ERROR,
+        payload: "Nessuna risposta selezionata.",
+      });
+      return;
+    }
+
+    dispatch({
+      type: QUESTIONNAIRE_SET_SUBMITTING,
+      payload: true,
+    });
+
+    try {
+      const res = await apiFetch("/api/Questionnaire/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ selectedOptionIds }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(text || "Errore durante l'invio del questionario.");
+      }
+
+      // Non mi interessa davvero il corpo della risposta: mi basta sapere che è ok.
+      dispatch({ type: QUESTIONNAIRE_SET_COMPLETED });
+    } catch (error) {
+      dispatch({
+        type: QUESTIONNAIRE_SET_SUBMIT_ERROR,
+        payload: error?.message || "Errore durante l'invio del questionario.",
+      });
+    }
+  };
+};
+
+// ===============================
+// GET /api/Questionnaire/status
+// ===============================
+export const loadQuestionnaireStatus = () => {
+  return async (dispatch) => {
+    dispatch({ type: QUESTIONNAIRE_STATUS_REQUEST });
+
+    try {
+      const res = await apiFetch("/api/Questionnaire/status");
+
+      if (!res.ok) {
+        throw new Error("Impossibile verificare lo stato del questionario.");
+      }
+
+      const data = await safeJson(res);
+
+      dispatch({
+        type: QUESTIONNAIRE_STATUS_SUCCESS,
+        payload: data,
+      });
+    } catch (err) {
+      dispatch({
+        type: QUESTIONNAIRE_STATUS_ERROR,
+        payload: err?.message || "Errore caricamento stato questionario",
+      });
+    }
+  };
+};
+
+// Nota per me futuro:
+// - Una sola chiamata al backend:
+//   GET /api/Recommendation?take=50   (o 100, tanto mostra solo top score)
+// - La paginazione è SOLO lato front (pageSize 6).
+
+export const loadRecommendations = () => {
+  return async (dispatch, getState) => {
+    const { recommendations } = getState();
+
+    // Se ho già items e non voglio forzare il reload, posso evitare la chiamata.
+    if (recommendations.items && recommendations.items.length > 0) {
+      return;
+    }
+
+    dispatch({ type: RECOMMENDATIONS_REQUEST });
+
+    try {
+      // prendo i top 50 dal backend (basta e avanza)
+      const res = await apiFetch(`/api/Recommendation?take=50`);
+
+      if (!res.ok) {
+        throw new Error("Impossibile caricare i giochi consigliati.");
+      }
+
+      const data = await safeJson(res);
+      // Mi aspetto un array di GameRecommendationDto.
+      dispatch({
+        type: RECOMMENDATIONS_SUCCESS,
+        payload: data || [],
+      });
+    } catch (error) {
+      dispatch({
+        type: RECOMMENDATIONS_ERROR,
+        payload: error?.message || "Errore durante il caricamento delle raccomandazioni.",
+      });
     }
   };
 };

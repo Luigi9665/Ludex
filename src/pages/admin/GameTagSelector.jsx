@@ -19,7 +19,14 @@ const GameTagSelector = ({ tags, selectedTagIds, onChange }) => {
 
     if (searchText.trim() !== "") {
       const q = searchText.toLowerCase();
-      result = result.filter((t) => t.displayName.toLowerCase().includes(q) || t.category.toLowerCase().includes(q));
+
+      result = result.filter((t) => {
+        const code = t.code?.toLowerCase() ?? "";
+        const name = t.displayName?.toLowerCase() ?? ""; // opzionale / backward compat
+        const category = String(t.category ?? "").toLowerCase();
+
+        return code.includes(q) || name.includes(q) || category.includes(q);
+      });
     } else {
       result = result.filter((t) => t.category === activeCategory);
     }
@@ -28,7 +35,7 @@ const GameTagSelector = ({ tags, selectedTagIds, onChange }) => {
       if (a.displayOrder !== b.displayOrder) {
         return a.displayOrder - b.displayOrder;
       }
-      return a.displayName.localeCompare(b.displayName);
+      return a.code.localeCompare(b.code); // 👈 ordina per code invece di displayName
     });
   }, [tags, searchText, activeCategory]);
 
@@ -73,8 +80,8 @@ const GameTagSelector = ({ tags, selectedTagIds, onChange }) => {
           <div className="lx-tag-pill-container">
             {selectedTags.map((t) => (
               <div key={t.id} className="lx-tag-pill lx-tag-selected">
-                <span>{t.displayName}</span>
-                <button type="button" className="lx-tag-remove" onClick={() => removeTag(t.id)} aria-label={`Rimuovi ${t.displayName}`}>
+                <span>{t.code}</span>
+                <button type="button" className="lx-tag-remove" onClick={() => removeTag(t.id)} aria-label={`Rimuovi ${t.code}`}>
                   <i className="bi bi-x" />
                 </button>
               </div>
@@ -148,7 +155,7 @@ const GameTagSelector = ({ tags, selectedTagIds, onChange }) => {
                   role="checkbox"
                   aria-checked={selected}
                   tabIndex={0}
-                  title={t.description || t.displayName}
+                  title={t.description || t.code}
                   onClick={() => toggleTag(t.id)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -157,7 +164,7 @@ const GameTagSelector = ({ tags, selectedTagIds, onChange }) => {
                     }
                   }}
                 >
-                  <span className="lx-tag-name">{t.displayName}</span>
+                  <span className="lx-tag-name">{t.code}</span>
                   {selected && <i className="bi bi-check-lg lx-tag-check" />}
                   {t.description && <div className="lx-tag-tooltip">{t.description}</div>}
                 </div>

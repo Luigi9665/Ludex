@@ -9,20 +9,25 @@ const HomePrivateArea = ({ isLogged, authUser, userDetails, userLoading }) => {
     return (
       <section className="lx-hero lx-hero-guest">
         <div className="container text-center py-5">
-          <h1 className="lx-hero-title">
-            <span className="lx-text-glow">Benvenuto </span>Viaggiatore 👾
-          </h1>
+          <h1 className="lx-hero-title">Benvenuto Viaggiatore 👾</h1>
 
           <p className="lx-hero-guest-text mt-3">
-            Stai esplorando LUDEX in modalità ospite. Accedi o crea un profilo per sbloccare la tua libreria personale, salvare giochi e lasciare recensioni
-            luminose come un critico d'élite.
+            Stai esplorando LUDEX in modalità ospite.
+            <br />
+            Accedi o crea un profilo per sbloccare la tua libreria personale, salvare giochi, lasciare recensioni e attivare la vera magia: il questionario
+            delle preferenze.
+          </p>
+
+          <p className="lx-hero-guest-text mt-2">
+            Solo con un account possiamo ricordarci i tuoi gusti e consigliarti giochi su misura in base alle tue risposte. Senza login… niente profilo, niente
+            magia ✨
           </p>
 
           <div className="mt-4 d-flex justify-content-center gap-3">
-            <Link to="/auth" className="btn lx-btn-primary" style={{ textDecoration: "" }}>
+            <Link to="/auth" className="btn lx-btn-primary d-flex align-items-center" style={{ textDecoration: "none" }}>
               Accedi
             </Link>
-            <Link to="/auth" className="btn lx-btn-outline">
+            <Link to="/auth" className="btn lx-btn-outline d-flex align-items-center">
               Crea Account
             </Link>
           </div>

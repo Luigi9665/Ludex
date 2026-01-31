@@ -1,0 +1,23 @@
+.box {
+  margin-top: 0.3rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: radial-gradient(circle at left, rgba(0, 217, 255, 0.18), rgba(15, 23, 42, 0.9));
+  border: 1px solid rgba(0, 217, 255, 0.4);
+}
+
+.icon {
+  font-size: 1.1rem;
+}
+
+.text {
+  font-size: 0.8rem;
+  color: var(--lx-text-secondary);
+}
+
+.text strong {
+  color: var(--lx-cyan);
+}

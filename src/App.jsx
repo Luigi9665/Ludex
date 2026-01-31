@@ -12,6 +12,8 @@ import GameDetailPage from "./pages/GameDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminGameListPage from "./pages/admin/AdminGameListPage";
 import AdminEditGamePage from "./pages/admin/AdminEditGamePage";
+import QuestionnairePage from "./pages/QuestionnairePage";
+import RecommendationsPage from "./pages/RecommendationsPage";
 
 function App() {
   return (
@@ -23,11 +25,19 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path="/home" element={<HomePage />} />
         <Route path="/library" element={<LibraryPage />} />
+
         {/* nuova pagina dettaglio */}
         <Route path="/game/:gameId" element={<GameDetailPage />} />
+
         {/* nuova pagina profilo */}
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/:userId" element={<ProfilePage />} />
+
+        {/* nuova pagina questionario */}
+        <Route path="/questionnaire" element={<QuestionnairePage />} />
+
+        {/* 👇 nuova pagina risultati questionario */}
+        <Route path="/recommendations" element={<RecommendationsPage />} />
       </Route>
 
       <Route path="/admin/games" element={<AdminGameListPage />} />

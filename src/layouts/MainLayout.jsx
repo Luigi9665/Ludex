@@ -22,7 +22,7 @@ export default function MainLayout() {
       <main className="lx-main lx-main-with-nav">
         <Outlet />
       </main>
-      <footer className="lx-footer mt-5">
+      <footer className="lx-footer">
         <div className="container">
           <div className="text-center py-4">
             <p className="mb-0 text-white-50">© 2026 Ludex - La tua libreria gaming V1</p>

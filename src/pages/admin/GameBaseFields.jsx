@@ -67,8 +67,8 @@ const GameBaseFields = ({ form, onChange, errors = {} }) => {
           placeholder="Es. Elden Ring"
         />
         <div className="d-flex justify-content-between mt-1">
-          <small className="text-muted">Nome ufficiale completo</small>
-          <small className={form.title.length > titleMaxLength * 0.9 ? "text-warning" : "text-muted"}>
+          <small className="text-white-50">Nome ufficiale completo</small>
+          <small className={form.title.length > titleMaxLength * 0.9 ? "text-warning" : "text-white-50"}>
             {form.title.length}/{titleMaxLength}
           </small>
         </div>
@@ -90,8 +90,8 @@ const GameBaseFields = ({ form, onChange, errors = {} }) => {
           placeholder="Breve sinossi del gioco..."
         />
         <div className="d-flex justify-content-between mt-1">
-          <small className="text-muted">Breve sinossi (max {descriptionMaxLength} caratteri)</small>
-          <small className={form.description.length > descriptionMaxLength * 0.9 ? "text-warning" : "text-muted"}>
+          <small className="text-white-50">Breve sinossi (max {descriptionMaxLength} caratteri)</small>
+          <small className={form.description.length > descriptionMaxLength * 0.9 ? "text-warning" : "text-white-50"}>
             {form.description.length}/{descriptionMaxLength}
           </small>
         </div>
@@ -111,7 +111,7 @@ const GameBaseFields = ({ form, onChange, errors = {} }) => {
             value={form.releaseDate}
             onChange={(e) => handleInputChange("releaseDate", e.target.value)}
           />
-          <small className="text-muted d-block mt-1">Data di rilascio originale</small>
+          <small className="text-white-50 d-block mt-1">Data di rilascio originale</small>
           {errors.releaseDate && <div className="invalid-feedback d-block">{errors.releaseDate}</div>}
         </div>
 
@@ -128,7 +128,7 @@ const GameBaseFields = ({ form, onChange, errors = {} }) => {
             onChange={(e) => handleInputChange("coverUrl", e.target.value)}
             placeholder="https://..."
           />
-          <small className="text-muted d-block mt-1">Link diretto ad un&apos;immagine (JPG/PNG/WebP)</small>
+          <small className="text-white-50 d-block mt-1">Link diretto ad un&apos;immagine (JPG/PNG/WebP)</small>
           {coverError && (
             <div className="text-danger mt-1 small">
               <i className="bi bi-exclamation-triangle me-1" />

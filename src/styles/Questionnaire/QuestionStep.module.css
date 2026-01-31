@@ -1,0 +1,19 @@
+/* QuestionStep.module.css */
+
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Nota per me futuro:
+   - Questo lo vedo solo se succede qualcosa di strano
+     (es. nessuna domanda nello step).
+*/
+.emptyStep {
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+}

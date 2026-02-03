@@ -187,9 +187,10 @@ const MyNavbar = ({ user }) => {
                       </Link>
                       {user?.role === "Admin" && (
                         <>
-                          <Link to="/admin/games" className="dropdown-item">
-                            <i className="bi bi-controller me-2" />
-                            Gestisci giochi
+                          {/* Dashboard admin generale */}
+                          <Link to="/admin" className="dropdown-item">
+                            <i className="bi bi-speedometer2 me-2" />
+                            Dashboard admin
                           </Link>
 
                           <Link to="/admin/games/new" className="dropdown-item">

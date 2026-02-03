@@ -227,7 +227,7 @@ const GameMetadataBasic = ({ focuses, moods, difficulties, form, onChange }) => 
               id="averageLength"
               type="number"
               min="0"
-              step="0.5"
+              step="1"
               className="form-control"
               value={form.averageLengthHours ?? ""}
               onChange={(e) => handleNumberChange("averageLengthHours", e.target.value)}

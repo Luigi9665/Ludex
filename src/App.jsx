@@ -14,6 +14,12 @@ import AdminGameListPage from "./pages/admin/AdminGameListPage";
 import AdminEditGamePage from "./pages/admin/AdminEditGamePage";
 import QuestionnairePage from "./pages/QuestionnairePage";
 import RecommendationsPage from "./pages/RecommendationsPage";
+import AnalyticsOverviewPage from "./pages/admin/AnalyticsOverviewPage";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminGenresPage from "./pages/admin/AdminGenresPage";
+import AdminTagsPage from "./pages/admin/AdminTagsPage";
+import AdminMetadataPage from "./pages/admin/AdminMetadataPage";
+import AdminQuestionsPage from "./pages/admin/AdminQuestionsPage";
 
 function App() {
   return (
@@ -40,9 +46,22 @@ function App() {
         <Route path="/recommendations" element={<RecommendationsPage />} />
       </Route>
 
-      <Route path="/admin/games" element={<AdminGameListPage />} />
-      <Route path="/admin/games/new" element={<AdminCreateGamePage />} />
-      <Route path="/admin/games/:id/edit" element={<AdminEditGamePage />} />
+      {/* Rotta singola per l'area admin */}
+      <Route path="/admin" element={<AdminLayout />}>
+        {/* index = /admin → dashboard analytics */}
+        <Route index element={<AnalyticsOverviewPage />} />
+
+        {/* Giochi */}
+        <Route path="games" element={<AdminGameListPage />} />
+        <Route path="games/new" element={<AdminCreateGamePage />} />
+        <Route path="games/:id/edit" element={<AdminEditGamePage />} />
+
+        {/* 👇 NUOVE PAGINE ADMIN */}
+        <Route path="genres" element={<AdminGenresPage />} />
+        <Route path="tags" element={<AdminTagsPage />} />
+        <Route path="metadata" element={<AdminMetadataPage />} />
+        <Route path="questions" element={<AdminQuestionsPage />} />
+      </Route>
 
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
 

@@ -14,7 +14,7 @@ const NotFoundPage = () => {
           <Link to="/home" className="btn lx-btn-primary">
             Rientra nella Home
           </Link>
-          <Link to="/library" className="btn lx-btn-outline">
+          <Link to="/library" className="btn lx-btn-outline d-flex align-items-center">
             Vai alla Libreria
           </Link>
         </div>

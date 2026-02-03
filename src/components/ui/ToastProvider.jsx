@@ -27,7 +27,7 @@ export const ToastProvider = ({ children }) => {
       {/* Stack di toast in alto a destra */}
       <div className="lx-toast-container">
         {toasts.map((t) => (
-          <div key={t.id} className={`lx-toast lx-toast--${t.type}`} onClick={() => removeToast(t.id)}>
+          <div key={t.id} className={`lx-toast lx-toast-${t.type}`} onClick={() => removeToast(t.id)}>
             {t.message}
           </div>
         ))}

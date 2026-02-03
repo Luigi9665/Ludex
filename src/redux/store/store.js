@@ -12,6 +12,9 @@ import patchDeleteReducer from "../reducer/patchDeleteReducer.js";
 import adminGamesReducer from "../reducer/adminGamesReducer.js";
 import questionnaireReducer from "../reducer/questionnaireReducer.js";
 import recommendationReducer from "../reducer/recommendationReducer.js";
+import questionnaireAnalyticsReducer from "../reducer/questionnaireAnalyticsReducer.js";
+import adminTaxonomyReducer from "../reducer/adminTaxonomyReducer.js";
+import questionnaireActiveReducer from "../reducer/questionnaireActiveReducer.js";
 
 const persistConfig = {
   key: "root",
@@ -31,6 +34,9 @@ const rootReducer = combineReducers({
   adminGames: adminGamesReducer,
   questionnaire: questionnaireReducer,
   recommendations: recommendationReducer,
+  questionnaireAnalytics: questionnaireAnalyticsReducer,
+  adminTaxonomy: adminTaxonomyReducer,
+  questionnaireActive: questionnaireActiveReducer,
 });
 
 const persisterReducer = persistReducer(persistConfig, rootReducer);

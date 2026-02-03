@@ -162,7 +162,7 @@
   position: fixed;
   right: 1.5rem;
   bottom: 1.5rem;
-  z-index: 1080;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

@@ -65,6 +65,33 @@ import {
   QUESTIONNAIRE_STATUS_REQUEST,
   QUESTIONNAIRE_STATUS_SUCCESS,
   QUESTIONNAIRE_STATUS_ERROR,
+  FETCH_QUESTIONNAIRE_ANALYTICS_REQUEST,
+  FETCH_QUESTIONNAIRE_ANALYTICS_SUCCESS,
+  FETCH_QUESTIONNAIRE_ANALYTICS_FAILURE,
+  ADMIN_TAXONOMY_GENRES_FETCH_REQUEST,
+  ADMIN_TAXONOMY_GENRES_FETCH_SUCCESS,
+  ADMIN_TAXONOMY_GENRES_FETCH_FAILURE,
+  ADMIN_TAXONOMY_GENRE_CREATE_SUCCESS,
+  ADMIN_TAXONOMY_GENRE_UPDATE_SUCCESS,
+  ADMIN_TAXONOMY_GENRE_DELETE_SUCCESS,
+  ADMIN_TAXONOMY_TAGS_FETCH_REQUEST,
+  ADMIN_TAXONOMY_TAGS_FETCH_SUCCESS,
+  ADMIN_TAXONOMY_TAGS_FETCH_FAILURE,
+  ADMIN_TAXONOMY_TAG_CREATE_SUCCESS,
+  ADMIN_TAXONOMY_TAG_UPDATE_SUCCESS,
+  ADMIN_TAXONOMY_TAG_DELETE_SUCCESS,
+  ADMIN_TAXONOMY_METADATA_FETCH_REQUEST,
+  ADMIN_TAXONOMY_METADATA_FETCH_SUCCESS,
+  ADMIN_TAXONOMY_METADATA_FETCH_FAILURE,
+  ADMIN_TAXONOMY_METADATA_CREATE_SUCCESS,
+  ADMIN_TAXONOMY_METADATA_UPDATE_SUCCESS,
+  ADMIN_TAXONOMY_METADATA_DELETE_SUCCESS,
+  QUESTIONNAIRE_ACTIVE_FETCH_REQUEST,
+  QUESTIONNAIRE_ACTIVE_FETCH_SUCCESS,
+  QUESTIONNAIRE_ACTIVE_FETCH_FAILURE,
+  QUESTIONNAIRE_ACTIVE_TOGGLE_REQUEST,
+  QUESTIONNAIRE_ACTIVE_TOGGLE_SUCCESS,
+  QUESTIONNAIRE_ACTIVE_TOGGLE_FAILURE,
 } from "../authTypes";
 import { STATUS_TO_ENUM } from "../../utils/statusMapper";
 
@@ -871,7 +898,7 @@ export const loadRecommendations = () => {
 
     try {
       // prendo i top 50 dal backend (basta e avanza)
-      const res = await apiFetch(`/api/Recommendation?take=50`);
+      const res = await apiFetch(`/api/Recommendation?take=30`);
 
       if (!res.ok) {
         throw new Error("Impossibile caricare i giochi consigliati.");
@@ -887,6 +914,691 @@ export const loadRecommendations = () => {
       dispatch({
         type: RECOMMENDATIONS_ERROR,
         payload: error?.message || "Errore durante il caricamento delle raccomandazioni.",
+      });
+    }
+  };
+};
+
+/**
+ * Nota per me futuro:
+ * - Chiama GET /api/QuestionnaireAdmin/analytics/overview
+ * - Usa Redux Thunk (funzione che ritorna async dispatch).
+ * - Il componente admin dashboard si limiterà a dispatchare questa action
+ *   e leggere loading / overview / error dal reducer questionnaireAnalytics.
+ */
+export const fetchQuestionnaireAnalyticsOverview = () => {
+  // eslint-disable-next-line no-unused-vars
+  return async (dispatch, getState) => {
+    dispatch({ type: FETCH_QUESTIONNAIRE_ANALYTICS_REQUEST });
+
+    try {
+      const res = await apiFetch("/api/QuestionnaireAdmin/analytics/overview", {
+        method: "GET",
+      });
+
+      if (!res.ok) {
+        // cerco di leggere un messaggio dal backend, se c'è
+        let message = "Errore nel caricamento delle analytics.";
+        try {
+          const data = await res.json();
+          if (data?.message) message = data.message;
+        } catch {
+          // fallback al messaggio di default
+        }
+
+        dispatch({
+          type: FETCH_QUESTIONNAIRE_ANALYTICS_FAILURE,
+          payload: message,
+        });
+        return;
+      }
+
+      const data = await res.json(); // dovrebbe essere QuestionnaireAnalyticsOverviewDto
+
+      dispatch({
+        type: FETCH_QUESTIONNAIRE_ANALYTICS_SUCCESS,
+        payload: data,
+      });
+    } catch (err) {
+      dispatch({
+        type: FETCH_QUESTIONNAIRE_ANALYTICS_FAILURE,
+        payload: err?.message || "Errore imprevisto nel caricamento delle analytics.",
+      });
+    }
+  };
+};
+
+// Nota per me futuro:
+// - Carica overview generi (lista + stats) per pagina admin generi.
+export const fetchAdminGenres = () => {
+  return async (dispatch) => {
+    dispatch({ type: ADMIN_TAXONOMY_GENRES_FETCH_REQUEST });
+    try {
+      const res = await apiFetch("/api/AdminTaxonomy/genres", { method: "GET" });
+      if (!res.ok) {
+        const msg = `Errore ${res.status} nel caricamento generi.`;
+        dispatch({ type: ADMIN_TAXONOMY_GENRES_FETCH_FAILURE, payload: msg });
+        return;
+      }
+      const data = await res.json();
+      dispatch({ type: ADMIN_TAXONOMY_GENRES_FETCH_SUCCESS, payload: data });
+    } catch (err) {
+      dispatch({
+        type: ADMIN_TAXONOMY_GENRES_FETCH_FAILURE,
+        payload: err?.message || "Errore imprevisto nel caricamento generi.",
+      });
+    }
+  };
+};
+
+// Crea genere
+export const createAdminGenre = (name) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch("/api/AdminTaxonomy/genres", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nella creazione del genere.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        // qui puoi decidere se dispatchare un FAILURE separato o alzare un toast
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json();
+      dispatch({ type: ADMIN_TAXONOMY_GENRE_CREATE_SUCCESS, payload: data });
+      return data;
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  };
+};
+
+// Update genere
+export const updateAdminGenre = (id, name) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/genres/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'aggiornamento del genere.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json();
+      dispatch({ type: ADMIN_TAXONOMY_GENRE_UPDATE_SUCCESS, payload: data });
+      return data;
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  };
+};
+
+// Delete genere
+export const deleteAdminGenre = (id) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/genres/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'eliminazione del genere.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      dispatch({ type: ADMIN_TAXONOMY_GENRE_DELETE_SUCCESS, payload: id });
+      return true;
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  };
+};
+
+export const fetchAdminTags = () => {
+  return async (dispatch) => {
+    dispatch({ type: ADMIN_TAXONOMY_TAGS_FETCH_REQUEST });
+    try {
+      const res = await apiFetch("/api/AdminTaxonomy/tags", { method: "GET" });
+      if (!res.ok) {
+        const msg = `Errore ${res.status} nel caricamento tag.`;
+        dispatch({ type: ADMIN_TAXONOMY_TAGS_FETCH_FAILURE, payload: msg });
+        return;
+      }
+      const data = await res.json();
+      dispatch({ type: ADMIN_TAXONOMY_TAGS_FETCH_SUCCESS, payload: data });
+    } catch (err) {
+      dispatch({
+        type: ADMIN_TAXONOMY_TAGS_FETCH_FAILURE,
+        payload: err?.message || "Errore imprevisto nel caricamento tag.",
+      });
+    }
+  };
+};
+
+export const createAdminTag = (payload) => {
+  // payload: { code, displayName, category, description, isActive, displayOrder }
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch("/api/AdminTaxonomy/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nella creazione del tag.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json();
+      dispatch({ type: ADMIN_TAXONOMY_TAG_CREATE_SUCCESS, payload: data });
+      return data;
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  };
+};
+
+// updateAdminTag(id, { displayName, category, description, isActive, displayOrder })
+export const updateAdminTag = (id, payload) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/tags/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'aggiornamento del tag.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json();
+      dispatch({ type: ADMIN_TAXONOMY_TAG_UPDATE_SUCCESS, payload: data });
+      return data;
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  };
+};
+
+export const deleteAdminTag = (id) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/tags/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'eliminazione del tag.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      dispatch({ type: ADMIN_TAXONOMY_TAG_DELETE_SUCCESS, payload: id });
+      return true;
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  };
+};
+
+export const fetchAdminMetadata = () => {
+  return async (dispatch) => {
+    dispatch({ type: ADMIN_TAXONOMY_METADATA_FETCH_REQUEST });
+    try {
+      const res = await apiFetch("/api/AdminTaxonomy/metadata", { method: "GET" });
+
+      if (!res.ok) {
+        const msg = `Errore ${res.status} nel caricamento metadata.`;
+        dispatch({ type: ADMIN_TAXONOMY_METADATA_FETCH_FAILURE, payload: msg });
+        return;
+      }
+
+      const data = await res.json();
+      dispatch({ type: ADMIN_TAXONOMY_METADATA_FETCH_SUCCESS, payload: data });
+    } catch (err) {
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_FETCH_FAILURE,
+        payload: err?.message || "Errore imprevisto nel caricamento metadata.",
+      });
+    }
+  };
+};
+
+// CREATE FOCUS
+export const createAdminMetadataFocus = ({ code, name, description }) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch("/api/AdminTaxonomy/metadata/focus", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          name,
+          description: description || null,
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nella creazione del focus.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // tengo il messaggio di default
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json(); // MetadataAdminListItemDto
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_CREATE_SUCCESS,
+        payload: data,
+      });
+
+      return data;
+    } catch (err) {
+      return Promise.reject(err instanceof Error ? err : new Error("Errore imprevisto nella creazione del focus."));
+    }
+  };
+};
+
+// UPDATE FOCUS
+export const updateAdminMetadataFocus = (id, { name, description }) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/metadata/focus/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          description: description || null,
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'aggiornamento del focus.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json(); // MetadataAdminListItemDto aggiornato
+
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_UPDATE_SUCCESS,
+        payload: data,
+      });
+
+      return data;
+    } catch (err) {
+      return Promise.reject(err instanceof Error ? err : new Error("Errore imprevisto nell'aggiornamento del focus."));
+    }
+  };
+};
+
+// DELETE FOCUS
+export const deleteAdminMetadataFocus = (id) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/metadata/focus/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'eliminazione del focus.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_DELETE_SUCCESS,
+        payload: id,
+      });
+
+      return true;
+    } catch (err) {
+      return Promise.reject(err instanceof Error ? err : new Error("Errore imprevisto nell'eliminazione del focus."));
+    }
+  };
+};
+
+// CREATE MOOD
+export const createAdminMetadataMood = ({ code, name, description }) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch("/api/AdminTaxonomy/metadata/mood", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          name,
+          description: description || null,
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nella creazione del mood.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json(); // MetadataAdminListItemDto
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_CREATE_SUCCESS,
+        payload: data,
+      });
+
+      return data;
+    } catch (err) {
+      return Promise.reject(err instanceof Error ? err : new Error("Errore imprevisto nella creazione del mood."));
+    }
+  };
+};
+
+// UPDATE MOOD
+export const updateAdminMetadataMood = (id, { name, description }) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/metadata/mood/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          description: description || null,
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'aggiornamento del mood.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json();
+
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_UPDATE_SUCCESS,
+        payload: data,
+      });
+
+      return data;
+    } catch (err) {
+      return Promise.reject(err instanceof Error ? err : new Error("Errore imprevisto nell'aggiornamento del mood."));
+    }
+  };
+};
+
+// DELETE MOOD
+export const deleteAdminMetadataMood = (id) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/metadata/mood/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'eliminazione del mood.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_DELETE_SUCCESS,
+        payload: id,
+      });
+
+      return true;
+    } catch (err) {
+      return Promise.reject(err instanceof Error ? err : new Error("Errore imprevisto nell'eliminazione del mood."));
+    }
+  };
+};
+
+// CREATE DIFFICULTY
+export const createAdminMetadataDifficulty = ({ code, name, description }) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch("/api/AdminTaxonomy/metadata/difficulty", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          name,
+          description: description || null,
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nella creazione della difficoltà.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json();
+
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_CREATE_SUCCESS,
+        payload: data,
+      });
+
+      return data;
+    } catch (err) {
+      return Promise.reject(err instanceof Error ? err : new Error("Errore imprevisto nella creazione della difficoltà."));
+    }
+  };
+};
+
+// UPDATE DIFFICULTY
+export const updateAdminMetadataDifficulty = (id, { name, description }) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/metadata/difficulty/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          description: description || null,
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'aggiornamento della difficoltà.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json();
+
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_UPDATE_SUCCESS,
+        payload: data,
+      });
+
+      return data;
+    } catch (err) {
+      return Promise.reject(err instanceof Error ? err : new Error("Errore imprevisto nell'aggiornamento della difficoltà."));
+    }
+  };
+};
+
+// DELETE DIFFICULTY
+export const deleteAdminMetadataDifficulty = (id) => {
+  return async (dispatch) => {
+    try {
+      const res = await apiFetch(`/api/AdminTaxonomy/metadata/difficulty/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'eliminazione della difficoltà.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        return Promise.reject(new Error(message));
+      }
+
+      dispatch({
+        type: ADMIN_TAXONOMY_METADATA_DELETE_SUCCESS,
+        payload: id,
+      });
+
+      return true;
+    } catch (err) {
+      return Promise.reject(err instanceof Error ? err : new Error("Errore imprevisto nell'eliminazione della difficoltà."));
+    }
+  };
+};
+
+// Carica overview domande attive
+export const fetchQuestionnaireActiveOverview = () => {
+  return async (dispatch) => {
+    dispatch({ type: QUESTIONNAIRE_ACTIVE_FETCH_REQUEST });
+
+    try {
+      const res = await apiFetch("/api/QuestionnaireAdmin/questions/active-overview", {
+        method: "GET",
+      });
+
+      if (!res.ok) {
+        let message = "Errore nel caricamento delle domande attive.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        dispatch({ type: QUESTIONNAIRE_ACTIVE_FETCH_FAILURE, payload: message });
+        return;
+      }
+
+      const data = await res.json();
+      dispatch({ type: QUESTIONNAIRE_ACTIVE_FETCH_SUCCESS, payload: data });
+    } catch (err) {
+      dispatch({
+        type: QUESTIONNAIRE_ACTIVE_FETCH_FAILURE,
+        payload: err?.message || "Errore imprevisto nel caricamento domande attive.",
+      });
+    }
+  };
+};
+
+// Toggle attivo / non attivo su una domanda
+export const setQuestionActive = (questionId, isActive) => {
+  return async (dispatch) => {
+    dispatch({ type: QUESTIONNAIRE_ACTIVE_TOGGLE_REQUEST, payload: questionId });
+
+    try {
+      const res = await apiFetch(`/api/QuestionnaireAdmin/questions/${questionId}/active`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nel cambio stato della domanda.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch (parseError) {
+          console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
+        }
+        dispatch({
+          type: QUESTIONNAIRE_ACTIVE_TOGGLE_FAILURE,
+          payload: { questionId, message },
+        });
+        return;
+      }
+
+      dispatch({
+        type: QUESTIONNAIRE_ACTIVE_TOGGLE_SUCCESS,
+        payload: { questionId, isActive },
+      });
+    } catch (err) {
+      dispatch({
+        type: QUESTIONNAIRE_ACTIVE_TOGGLE_FAILURE,
+        payload: { questionId, message: err?.message },
       });
     }
   };

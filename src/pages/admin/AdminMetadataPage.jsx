@@ -1,0 +1,384 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import AdminImpactTable from "../../components/SectionAdmin/Adminimpacttable.jsx";
+import MetadataFormModal from "../../components/SectionAdmin/MetadataFormModal";
+import EntityUsageModal from "../../components/SectionAdmin/EntityUsageModal";
+import ConfirmDeleteModal from "../../components/SectionAdmin/ConfirmDeleteModal";
+
+import { fetchAdminMetadata, deleteAdminMetadataFocus, deleteAdminMetadataMood, deleteAdminMetadataDifficulty } from "../../redux/action/index.js";
+import { apiFetch } from "../../apiFetch Autenticate/apiFetch.js";
+import { useToast } from "../../components/ui/ToastProvider.jsx";
+
+/**
+ * Pagina admin per la gestione dei METADATA (Focus / Mood / Difficulty).
+ *
+ * Nota per me futuro:
+ * - Legge dal reducer adminTaxonomy.metadata:
+ *     state.adminTaxonomy.metadata = { items, loading, error }
+ * - items è una lista di MetadataAdminListItemDto in camelCase:
+ *     {
+ *       id,
+ *       type,   // "FOCUS" | "MOOD" | "DIFFICULTY"
+ *       code,
+ *       name,
+ *       description,
+ *       gamesCount,
+ *       questionnaireEffectsCount,
+ *       questionnaireTotalDelta,
+ *       questionnaireOptionsCount,
+ *       questionnaireQuestionsCount,
+ *       // opzionale: sampleGames: string[]
+ *     }
+ */
+export default function AdminMetadataPage() {
+  const dispatch = useDispatch();
+
+  const [activeTab, setActiveTab] = useState("focus"); // 'focus' | 'mood' | 'difficulty'
+
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [showUsageModal, setShowUsageModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedMetadata, setSelectedMetadata] = useState(null);
+
+  const [usageData, setUsageData] = useState([]);
+  const [usageLoading, setUsageLoading] = useState(false);
+  const [usageError, setUsageError] = useState(null);
+
+  const [deleteError, setDeleteError] = useState(null);
+
+  const { items: metadataItems = [], loading, error } = useSelector((state) => state.adminTaxonomy.metadata);
+
+  const { addToast } = useToast();
+
+  // Al mount: carico overview metadata
+  useEffect(() => {
+    dispatch(fetchAdminMetadata());
+  }, [dispatch]);
+
+  const tabToType = {
+    focus: "FOCUS",
+    mood: "MOOD",
+    difficulty: "DIFFICULTY",
+  };
+
+  const typeToTabLabel = {
+    focus: "Focus",
+    mood: "Mood",
+    difficulty: "Difficoltà",
+  };
+
+  const typeToIcon = {
+    focus: "bi-bullseye",
+    mood: "bi-emoji-smile",
+    difficulty: "bi-speedometer2",
+  };
+
+  const tabConfig = {
+    focus: {
+      label: "Focus",
+      icon: typeToIcon.focus,
+      title: "Game Focus",
+      subtitle: "Gestisci i focus di gioco (story-driven, gameplay-focused, ecc.)",
+    },
+    mood: {
+      label: "Mood",
+      icon: typeToIcon.mood,
+      title: "Game Mood",
+      subtitle: "Gestisci i mood di gioco (cozy, epico, intenso, ecc.)",
+    },
+    difficulty: {
+      label: "Difficoltà",
+      icon: typeToIcon.difficulty,
+      title: "Game Difficulty",
+      subtitle: "Gestisci i livelli di difficoltà dei giochi.",
+    },
+  };
+
+  // Lista filtrata per tab attivo
+  const currentData = useMemo(() => {
+    const type = tabToType[activeTab];
+    return metadataItems.filter((m) => m.type === type);
+  }, [metadataItems, activeTab]);
+
+  // Delta massimo (in valore assoluto) per calcolo dell’impatto
+  const maxAbsDelta = currentData.length ? Math.max(...currentData.map((m) => Math.abs(m.questionnaireTotalDelta || 0))) : 0;
+
+  const rows = currentData.map((m) => {
+    const totalDelta = m.questionnaireTotalDelta || 0;
+    const impactPercent = maxAbsDelta > 0 ? (Math.abs(totalDelta) / maxAbsDelta) * 100 : 0;
+
+    return {
+      ...m,
+      gamesInfo: {
+        count: m.gamesCount || 0,
+        examples: m.sampleGames || [],
+      },
+      rulesCount: m.questionnaireEffectsCount || 0,
+      totalDelta,
+      impactPercent,
+    };
+  });
+
+  // =========================
+  // HANDLER TABELLA
+  // =========================
+
+  const handleEdit = (metadataRow) => {
+    setSelectedMetadata(metadataRow);
+    setShowFormModal(true);
+  };
+
+  const handleNew = () => {
+    setSelectedMetadata(null);
+    setShowFormModal(true);
+  };
+
+  const handleDelete = (metadataRow) => {
+    setSelectedMetadata(metadataRow);
+    setDeleteError(null);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedMetadata) return;
+
+    try {
+      const id = selectedMetadata.id;
+
+      switch (activeTab) {
+        case "focus":
+          await dispatch(deleteAdminMetadataFocus(id));
+          break;
+        case "mood":
+          await dispatch(deleteAdminMetadataMood(id));
+          break;
+        case "difficulty":
+          await dispatch(deleteAdminMetadataDifficulty(id));
+          break;
+        default:
+          break;
+      }
+
+      setShowDeleteModal(false);
+      setSelectedMetadata(null);
+      setDeleteError(null);
+      addToast(`Metadata "${selectedMetadata.name}" eliminato.`, "success");
+    } catch (err) {
+      setDeleteError(err?.message || "Errore durante l'eliminazione del metadata. Controlla collegamenti a giochi / questionario.");
+      addToast(err?.message, "error");
+    }
+  };
+
+  const handleViewUsage = async (metadataRow) => {
+    setSelectedMetadata(metadataRow);
+    setUsageLoading(true);
+    setUsageError(null);
+
+    try {
+      const routeSegment = activeTab; // "focus" | "mood" | "difficulty"
+
+      // Endpoint pensato lato backend:
+      // GET /api/AdminTaxonomy/metadata/{type}/{id}/questionnaire-usage
+      const res = await apiFetch(`/api/AdminTaxonomy/metadata/${routeSegment}/${metadataRow.id}/questionnaire-usage`, { method: "GET" });
+
+      if (!res.ok) {
+        let message = "Errore nel caricamento degli utilizzi nel questionario per questo metadata.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // lascio il messaggio di default
+        }
+        setUsageData([]);
+        setUsageError(message);
+        setShowUsageModal(true);
+        return;
+      }
+
+      const data = await res.json();
+      setUsageData(Array.isArray(data) ? data : []);
+      setShowUsageModal(true);
+    } catch (err) {
+      setUsageData([]);
+      setUsageError(err?.message || "Errore imprevisto nel caricamento degli utilizzi.");
+      setShowUsageModal(true);
+    } finally {
+      setUsageLoading(false);
+    }
+  };
+
+  const handleSaveFromModal = () => {
+    setShowFormModal(false);
+    setSelectedMetadata(null);
+    // Le thunk create/update dentro il form aggiornano lo store;
+    // non servono refetch espliciti qui.
+  };
+
+  // =========================
+  // UI: loading / error globali
+  // =========================
+
+  if (loading) {
+    return (
+      <div className="lx-loading-container">
+        <div className="lx-spinner" />
+        <p className="lx-loading-text">Caricamento metadata...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="lx-error-container">
+        <i className="bi bi-exclamation-triangle lx-error-icon" />
+        <h3 className="lx-error-title">Errore nel caricamento</h3>
+        <p className="lx-error-message">{error || "Impossibile caricare i metadata. Riprova più tardi."}</p>
+      </div>
+    );
+  }
+
+  // =========================
+  // COLONNE TABELLA
+  // =========================
+
+  const columns = [
+    {
+      key: "name",
+      label: "Nome",
+      width: "2fr",
+    },
+    {
+      key: "code",
+      label: "Codice",
+      width: "1.5fr",
+    },
+    {
+      key: "gamesInfo",
+      label: "Giochi",
+      align: "center",
+      width: "1fr",
+      type: "count-with-tooltip",
+    },
+    {
+      key: "rulesCount",
+      label: "Regole",
+      align: "center",
+      width: "0.8fr",
+      type: "badge",
+    },
+    {
+      key: "totalDelta",
+      label: "Delta totale",
+      align: "center",
+      width: "1fr",
+      type: "delta",
+    },
+    {
+      key: "impactPercent",
+      label: "Impatto nel questionario",
+      width: "1.5fr",
+      type: "percent-bar",
+    },
+  ];
+
+  // =========================
+  // RENDER
+  // =========================
+
+  return (
+    <div className="lx-admin-page">
+      {/* Tabs Navigation */}
+      <div className="lx-tabs-wrapper mb-4">
+        <ul className="lx-nav-tabs">
+          {Object.entries(tabConfig).map(([key, config]) => (
+            <li key={key} className="lx-nav-tab-item">
+              <button
+                className={`lx-nav-tab-link ${activeTab === key ? "active" : ""}`}
+                onClick={() => {
+                  setActiveTab(key);
+                  setSelectedMetadata(null);
+                  setUsageData([]);
+                  setUsageError(null);
+                  setDeleteError(null);
+                }}
+              >
+                <i className={`bi ${config.icon} me-2`} />
+                {config.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Tab Content */}
+      <div className="row g-3">
+        <div className="col-12">
+          <AdminImpactTable
+            title={tabConfig[activeTab].title}
+            subtitle={tabConfig[activeTab].subtitle}
+            columns={columns}
+            rows={rows}
+            percentField="impactPercent"
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onViewUsage={handleViewUsage}
+            headerAction={
+              <button className="lx-btn lx-btn-primary lx-btn-sm" onClick={handleNew}>
+                <i className="bi bi-plus-lg me-2" />
+                Nuovo {typeToTabLabel[activeTab]}
+              </button>
+            }
+            emptyMessage={`Nessun ${typeToTabLabel[activeTab].toLowerCase()} trovato.`}
+          />
+        </div>
+      </div>
+
+      {/* ===== MODAL: CREA / MODIFICA METADATA ===== */}
+      <MetadataFormModal
+        isOpen={showFormModal}
+        onClose={() => {
+          setShowFormModal(false);
+          setSelectedMetadata(null);
+        }}
+        metadata={selectedMetadata}
+        metadataType={activeTab}
+        onSave={handleSaveFromModal}
+        onSuccess={(msg) => addToast(msg)}
+        onError={(msg) => addToast(msg)}
+      />
+
+      {/* ===== MODAL: UTILIZZI NEL QUESTIONARIO ===== */}
+      <EntityUsageModal
+        isOpen={showUsageModal}
+        onClose={() => {
+          setShowUsageModal(false);
+          setUsageData([]);
+          setUsageError(null);
+        }}
+        entityName={selectedMetadata?.name}
+        entityType={tabConfig[activeTab].label.toLowerCase()}
+        usages={usageData}
+        loading={usageLoading}
+        error={usageError}
+      />
+
+      {/* ===== MODAL: CONFERMA ELIMINAZIONE ===== */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedMetadata(null);
+          setDeleteError(null);
+        }}
+        onConfirm={confirmDelete}
+        entityName={selectedMetadata?.name}
+        entityType={tabConfig[activeTab].label.toLowerCase()}
+        warningMessage={
+          deleteError ||
+          `Attenzione: non puoi eliminare questo ${tabConfig[activeTab].label.toLowerCase()} se è ancora associato a giochi o usato nel questionario.`
+        }
+      />
+    </div>
+  );
+}

@@ -1,4 +1,3 @@
-// src/components/admin/modals/MetadataFormModal.jsx
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -37,6 +36,7 @@ export default function MetadataFormModal({
     name: "",
     code: "",
     description: "",
+    keywordsIt: "",
   });
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
@@ -47,12 +47,14 @@ export default function MetadataFormModal({
         name: metadata.name || "",
         code: metadata.code || "",
         description: metadata.description || "",
+        keywordsIt: metadata.keywordsIt || "",
       });
     } else {
       setFormData({
         name: "",
         code: "",
         description: "",
+        keywordsIt: "",
       });
     }
     setErrors({});
@@ -120,6 +122,7 @@ export default function MetadataFormModal({
           updateThunk(metadata.id, {
             name: formData.name,
             description: formData.description || null,
+            keywordsIt: formData.keywordsIt?.trim() || null,
           }),
         );
         onSuccess?.(`${typeLabels[metadataType]} "${formData.name}" aggiornato.`);
@@ -131,6 +134,7 @@ export default function MetadataFormModal({
             code: formData.code,
             name: formData.name,
             description: formData.description || null,
+            keywordsIt: formData.keywordsIt?.trim() || null,
           }),
         );
         onSuccess?.(`${typeLabels[metadataType]} "${formData.name}" creato.`);
@@ -199,6 +203,25 @@ export default function MetadataFormModal({
               />
               {errors.code && <span className="lx-form-error">{errors.code}</span>}
               <small className="lx-form-hint">Solo maiuscole, numeri e underscore</small>
+            </div>
+
+            {/* Nuovo campo KEYWORDS */}
+            <div className="lx-form-group">
+              <label className="lx-form-label" htmlFor="metadata-keywords">
+                Parole chiave (italiano)
+              </label>
+              <textarea
+                id="metadata-keywords"
+                className="lx-form-input lx-form-textarea"
+                value={formData.keywordsIt}
+                onChange={(e) => setFormData({ ...formData, keywordsIt: e.target.value })}
+                rows="3"
+                placeholder="es. avventura narrativa; atmosfera tranquilla; sfida moderata..."
+                disabled={isSaving}
+              />
+              <small className="lx-form-hint">
+                Lista libera di parole/frasi separate da punto e virgola. Verranno usate per collegare automaticamente le risposte del questionario.
+              </small>
             </div>
 
             <div className="lx-form-group">

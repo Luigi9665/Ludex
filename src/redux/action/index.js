@@ -92,6 +92,37 @@ import {
   QUESTIONNAIRE_ACTIVE_TOGGLE_REQUEST,
   QUESTIONNAIRE_ACTIVE_TOGGLE_SUCCESS,
   QUESTIONNAIRE_ACTIVE_TOGGLE_FAILURE,
+  QUESTIONNAIRE_EFFECTS_FETCH_REQUEST,
+  QUESTIONNAIRE_EFFECTS_FETCH_SUCCESS,
+  QUESTIONNAIRE_EFFECTS_FETCH_FAILURE,
+  QUESTIONNAIRE_EFFECTS_CREATE_REQUEST,
+  QUESTIONNAIRE_EFFECTS_CREATE_SUCCESS,
+  QUESTIONNAIRE_EFFECTS_CREATE_FAILURE,
+  QUESTIONNAIRE_EFFECTS_UPDATE_REQUEST,
+  QUESTIONNAIRE_EFFECTS_UPDATE_SUCCESS,
+  QUESTIONNAIRE_EFFECTS_UPDATE_FAILURE,
+  QUESTIONNAIRE_EFFECTS_DELETE_REQUEST,
+  QUESTIONNAIRE_EFFECTS_DELETE_SUCCESS,
+  QUESTIONNAIRE_EFFECTS_DELETE_FAILURE,
+  QUESTIONNAIRE_EFFECTS_SUGGESTIONS_REQUEST,
+  QUESTIONNAIRE_EFFECTS_SUGGESTIONS_SUCCESS,
+  QUESTIONNAIRE_EFFECTS_SUGGESTIONS_FAILURE,
+  QUESTIONNAIRE_EFFECTS_SUGGESTIONS_CLEAR,
+  QUESTIONNAIRE_ADMIN_CREATE_QUESTION_REQUEST,
+  QUESTIONNAIRE_ADMIN_CREATE_QUESTION_SUCCESS,
+  QUESTIONNAIRE_ADMIN_CREATE_QUESTION_FAILURE,
+  QUESTIONNAIRE_ADMIN_UPDATE_QUESTION_REQUEST,
+  QUESTIONNAIRE_ADMIN_UPDATE_QUESTION_SUCCESS,
+  QUESTIONNAIRE_ADMIN_UPDATE_QUESTION_FAILURE,
+  QUESTIONNAIRE_ADMIN_CREATE_OPTION_REQUEST,
+  QUESTIONNAIRE_ADMIN_CREATE_OPTION_SUCCESS,
+  QUESTIONNAIRE_ADMIN_CREATE_OPTION_FAILURE,
+  QUESTIONNAIRE_ADMIN_UPDATE_OPTION_REQUEST,
+  QUESTIONNAIRE_ADMIN_UPDATE_OPTION_SUCCESS,
+  QUESTIONNAIRE_ADMIN_UPDATE_OPTION_FAILURE,
+  QUESTIONNAIRE_ADMIN_DELETE_OPTION_REQUEST,
+  QUESTIONNAIRE_ADMIN_DELETE_OPTION_SUCCESS,
+  QUESTIONNAIRE_ADMIN_DELETE_OPTION_FAILURE,
 } from "../authTypes";
 import { STATUS_TO_ENUM } from "../../utils/statusMapper";
 
@@ -992,13 +1023,17 @@ export const fetchAdminGenres = () => {
 };
 
 // Crea genere
-export const createAdminGenre = (name) => {
+// prima: export const createAdminGenre = (name) => {
+export const createAdminGenre = ({ name, keywordsIt }) => {
   return async (dispatch) => {
     try {
       const res = await apiFetch("/api/AdminTaxonomy/genres", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({
+          name,
+          keywordsIt: keywordsIt || null, // 👈 nuovo campo
+        }),
       });
 
       if (!res.ok) {
@@ -1009,7 +1044,6 @@ export const createAdminGenre = (name) => {
         } catch (parseError) {
           console.warn("Impossibile leggere il JSON di errore dell'API", parseError);
         }
-        // qui puoi decidere se dispatchare un FAILURE separato o alzare un toast
         return Promise.reject(new Error(message));
       }
 
@@ -1023,13 +1057,16 @@ export const createAdminGenre = (name) => {
 };
 
 // Update genere
-export const updateAdminGenre = (id, name) => {
+export const updateAdminGenre = (id, payload) => {
   return async (dispatch) => {
     try {
       const res = await apiFetch(`/api/AdminTaxonomy/genres/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({
+          name: payload.name,
+          keywordsIt: payload.keywordsIt ?? null, // importante!
+        }),
       });
 
       if (!res.ok) {
@@ -1134,10 +1171,20 @@ export const createAdminTag = (payload) => {
 export const updateAdminTag = (id, payload) => {
   return async (dispatch) => {
     try {
+      const body = {
+        code: payload.code, // se NON vuoi permettere update del code, togli questo
+        displayName: payload.displayName,
+        category: payload.category,
+        description: payload.description || null,
+        keywordsIt: payload.keywordsIt || null,
+        isActive: payload.isActive,
+        displayOrder: payload.displayOrder,
+      };
+
       const res = await apiFetch(`/api/AdminTaxonomy/tags/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -1210,7 +1257,7 @@ export const fetchAdminMetadata = () => {
 };
 
 // CREATE FOCUS
-export const createAdminMetadataFocus = ({ code, name, description }) => {
+export const createAdminMetadataFocus = ({ code, name, description, keywordsIt }) => {
   return async (dispatch) => {
     try {
       const res = await apiFetch("/api/AdminTaxonomy/metadata/focus", {
@@ -1220,6 +1267,7 @@ export const createAdminMetadataFocus = ({ code, name, description }) => {
           code,
           name,
           description: description || null,
+          keywordsIt: keywordsIt || null, // 👈 nuovo campo
         }),
       });
 
@@ -1248,16 +1296,19 @@ export const createAdminMetadataFocus = ({ code, name, description }) => {
 };
 
 // UPDATE FOCUS
-export const updateAdminMetadataFocus = (id, { name, description }) => {
+export const updateAdminMetadataFocus = (id, payload) => {
   return async (dispatch) => {
     try {
+      const body = {
+        name: payload.name,
+        description: payload.description || null,
+        keywordsIt: payload.keywordsIt || null,
+      };
+
       const res = await apiFetch(`/api/AdminTaxonomy/metadata/focus/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          description: description || null,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -1317,7 +1368,7 @@ export const deleteAdminMetadataFocus = (id) => {
 };
 
 // CREATE MOOD
-export const createAdminMetadataMood = ({ code, name, description }) => {
+export const createAdminMetadataMood = ({ code, name, description, keywordsIt }) => {
   return async (dispatch) => {
     try {
       const res = await apiFetch("/api/AdminTaxonomy/metadata/mood", {
@@ -1327,6 +1378,7 @@ export const createAdminMetadataMood = ({ code, name, description }) => {
           code,
           name,
           description: description || null,
+          keywordsIt: keywordsIt || null, // 👈 nuovo campo
         }),
       });
 
@@ -1355,16 +1407,19 @@ export const createAdminMetadataMood = ({ code, name, description }) => {
 };
 
 // UPDATE MOOD
-export const updateAdminMetadataMood = (id, { name, description }) => {
+export const updateAdminMetadataMood = (id, payload) => {
   return async (dispatch) => {
     try {
+      const body = {
+        name: payload.name,
+        description: payload.description || null,
+        keywordsIt: payload.keywordsIt || null,
+      };
+
       const res = await apiFetch(`/api/AdminTaxonomy/metadata/mood/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          description: description || null,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -1424,7 +1479,7 @@ export const deleteAdminMetadataMood = (id) => {
 };
 
 // CREATE DIFFICULTY
-export const createAdminMetadataDifficulty = ({ code, name, description }) => {
+export const createAdminMetadataDifficulty = ({ code, name, description, keywordsIt }) => {
   return async (dispatch) => {
     try {
       const res = await apiFetch("/api/AdminTaxonomy/metadata/difficulty", {
@@ -1434,6 +1489,7 @@ export const createAdminMetadataDifficulty = ({ code, name, description }) => {
           code,
           name,
           description: description || null,
+          keywordsIt: keywordsIt || null, // 👈 nuovo campo
         }),
       });
 
@@ -1463,16 +1519,19 @@ export const createAdminMetadataDifficulty = ({ code, name, description }) => {
 };
 
 // UPDATE DIFFICULTY
-export const updateAdminMetadataDifficulty = (id, { name, description }) => {
+export const updateAdminMetadataDifficulty = (id, payload) => {
   return async (dispatch) => {
     try {
+      const body = {
+        name: payload.name,
+        description: payload.description || null,
+        keywordsIt: payload.keywordsIt || null,
+      };
+
       const res = await apiFetch(`/api/AdminTaxonomy/metadata/difficulty/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          description: description || null,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
@@ -1599,6 +1658,587 @@ export const setQuestionActive = (questionId, isActive) => {
       dispatch({
         type: QUESTIONNAIRE_ACTIVE_TOGGLE_FAILURE,
         payload: { questionId, message: err?.message },
+      });
+    }
+  };
+};
+
+/**
+ * Carica tutti gli effetti (Genre/Tag/Metadata) per UNA singola option.
+ *
+ * Nota per me futuro:
+ * - backend: GET /api/QuestionnaireAdmin/options/{optionId}/effects
+ * - response: QuestionnaireOptionEffectAdminDto[]
+ */
+export const fetchOptionEffects = (optionId) => {
+  return async (dispatch) => {
+    dispatch({
+      type: QUESTIONNAIRE_EFFECTS_FETCH_REQUEST,
+      payload: { optionId },
+    });
+
+    try {
+      const res = await apiFetch(`/api/QuestionnaireAdmin/options/${optionId}/effects`, {
+        method: "GET",
+      });
+
+      if (!res.ok) {
+        let message = "Errore nel caricamento degli effetti dell'opzione.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // tengo il messaggio di default
+        }
+
+        dispatch({
+          type: QUESTIONNAIRE_EFFECTS_FETCH_FAILURE,
+          payload: { optionId, message },
+        });
+        return;
+      }
+
+      const data = await res.json(); // array di QuestionnaireOptionEffectAdminDto
+
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_FETCH_SUCCESS,
+        payload: { optionId, effects: Array.isArray(data) ? data : [] },
+      });
+    } catch (err) {
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_FETCH_FAILURE,
+        payload: {
+          optionId,
+          message: err?.message || "Errore imprevisto nel caricamento degli effetti.",
+        },
+      });
+    }
+  };
+};
+
+/**
+ * Crea un nuovo effetto per una option.
+ *
+ * payload:
+ * {
+ *   effectType: "Genre" | "Tag" | "Metadata",
+ *   genreId?: number,
+ *   tagId?: number,
+ *   metadataCode?: string,
+ *   deltaWeight: number
+ * }
+ */
+export const createOptionEffect = (optionId, dto) => {
+  // dto deve già essere del tipo:
+  // { optionId, effectType (int), genreId, tagId, metadataCode, deltaWeight }
+  return async (dispatch) => {
+    dispatch({
+      type: QUESTIONNAIRE_EFFECTS_CREATE_REQUEST,
+      payload: { optionId },
+    });
+
+    try {
+      const res = await apiFetch(`/api/QuestionnaireAdmin/effects`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dto),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nella creazione dell'effetto.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // tengo il default
+        }
+
+        dispatch({
+          type: QUESTIONNAIRE_EFFECTS_CREATE_FAILURE,
+          payload: { optionId, message },
+        });
+
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json(); // QuestionnaireOptionEffectDto
+
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_CREATE_SUCCESS,
+        payload: { optionId, effect: data },
+      });
+
+      return data;
+    } catch (err) {
+      const message = err?.message || "Errore imprevisto nella creazione dell'effetto.";
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_CREATE_FAILURE,
+        payload: { optionId, message },
+      });
+      return Promise.reject(new Error(message));
+    }
+  };
+};
+
+/**
+ * Aggiorna un effetto esistente (per ora solo deltaWeight).
+ *
+ * payload: { deltaWeight: number }
+ */
+export const updateOptionEffect = (optionId, effectId, dto) => {
+  // dto: { effectType (int), genreId, tagId, metadataCode, deltaWeight }
+  return async (dispatch) => {
+    dispatch({
+      type: QUESTIONNAIRE_EFFECTS_UPDATE_REQUEST,
+      payload: { optionId, effectId },
+    });
+
+    try {
+      const res = await apiFetch(`/api/QuestionnaireAdmin/effects/${effectId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: effectId,
+          ...dto,
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'aggiornamento dell'effetto.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // default
+        }
+
+        dispatch({
+          type: QUESTIONNAIRE_EFFECTS_UPDATE_FAILURE,
+          payload: { optionId, effectId, message },
+        });
+
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json(); // QuestionnaireOptionEffectDto aggiornato
+
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_UPDATE_SUCCESS,
+        payload: { optionId, effect: data },
+      });
+
+      return data;
+    } catch (err) {
+      const message = err?.message || "Errore imprevisto nell'aggiornamento dell'effetto.";
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_UPDATE_FAILURE,
+        payload: { optionId, effectId, message },
+      });
+      return Promise.reject(new Error(message));
+    }
+  };
+};
+
+/**
+ * Elimina un effetto da una option.
+ */
+export const deleteOptionEffect = (optionId, effectId) => {
+  return async (dispatch) => {
+    dispatch({
+      type: QUESTIONNAIRE_EFFECTS_DELETE_REQUEST,
+      payload: { optionId, effectId },
+    });
+
+    try {
+      const res = await apiFetch(`/api/QuestionnaireAdmin/effects/${effectId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'eliminazione dell'effetto.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // default
+        }
+
+        dispatch({
+          type: QUESTIONNAIRE_EFFECTS_DELETE_FAILURE,
+          payload: { optionId, effectId, message },
+        });
+
+        return Promise.reject(new Error(message));
+      }
+
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_DELETE_SUCCESS,
+        payload: { optionId, effectId },
+      });
+
+      return true;
+    } catch (err) {
+      const message = err?.message || "Errore imprevisto nell'eliminazione dell'effetto.";
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_DELETE_FAILURE,
+        payload: { optionId, effectId, message },
+      });
+      return Promise.reject(new Error(message));
+    }
+  };
+};
+
+/**
+ * Richiede al backend i suggerimenti di link per un'entità
+ * (es: "Tag #Singleplayer", "Metadata FOCUS:STORY", ecc.)
+ *
+ * request:
+ * {
+ *   entityType: "Genre" | "Tag" | "Metadata",
+ *   entityId?: number,        // Genre / Tag
+ *   metadataCode?: string,    // Metadata
+ *   questionId?: number,
+ *   defaultDelta?: number,
+ *   maxSuggestions?: number
+ * }
+ */
+export const fetchEntityLinkSuggestions = (request) => {
+  return async (dispatch) => {
+    dispatch({
+      type: QUESTIONNAIRE_EFFECTS_SUGGESTIONS_REQUEST,
+      payload: { request },
+    });
+
+    try {
+      const res = await apiFetch("/api/QuestionnaireAdmin/entities/link-suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nel caricamento dei suggerimenti.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // default
+        }
+
+        dispatch({
+          type: QUESTIONNAIRE_EFFECTS_SUGGESTIONS_FAILURE,
+          payload: { message },
+        });
+
+        return Promise.reject(new Error(message));
+      }
+
+      const data = await res.json(); // EntityLinkSuggestionResponseDto
+
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_SUGGESTIONS_SUCCESS,
+        payload: { data },
+      });
+
+      return data;
+    } catch (err) {
+      const message = err?.message || "Errore imprevisto nel caricamento dei suggerimenti.";
+      dispatch({
+        type: QUESTIONNAIRE_EFFECTS_SUGGESTIONS_FAILURE,
+        payload: { message },
+      });
+      return Promise.reject(new Error(message));
+    }
+  };
+};
+
+/**
+ * Pulisce i suggerimenti correnti (es. quando chiudo il modal).
+ */
+export const clearEntityLinkSuggestions = () => ({
+  type: QUESTIONNAIRE_EFFECTS_SUGGESTIONS_CLEAR,
+});
+
+/**
+ * Crea una nuova domanda.
+ *
+ * DTO di input (QuestionnaireQuestionCreateDto) – esempio:
+ * {
+ *   code: "PRIMARY_MOTIVATION",
+ *   textIt: "Testo in italiano",
+ *   isMultipleChoice: false,
+ *   order: 10
+ * }
+ */
+export const createQuestionnaireQuestion = (questionDto) => {
+  return async (dispatch) => {
+    dispatch({ type: QUESTIONNAIRE_ADMIN_CREATE_QUESTION_REQUEST });
+
+    try {
+      const res = await apiFetch("/api/QuestionnaireAdmin/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(questionDto),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nella creazione della domanda.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // ignore
+        }
+        dispatch({
+          type: QUESTIONNAIRE_ADMIN_CREATE_QUESTION_FAILURE,
+          payload: message,
+        });
+        return;
+      }
+
+      const created = await res.json();
+
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_CREATE_QUESTION_SUCCESS,
+        payload: created,
+      });
+
+      // Ricarico la lista intera per avere struttura aggiornata
+      dispatch(fetchQuestionnaireActiveOverview());
+    } catch (err) {
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_CREATE_QUESTION_FAILURE,
+        payload: err?.message || "Errore imprevisto nella creazione della domanda.",
+      });
+    }
+  };
+};
+
+// =========================
+// Domande – UPDATE
+// =========================
+
+/**
+ * Aggiorna una domanda esistente.
+ *
+ * DTO di input (QuestionnaireQuestionUpdateDto) – esempio:
+ * {
+ *   textIt: "Nuovo testo",
+ *   isMultipleChoice: true,
+ *   order: 20,
+ *   // eventuali altri campi aggiornabili
+ * }
+ */
+export const updateQuestionnaireQuestion = (questionId, updateDto) => {
+  return async (dispatch) => {
+    dispatch({
+      type: QUESTIONNAIRE_ADMIN_UPDATE_QUESTION_REQUEST,
+      payload: questionId,
+    });
+
+    try {
+      const res = await apiFetch(`/api/QuestionnaireAdmin/questions/${questionId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateDto),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'aggiornamento della domanda.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // ignore
+        }
+        dispatch({
+          type: QUESTIONNAIRE_ADMIN_UPDATE_QUESTION_FAILURE,
+          payload: { questionId, message },
+        });
+        return;
+      }
+
+      const updated = await res.json();
+
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_UPDATE_QUESTION_SUCCESS,
+        payload: updated,
+      });
+
+      // Ricarico struttura
+      dispatch(fetchQuestionnaireActiveOverview());
+    } catch (err) {
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_UPDATE_QUESTION_FAILURE,
+        payload: { questionId, message: err?.message },
+      });
+    }
+  };
+};
+
+// =========================
+// Opzioni – CREATE
+// =========================
+
+/**
+ * Crea una nuova opzione per una domanda.
+ *
+ * DTO di input (QuestionnaireOptionCreateDto) – esempio:
+ * {
+ *   questionId: 1,
+ *   textIt: "Testo opzione",
+ *   baseWeight: 12
+ * }
+ */
+export const createQuestionnaireOption = (optionDto) => {
+  return async (dispatch) => {
+    dispatch({ type: QUESTIONNAIRE_ADMIN_CREATE_OPTION_REQUEST });
+
+    try {
+      const res = await apiFetch("/api/QuestionnaireAdmin/options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(optionDto),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nella creazione dell'opzione.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // ignore
+        }
+        dispatch({
+          type: QUESTIONNAIRE_ADMIN_CREATE_OPTION_FAILURE,
+          payload: message,
+        });
+        return;
+      }
+
+      const created = await res.json();
+
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_CREATE_OPTION_SUCCESS,
+        payload: created,
+      });
+
+      // Ricarico struttura
+      dispatch(fetchQuestionnaireActiveOverview());
+    } catch (err) {
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_CREATE_OPTION_FAILURE,
+        payload: err?.message || "Errore imprevisto nella creazione dell'opzione.",
+      });
+    }
+  };
+};
+
+// =========================
+// Opzioni – UPDATE
+// =========================
+
+/**
+ * Aggiorna una opzione esistente.
+ *
+ * DTO di input (QuestionnaireOptionUpdateDto) – esempio:
+ * {
+ *   textIt: "Nuovo testo opzione",
+ *   baseWeight: 10
+ * }
+ */
+export const updateQuestionnaireOption = (optionId, updateDto) => {
+  return async (dispatch) => {
+    dispatch({
+      type: QUESTIONNAIRE_ADMIN_UPDATE_OPTION_REQUEST,
+      payload: optionId,
+    });
+
+    try {
+      const res = await apiFetch(`/api/QuestionnaireAdmin/options/${optionId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateDto),
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'aggiornamento dell'opzione.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // ignore
+        }
+        dispatch({
+          type: QUESTIONNAIRE_ADMIN_UPDATE_OPTION_FAILURE,
+          payload: { optionId, message },
+        });
+        return;
+      }
+
+      const updated = await res.json();
+
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_UPDATE_OPTION_SUCCESS,
+        payload: updated,
+      });
+
+      // Ricarico struttura
+      dispatch(fetchQuestionnaireActiveOverview());
+    } catch (err) {
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_UPDATE_OPTION_FAILURE,
+        payload: { optionId, message: err?.message },
+      });
+    }
+  };
+};
+
+// =========================
+// Opzioni – DELETE
+// =========================
+
+/**
+ * Elimina una opzione.
+ */
+export const deleteQuestionnaireOption = (optionId) => {
+  return async (dispatch) => {
+    dispatch({
+      type: QUESTIONNAIRE_ADMIN_DELETE_OPTION_REQUEST,
+      payload: optionId,
+    });
+
+    try {
+      const res = await apiFetch(`/api/QuestionnaireAdmin/options/${optionId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        let message = "Errore nell'eliminazione dell'opzione.";
+        try {
+          const json = await res.json();
+          if (json?.message) message = json.message;
+        } catch {
+          // ignore
+        }
+        dispatch({
+          type: QUESTIONNAIRE_ADMIN_DELETE_OPTION_FAILURE,
+          payload: { optionId, message },
+        });
+        return;
+      }
+
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_DELETE_OPTION_SUCCESS,
+        payload: optionId,
+      });
+
+      // Ricarico struttura
+      dispatch(fetchQuestionnaireActiveOverview());
+    } catch (err) {
+      dispatch({
+        type: QUESTIONNAIRE_ADMIN_DELETE_OPTION_FAILURE,
+        payload: { optionId, message: err?.message },
       });
     }
   };

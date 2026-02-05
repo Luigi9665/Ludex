@@ -15,6 +15,8 @@ import recommendationReducer from "../reducer/recommendationReducer.js";
 import questionnaireAnalyticsReducer from "../reducer/questionnaireAnalyticsReducer.js";
 import adminTaxonomyReducer from "../reducer/adminTaxonomyReducer.js";
 import questionnaireActiveReducer from "../reducer/questionnaireActiveReducer.js";
+import questionnaireEffectsReducer from "../reducer/questionnaireEffectsReducer.js";
+import { questionnaireAdminReducer } from "../reducer/questionnaireAdminReducer.js";
 
 const persistConfig = {
   key: "root",
@@ -36,7 +38,9 @@ const rootReducer = combineReducers({
   recommendations: recommendationReducer,
   questionnaireAnalytics: questionnaireAnalyticsReducer,
   adminTaxonomy: adminTaxonomyReducer,
+  questionnaireAdmin: questionnaireAdminReducer,
   questionnaireActive: questionnaireActiveReducer,
+  questionnaireEffects: questionnaireEffectsReducer,
 });
 
 const persisterReducer = persistReducer(persistConfig, rootReducer);

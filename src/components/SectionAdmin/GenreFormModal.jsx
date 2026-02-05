@@ -1,4 +1,3 @@
-// src/components/admin/modals/GenreFormModal.jsx
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { createAdminGenre, updateAdminGenre } from "../../redux/action/index";
@@ -19,7 +18,9 @@ export default function GenreFormModal({ isOpen, onClose, genre, onSave, onSucce
 
   const [formData, setFormData] = useState({
     name: "",
+    keywordsIt: "", // 🔹 nuovo campo
   });
+
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -27,9 +28,13 @@ export default function GenreFormModal({ isOpen, onClose, genre, onSave, onSucce
     if (genre) {
       setFormData({
         name: genre.name || "",
+        keywordsIt: genre.keywordsIt || "", // 🔹 prefill da backend
       });
     } else {
-      setFormData({ name: "" });
+      setFormData({
+        name: "",
+        keywordsIt: "",
+      });
     }
     setErrors({});
   }, [genre, isOpen]);
@@ -39,6 +44,7 @@ export default function GenreFormModal({ isOpen, onClose, genre, onSave, onSucce
     if (!formData.name.trim()) {
       newErrors.name = "Il nome è obbligatorio.";
     }
+    // keywordsIt rimane opzionale → nessuna validazione hard
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -50,15 +56,18 @@ export default function GenreFormModal({ isOpen, onClose, genre, onSave, onSucce
     setIsSaving(true);
     setErrors((prev) => ({ ...prev, submit: undefined }));
 
+    const payloadName = formData.name.trim();
+    const payloadKeywords = formData.keywordsIt?.trim() || null;
+
     try {
       if (genre) {
-        // UPDATE
-        await dispatch(updateAdminGenre(genre.id, formData.name));
-        onSuccess?.(`Genere "${formData.name}" aggiornato.`);
+        // UPDATE 🔹 ora passiamo anche le keywords
+        await dispatch(updateAdminGenre(genre.id, { name: payloadName, keywordsIt: payloadKeywords }));
+        onSuccess?.(`Genere "${payloadName}" aggiornato.`);
       } else {
-        // CREATE
-        await dispatch(createAdminGenre(formData.name));
-        onSuccess?.(`Genere "${formData.name}" creato.`);
+        // CREATE 🔹 idem qui
+        await dispatch(createAdminGenre({ name: payloadName, keywordsIt: payloadKeywords }));
+        onSuccess?.(`Genere "${payloadName}" creato.`);
       }
 
       onSave?.();
@@ -90,6 +99,7 @@ export default function GenreFormModal({ isOpen, onClose, genre, onSave, onSucce
 
         <form onSubmit={handleSubmit}>
           <div className="lx-modal-body">
+            {/* Nome */}
             <div className="lx-form-group">
               <label className="lx-form-label" htmlFor="genre-name">
                 Nome <span className="lx-required">*</span>
@@ -99,11 +109,30 @@ export default function GenreFormModal({ isOpen, onClose, genre, onSave, onSucce
                 type="text"
                 className={`lx-form-input ${errors.name ? "lx-input-error" : ""}`}
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                 placeholder="es. Action, RPG, Strategy"
                 disabled={isSaving}
               />
               {errors.name && <span className="lx-form-error">{errors.name}</span>}
+            </div>
+
+            {/* 🔹 Keywords IT (nuovo campo) */}
+            <div className="lx-form-group">
+              <label className="lx-form-label" htmlFor="genre-keywords">
+                Parole chiave (IT) <span className="text-white-50">(opzionale)</span>
+              </label>
+              <textarea
+                id="genre-keywords"
+                className="lx-form-textarea"
+                rows={3}
+                value={formData.keywordsIt}
+                onChange={(e) => setFormData((prev) => ({ ...prev, keywordsIt: e.target.value }))}
+                placeholder='es. "avventura narrativa, esplorazione, storia, puzzle"'
+                disabled={isSaving}
+              />
+              <span className="lx-form-hint">
+                Usa una lista di parole/frasi separate da virgole che descrivono il genere (in italiano). Verranno usate per i suggerimenti automatici.
+              </span>
             </div>
 
             {errors.submit && (

@@ -5,41 +5,30 @@ import AdminImpactTable from "../../components/SectionAdmin/Adminimpacttable.jsx
 import TagFormModal from "../../components/SectionAdmin/TagFormModal";
 import EntityUsageModal from "../../components/SectionAdmin/EntityUsageModal";
 import ConfirmDeleteModal from "../../components/SectionAdmin/ConfirmDeleteModal";
+import EntitySuggestionModal from "../../components/SectionAdmin/EntitySuggestionModal";
 
-import { fetchAdminTags, deleteAdminTag } from "../../redux/action/index.js";
+import { fetchAdminTags, deleteAdminTag, fetchEntityLinkSuggestions, createOptionEffect } from "../../redux/action/index.js";
+
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch.js";
 import { useToast } from "../../components/ui/ToastProvider.jsx";
+// se hai messo il helper in src/utils/entityLinkSuggestions.js:
+import { buildEntityLinkSuggestionRequest } from "../../utils/entityLinkHelpers.js";
 
 /**
  * Pagina admin per la gestione dei TAG.
  *
- * Nota per me futuro:
- * - Legge i dati dal reducer adminTaxonomy.tags:
- *     state.adminTaxonomy.tags = { items, loading, error }
- * - items è una lista di TagAdminListItemDto serializzati in camelCase:
- *     {
- *       id,
- *       code,
- *       displayName,
- *       category,
- *       description,
- *       isActive,
- *       displayOrder,
- *       gamesCount,
- *       questionnaireEffectsCount,
- *       questionnaireTotalDelta,
- *       questionnaireOptionsCount,
- *       questionnaireQuestionsCount,
- *       // opzionale: sampleGames: string[]
- *     }
+ * state.adminTaxonomy.tags = { items, loading, error }
  */
 export default function AdminTagsPage() {
   const dispatch = useDispatch();
+  const { addToast } = useToast();
 
-  // Stato locale per modali / usage
+  // Stato locale per modali / usage / suggerimenti
   const [showFormModal, setShowFormModal] = useState(false);
   const [showUsageModal, setShowUsageModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
+
   const [selectedTag, setSelectedTag] = useState(null);
 
   const [usageData, setUsageData] = useState([]); // Array<EntityUsageDto-like>
@@ -50,8 +39,6 @@ export default function AdminTagsPage() {
 
   // Stato dal Redux store
   const { items: tags = [], loading, error } = useSelector((state) => state.adminTaxonomy.tags);
-
-  const { addToast } = useToast();
 
   // Al mount: carico i tag dal backend
   useEffect(() => {
@@ -86,23 +73,25 @@ export default function AdminTagsPage() {
       setShowDeleteModal(false);
       setSelectedTag(null);
       setDeleteError(null);
-      // Il reducer rimuove l’item; non serve refetch qui.
 
-      // ✅ niente dispatch, solo addToast con stringa
-      addToast(`Tag "${selectedTag.name}" eliminato.`, "success");
+      // usare displayName, non name
+      addToast(`Tag "${selectedTag.displayName}" eliminato.`, "success");
     } catch (err) {
-      setDeleteError(err?.message || "Errore nell'eliminazione del tag.");
-      addToast(err?.message, "error");
+      const msg = err?.message || "Errore nell'eliminazione del tag.";
+      setDeleteError(msg);
+      addToast(msg, "error");
     }
   };
 
   const handleViewUsage = async (tagRow) => {
+    if (!tagRow?.id) return;
+
     setSelectedTag(tagRow);
     setUsageLoading(true);
     setUsageError(null);
+    setUsageData([]);
 
     try {
-      // Endpoint pensato lato backend:
       // GET /api/AdminTaxonomy/tags/{id}/questionnaire-usage
       const res = await apiFetch(`/api/AdminTaxonomy/tags/${tagRow.id}/questionnaire-usage`, { method: "GET" });
 
@@ -120,8 +109,19 @@ export default function AdminTagsPage() {
         return;
       }
 
-      const data = await res.json();
-      setUsageData(Array.isArray(data) ? data : []);
+      const raw = await res.json();
+      const list = Array.isArray(raw) ? raw : Array.isArray(raw.items) ? raw.items : [];
+
+      const normalized = list.map((u) => ({
+        questionId: u.questionId ?? u.QuestionId ?? null,
+        questionCode: u.questionCode ?? u.QuestionCode ?? "",
+        questionText: u.questionText ?? u.QuestionText ?? "",
+        optionId: u.optionId ?? u.OptionId ?? null,
+        optionText: u.optionText ?? u.OptionText ?? "",
+        delta: typeof u.delta === "number" ? u.delta : typeof u.Delta === "number" ? u.Delta : 0,
+      }));
+
+      setUsageData(normalized);
       setShowUsageModal(true);
     } catch (err) {
       setUsageData([]);
@@ -132,11 +132,69 @@ export default function AdminTagsPage() {
     }
   };
 
+  // === NUOVO: chiedi suggerimenti di collegamento per un TAG ===
+  const handleSuggestLinks = async (tagRow) => {
+    if (!tagRow?.id) return;
+
+    setSelectedTag(tagRow);
+
+    let request;
+    try {
+      // usa lo stesso helper usato altrove (Enum numerico + chiave string)
+      request = buildEntityLinkSuggestionRequest({
+        entityType: "Tag",
+        entityKey: String(tagRow.id),
+        focusQuestionId: null,
+        defaultDelta: 5,
+        maxSuggestions: 50,
+      });
+    } catch (err) {
+      addToast(err?.message || "Impossibile costruire la richiesta di suggerimenti.", "error");
+      return;
+    }
+
+    try {
+      await dispatch(fetchEntityLinkSuggestions(request));
+      setShowSuggestionsModal(true);
+    } catch (err) {
+      addToast(err?.message || "Errore nel calcolo dei suggerimenti per questo tag.", "error");
+    }
+  };
+
+  // === NUOVO: applica i suggerimenti, creando effetti di tipo TAG ===
+  const handleApplySuggestions = async (payload) => {
+    if (!selectedTag) return;
+    const links = payload?.links || [];
+    if (!links.length) return;
+
+    try {
+      for (const link of links) {
+        const effectPayload = {
+          optionId: link.optionId,
+          effectType: 2, // 2 = Tag (stessa enum usata in OptionEffectsModal)
+          genreId: null,
+          tagId: selectedTag.id,
+          metadataCode: null,
+          deltaWeight: link.deltaWeight,
+        };
+
+        await dispatch(createOptionEffect(link.optionId, effectPayload));
+      }
+
+      addToast(`Aggiunti ${links.length} collegamenti per il tag "${selectedTag.displayName}".`, "success");
+
+      setShowSuggestionsModal(false);
+      // ricarico la lista per aggiornare le stats (Regole / Delta / Impatto)
+      dispatch(fetchAdminTags());
+    } catch (err) {
+      addToast(err?.message || "Errore nell'applicazione dei suggerimenti.", "error");
+    }
+  };
+
   // Il form chiama le action create/update al suo interno
   const handleSaveFromModal = () => {
     setShowFormModal(false);
     setSelectedTag(null);
-    // Le thunk di create/update aggiornano i dati nel reducer
   };
 
   // =========================
@@ -176,7 +234,6 @@ export default function AdminTagsPage() {
       ...t,
       gamesInfo: {
         count: t.gamesCount || 0,
-        // opzionale: sampleGames lato backend; se manca → array vuoto
         examples: t.sampleGames || [],
       },
       rulesCount: t.questionnaireEffectsCount || 0,
@@ -256,6 +313,7 @@ export default function AdminTagsPage() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onViewUsage={handleViewUsage}
+            onSuggestLinks={handleSuggestLinks}
             headerAction={
               <button className="lx-btn lx-btn-primary lx-btn-sm" onClick={handleNewTag}>
                 <i className="bi bi-plus-lg me-2" />
@@ -311,6 +369,15 @@ export default function AdminTagsPage() {
           "Attenzione: non puoi eliminare un tag se è ancora usato da giochi o dal questionario. " +
             "Puoi disattivarlo impostando IsActive = false, oppure rimuovere prima i collegamenti."
         }
+      />
+
+      {/* ===== MODAL: SUGGERIMENTI COLLEGAMENTI (TAG) ===== */}
+      <EntitySuggestionModal
+        isOpen={showSuggestionsModal}
+        onClose={() => {
+          setShowSuggestionsModal(false);
+        }}
+        onApplySuggestions={handleApplySuggestions}
       />
     </div>
   );

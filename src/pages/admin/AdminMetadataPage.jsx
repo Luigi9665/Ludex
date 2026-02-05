@@ -5,10 +5,22 @@ import AdminImpactTable from "../../components/SectionAdmin/Adminimpacttable.jsx
 import MetadataFormModal from "../../components/SectionAdmin/MetadataFormModal";
 import EntityUsageModal from "../../components/SectionAdmin/EntityUsageModal";
 import ConfirmDeleteModal from "../../components/SectionAdmin/ConfirmDeleteModal";
+import EntitySuggestionModal from "../../components/SectionAdmin/EntitySuggestionModal";
 
-import { fetchAdminMetadata, deleteAdminMetadataFocus, deleteAdminMetadataMood, deleteAdminMetadataDifficulty } from "../../redux/action/index.js";
+import {
+  fetchAdminMetadata,
+  deleteAdminMetadataFocus,
+  deleteAdminMetadataMood,
+  deleteAdminMetadataDifficulty,
+  fetchEntityLinkSuggestions,
+  createOptionEffect,
+} from "../../redux/action/index.js";
+
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch.js";
 import { useToast } from "../../components/ui/ToastProvider.jsx";
+
+// 🔧 helper per EntityLink (in utils, come avevi fatto tu)
+import { buildEntityLinkSuggestionRequest, ENTITY_LINK_ENTITY_TYPE } from "../../utils/entityLinkHelpers.js";
 
 /**
  * Pagina admin per la gestione dei METADATA (Focus / Mood / Difficulty).
@@ -39,6 +51,8 @@ export default function AdminMetadataPage() {
   const [showFormModal, setShowFormModal] = useState(false);
   const [showUsageModal, setShowUsageModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
+
   const [selectedMetadata, setSelectedMetadata] = useState(null);
 
   const [usageData, setUsageData] = useState([]);
@@ -99,6 +113,7 @@ export default function AdminMetadataPage() {
   const currentData = useMemo(() => {
     const type = tabToType[activeTab];
     return metadataItems.filter((m) => m.type === type);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metadataItems, activeTab]);
 
   // Delta massimo (in valore assoluto) per calcolo dell’impatto
@@ -107,7 +122,6 @@ export default function AdminMetadataPage() {
   const rows = currentData.map((m) => {
     const totalDelta = m.questionnaireTotalDelta || 0;
     const impactPercent = maxAbsDelta > 0 ? (Math.abs(totalDelta) / maxAbsDelta) * 100 : 0;
-
     return {
       ...m,
       gamesInfo: {
@@ -145,7 +159,6 @@ export default function AdminMetadataPage() {
 
     try {
       const id = selectedMetadata.id;
-
       switch (activeTab) {
         case "focus":
           await dispatch(deleteAdminMetadataFocus(id));
@@ -166,7 +179,7 @@ export default function AdminMetadataPage() {
       addToast(`Metadata "${selectedMetadata.name}" eliminato.`, "success");
     } catch (err) {
       setDeleteError(err?.message || "Errore durante l'eliminazione del metadata. Controlla collegamenti a giochi / questionario.");
-      addToast(err?.message, "error");
+      addToast(err?.message || "Errore durante l'eliminazione del metadata.", "error");
     }
   };
 
@@ -177,7 +190,6 @@ export default function AdminMetadataPage() {
 
     try {
       const routeSegment = activeTab; // "focus" | "mood" | "difficulty"
-
       // Endpoint pensato lato backend:
       // GET /api/AdminTaxonomy/metadata/{type}/{id}/questionnaire-usage
       const res = await apiFetch(`/api/AdminTaxonomy/metadata/${routeSegment}/${metadataRow.id}/questionnaire-usage`, { method: "GET" });
@@ -205,6 +217,74 @@ export default function AdminMetadataPage() {
       setShowUsageModal(true);
     } finally {
       setUsageLoading(false);
+    }
+  };
+
+  // 👉 SUGGERIMENTI COLLEGAMENTI (EntitySuggestionModal)
+
+  const handleSuggestLinks = async (metadataRow) => {
+    if (!metadataRow) return;
+
+    setSelectedMetadata(metadataRow);
+
+    // MetadataCode usato dal backend: "FOCUS:STORY", "MOOD:COZY", "DIFFICULTY:HARD"
+    const metadataCode = `${metadataRow.type}:${metadataRow.code}`;
+
+    try {
+      const request = buildEntityLinkSuggestionRequest({
+        entityType: "Metadata", // string → verrà mappato a enum numerico (3)
+        entityKey: metadataCode,
+        defaultDelta: 5,
+        focusQuestionId: null,
+        maxSuggestions: 50,
+      });
+
+      await dispatch(fetchEntityLinkSuggestions(request));
+      setShowSuggestionsModal(true);
+    } catch (err) {
+      console.error("Errore nel fetch dei suggerimenti metadata:", err);
+      addToast(err?.message || "Errore nel calcolo dei suggerimenti per questo metadata.", "error");
+    }
+  };
+
+  const handleApplySuggestions = async (payload) => {
+    // payload.links: [{ optionId, deltaWeight }]
+    const links = payload?.links || [];
+    if (!links.length) return;
+
+    if (payload.entityType !== "Metadata") {
+      addToast("I suggerimenti ricevuti non sono di tipo Metadata.", "error");
+      return;
+    }
+
+    const metadataCode = payload.metadataCode; // es. "FOCUS:STORY"
+    if (!metadataCode) {
+      addToast("MetadataCode mancante nei suggerimenti.", "error");
+      return;
+    }
+
+    try {
+      for (const link of links) {
+        const effectPayload = {
+          optionId: link.optionId,
+          effectType: ENTITY_LINK_ENTITY_TYPE.Metadata, // 3
+          genreId: null,
+          tagId: null,
+          metadataCode,
+          deltaWeight: link.deltaWeight,
+        };
+
+        await dispatch(createOptionEffect(link.optionId, effectPayload));
+      }
+
+      addToast(`Aggiunti ${links.length} collegamenti per ${selectedMetadata?.name || "il metadata"}.`, "success");
+
+      setShowSuggestionsModal(false);
+      // ricarico i dati per aggiornare stats (Giochi, Regole, Delta, Impatto)
+      dispatch(fetchAdminMetadata());
+    } catch (err) {
+      console.error("Errore nell'applicazione dei suggerimenti metadata:", err);
+      addToast(err?.message || "Errore nell'applicazione dei suggerimenti.", "error");
     }
   };
 
@@ -323,6 +403,7 @@ export default function AdminMetadataPage() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onViewUsage={handleViewUsage}
+            onSuggestLinks={handleSuggestLinks}
             headerAction={
               <button className="lx-btn lx-btn-primary lx-btn-sm" onClick={handleNew}>
                 <i className="bi bi-plus-lg me-2" />
@@ -378,6 +459,15 @@ export default function AdminMetadataPage() {
           deleteError ||
           `Attenzione: non puoi eliminare questo ${tabConfig[activeTab].label.toLowerCase()} se è ancora associato a giochi o usato nel questionario.`
         }
+      />
+
+      {/* ===== MODAL: SUGGERIMENTI COLLEGAMENTI ===== */}
+      <EntitySuggestionModal
+        isOpen={showSuggestionsModal}
+        onClose={() => {
+          setShowSuggestionsModal(false);
+        }}
+        onApplySuggestions={handleApplySuggestions}
       />
     </div>
   );

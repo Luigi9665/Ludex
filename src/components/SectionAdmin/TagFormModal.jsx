@@ -18,9 +18,11 @@ export default function TagFormModal({
     code: "",
     category: "GENRE",
     description: "",
+    keywordsIt: "",
     isActive: true,
     displayOrder: 0,
   });
+
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -31,6 +33,7 @@ export default function TagFormModal({
         code: tag.code || "",
         category: tag.category || "GENRE",
         description: tag.description || "",
+        keywordsIt: tag.keywordsIt || "",
         isActive: tag.isActive ?? true,
         displayOrder: tag.displayOrder || 0,
       });
@@ -40,6 +43,7 @@ export default function TagFormModal({
         code: "",
         category: "GENRE",
         description: "",
+        keywordsIt: "",
         isActive: true,
         displayOrder: 0,
       });
@@ -81,6 +85,7 @@ export default function TagFormModal({
             displayName: formData.displayName,
             category: formData.category,
             description: formData.description || null,
+            keywordsIt: formData.keywordsIt?.trim() || null,
             isActive: formData.isActive,
             displayOrder: formData.displayOrder,
           }),
@@ -94,6 +99,7 @@ export default function TagFormModal({
             displayName: formData.displayName,
             category: formData.category,
             description: formData.description || null,
+            keywordsIt: formData.keywordsIt?.trim() || null,
             isActive: formData.isActive,
             displayOrder: formData.displayOrder,
           }),
@@ -221,6 +227,27 @@ export default function TagFormModal({
                     rows="3"
                     disabled={isSaving}
                   />
+                </div>
+              </div>
+
+              {/* Nuovo campo KEYWORDS */}
+              <div className="col-12">
+                <div className="lx-form-group">
+                  <label className="lx-form-label" htmlFor="tag-keywords">
+                    Parole chiave (italiano, facoltativo)
+                  </label>
+                  <textarea
+                    id="tag-keywords"
+                    className="lx-form-input lx-form-textarea"
+                    value={formData.keywordsIt}
+                    onChange={(e) => setFormData({ ...formData, keywordsIt: e.target.value })}
+                    rows="3"
+                    placeholder="es. open world; esplorazione libera; mondo vasto; missioni secondarie; libertà di movimento"
+                    disabled={isSaving}
+                  />
+                  <small className="lx-form-hint">
+                    Usa frasi separate da punto e virgola. Verranno usate per suggerire collegamenti tra tag e domande/risposte del questionario.
+                  </small>
                 </div>
               </div>
 

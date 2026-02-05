@@ -5,70 +5,48 @@ import AdminImpactTable from "../../components/SectionAdmin/Adminimpacttable";
 import GenreFormModal from "../../components/SectionAdmin/GenreFormModal";
 import EntityUsageModal from "../../components/SectionAdmin/EntityUsageModal";
 import ConfirmDeleteModal from "../../components/SectionAdmin/ConfirmDeleteModal";
+import EntitySuggestionModal from "../../components/SectionAdmin/EntitySuggestionModal";
 
-import { fetchAdminGenres, deleteAdminGenre } from "../../redux/action/index";
+import { fetchAdminGenres, deleteAdminGenre, fetchEntityLinkSuggestions, createOptionEffect } from "../../redux/action/index";
 
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch";
 import LxLoader from "../../components/LxLoader";
 import { useToast } from "../../components/ui/ToastProvider";
 
-/**
- * Pagina admin per la gestione dei GENERI.
- *
- * Nota per me futuro:
- * - Legge i dati dal reducer adminTaxonomy.genres:
- *     state.adminTaxonomy.genres = { items, loading, error }
- * - items è una lista di GenreAdminListItemDto serializzati in camelCase:
- *     {
- *       id,
- *       name,
- *       gamesCount,
- *       sampleGames: string[],
- *       questionnaireEffectsCount,
- *       questionnaireTotalDelta,
- *       questionnaireOptionsCount,
- *       questionnaireQuestionsCount
- *     }
- * - Usa:
- *     - AdminImpactTable per la tabella
- *     - GenreFormModal per creare/modificare
- *     - ConfirmDeleteModal per cancellare
- *     - EntityUsageModal per vedere dove il genere è usato nel questionario
- */
+// 🔹 QUI usiamo davvero gli helper che hai messo in src/utils
+import { buildEntityLinkSuggestionRequest, ENTITY_LINK_ENTITY_TYPE } from "../../utils/entityLinkHelpers";
+
 export default function AdminGenresPage() {
   const dispatch = useDispatch();
+  const { addToast } = useToast();
 
-  // Stato locale per i vari modali
+  // Modali
   const [showFormModal, setShowFormModal] = useState(false);
   const [showUsageModal, setShowUsageModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSuggestionsModal, setShowSuggestionsModal] = useState(false);
 
   const [selectedGenre, setSelectedGenre] = useState(null);
 
-  // Stato per modal "utilizzi nel questionario"
-  const [usageData, setUsageData] = useState([]); // Array<EntityUsageDto>
+  // Usage modal
+  const [usageData, setUsageData] = useState([]);
   const [usageLoading, setUsageLoading] = useState(false);
   const [usageError, setUsageError] = useState(null);
 
-  // Stato per errori in delete
+  // Delete error
   const [deleteError, setDeleteError] = useState(null);
 
-  // Stato dal Redux store
+  // Redux state
   const { items: genres = [], loading, error } = useSelector((state) => state.adminTaxonomy.genres);
 
-  const { addToast } = useToast();
-
-  // Al mount: carico i generi dal backend
+  // Load generi
   useEffect(() => {
     dispatch(fetchAdminGenres());
   }, [dispatch]);
 
-  // =========================
-  // HANDLER AZIONI TABELLA
-  // =========================
+  // ============ Handlers tabella ============
 
   const handleEdit = (genreRow) => {
-    // genreRow è già un elemento della lista Redux (camelCase)
     setSelectedGenre(genreRow);
     setShowFormModal(true);
   };
@@ -92,8 +70,6 @@ export default function AdminGenresPage() {
       setShowDeleteModal(false);
       setSelectedGenre(null);
       setDeleteError(null);
-
-      // ✅ niente dispatch, solo addToast con stringa
       addToast(`Genere "${selectedGenre.name}" eliminato.`, "success");
     } catch (err) {
       const msg = err?.message || "Errore nell'eliminazione del genere.";
@@ -119,7 +95,7 @@ export default function AdminGenresPage() {
           const json = await res.json();
           if (json?.message) message = json.message;
         } catch {
-          // lascio il messaggio di default
+          /* ignore */
         }
         setUsageError(message);
         setUsageData([]);
@@ -128,13 +104,8 @@ export default function AdminGenresPage() {
       }
 
       const raw = await res.json();
-
-      // 🔧 Normalizzazione robusta:
-      // - Se il backend torna direttamente una lista: [ ... ]
-      // - Se torna un oggetto tipo { items: [ ... ] }
       const list = Array.isArray(raw) ? raw : Array.isArray(raw.items) ? raw.items : [];
 
-      // Normalizziamo i nomi dei campi a camelCase:
       const normalized = list.map((u) => ({
         questionId: u.questionId ?? u.QuestionId ?? null,
         questionCode: u.questionCode ?? u.QuestionCode ?? "",
@@ -155,16 +126,73 @@ export default function AdminGenresPage() {
     }
   };
 
-  // Il form chiama le action (create/update) al suo interno;
-  // qui ci limitiamo a chiudere il modal.
+  // 🔮 NUOVO: chiedi suggerimenti partendo da un GENERE
+  const handleSuggestLinks = async (genreRow) => {
+    if (!genreRow?.id) return;
+
+    setSelectedGenre(genreRow);
+
+    let request;
+    try {
+      request = buildEntityLinkSuggestionRequest({
+        entityType: "Genre", // string "high level"
+        entityKey: String(genreRow.id), // "2", "5", ...
+        defaultDelta: 5,
+        focusQuestionId: null,
+        maxSuggestions: 50,
+      });
+      // qui dentro buildEntityLinkSuggestionRequest converte in enum numerico
+    } catch (err) {
+      addToast(err.message, "error");
+      return;
+    }
+
+    try {
+      await dispatch(fetchEntityLinkSuggestions(request));
+      setShowSuggestionsModal(true);
+    } catch (err) {
+      addToast(err?.message || "Errore nel calcolo dei suggerimenti.", "error");
+    }
+  };
+
+  // Quando l'utente clicca "Applica collegamenti"
+  const handleApplySuggestions = async (payload) => {
+    if (!selectedGenre) return;
+    const links = payload?.links || [];
+    if (!links.length) return;
+
+    try {
+      for (const link of links) {
+        const effectPayload = {
+          optionId: link.optionId,
+          // 👇 Qui stiamo usando il valore numerico che, lato backend,
+          // corrisponde al PreferenceEffectType.Genre (1)
+          effectType: ENTITY_LINK_ENTITY_TYPE.Genre,
+          genreId: selectedGenre.id,
+          tagId: null,
+          metadataCode: null,
+          deltaWeight: link.deltaWeight,
+        };
+
+        await dispatch(createOptionEffect(link.optionId, effectPayload));
+      }
+
+      addToast(`Aggiunti ${links.length} collegamenti per il genere "${selectedGenre.name}".`, "success");
+
+      setShowSuggestionsModal(false);
+      // Ricarico i generi per aggiornare stats (Regole, Delta totale, ecc.)
+      dispatch(fetchAdminGenres());
+    } catch (err) {
+      addToast(err?.message || "Errore nell'applicazione dei suggerimenti.", "error");
+    }
+  };
+
   const handleSaveFromModal = () => {
     setShowFormModal(false);
     setSelectedGenre(null);
   };
 
-  // =========================
-  // UI: stati di caricamento / errore MAIN PAGE
-  // =========================
+  // ============ Stati loading / errore pagina ============
 
   if (loading) {
     return (
@@ -186,11 +214,8 @@ export default function AdminGenresPage() {
     );
   }
 
-  // =========================
-  // PREPARAZIONE COLONNE / RIGHE
-  // =========================
+  // ============ Preparazione colonne / righe ============
 
-  // Calcolo un "impatto %" relativo usando il delta massimo in valore assoluto
   const maxAbsDelta = genres.length ? Math.max(...genres.map((g) => Math.abs(g.questionnaireTotalDelta || 0))) : 0;
 
   const rows = genres.map((g) => {
@@ -199,8 +224,6 @@ export default function AdminGenresPage() {
 
     return {
       ...g,
-      // Per la colonna "Giochi" usiamo count-with-tooltip:
-      // AdminImpactTable si aspetta { count, examples }
       gamesInfo: {
         count: g.gamesCount || 0,
         examples: g.sampleGames || [],
@@ -246,9 +269,7 @@ export default function AdminGenresPage() {
     },
   ];
 
-  // =========================
-  // RENDER
-  // =========================
+  // ============ Render ============
 
   return (
     <div className="lx-admin-page">
@@ -263,6 +284,7 @@ export default function AdminGenresPage() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onViewUsage={handleViewUsage}
+            onSuggestLinks={handleSuggestLinks} // 👈 nuovo hook per l’icona magic
             headerAction={
               <button className="lx-btn lx-btn-primary lx-btn-sm" onClick={handleNewGenre}>
                 <i className="bi bi-plus-lg me-2" />
@@ -274,7 +296,7 @@ export default function AdminGenresPage() {
         </div>
       </div>
 
-      {/* ===== MODAL: CREA / MODIFICA GENERE ===== */}
+      {/* MODAL: CREA / MODIFICA GENERE */}
       <GenreFormModal
         isOpen={showFormModal}
         onClose={() => {
@@ -287,7 +309,7 @@ export default function AdminGenresPage() {
         onError={(msg) => addToast(msg)}
       />
 
-      {/* ===== MODAL: UTILIZZI NEL QUESTIONARIO ===== */}
+      {/* MODAL: UTILIZZI NEL QUESTIONARIO */}
       <EntityUsageModal
         isOpen={showUsageModal}
         onClose={() => {
@@ -302,7 +324,7 @@ export default function AdminGenresPage() {
         error={usageError}
       />
 
-      {/* ===== MODAL: CONFERMA ELIMINAZIONE ===== */}
+      {/* MODAL: CONFERMA ELIMINAZIONE */}
       <ConfirmDeleteModal
         isOpen={showDeleteModal}
         onClose={() => {
@@ -314,9 +336,17 @@ export default function AdminGenresPage() {
         entityName={selectedGenre?.name}
         entityType="genere"
         warningMessage={
-          deleteError ||
-          "Attenzione: non puoi eliminare un genere se è ancora usato da giochi o dal questionario. " + "Prima rimuovi i collegamenti, poi riprova."
+          deleteError || "Attenzione: non puoi eliminare un genere se è ancora usato da giochi o dal questionario. Prima rimuovi i collegamenti, poi riprova."
         }
+      />
+
+      {/* MODAL: SUGGERIMENTI COLLEGAMENTI */}
+      <EntitySuggestionModal
+        isOpen={showSuggestionsModal}
+        onClose={() => {
+          setShowSuggestionsModal(false);
+        }}
+        onApplySuggestions={handleApplySuggestions}
       />
     </div>
   );

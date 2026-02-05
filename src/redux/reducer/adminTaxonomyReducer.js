@@ -69,14 +69,35 @@ export default function adminTaxonomyReducer(state = initialState, action) {
         },
       };
 
-    case ADMIN_TAXONOMY_GENRE_UPDATE_SUCCESS:
+    case ADMIN_TAXONOMY_GENRE_UPDATE_SUCCESS: {
+      const updated = action.payload; // { id, name, keywordsIt, gamesCount ...parziale }
+
       return {
         ...state,
         genres: {
           ...state.genres,
-          items: state.genres.items.map((g) => (g.id === action.payload.id ? action.payload : g)),
+          items: state.genres.items.map((g) =>
+            g.id === updated.id
+              ? {
+                  ...g,
+                  // patch solo i campi realmente aggiornati dal form
+                  name: updated.name,
+                  keywordsIt: updated.keywordsIt,
+                  // se vuoi, puoi tenere anche gamesCount aggiornato
+                  gamesCount: updated.gamesCount ?? g.gamesCount,
+                  // lasciamo intatte tutte le stats questionario
+                  // questionnaireEffectsCount: g.questionnaireEffectsCount,
+                  // questionnaireTotalDelta: g.questionnaireTotalDelta,
+                  // questionnaireOptionsCount: g.questionnaireOptionsCount,
+                  // questionnaireQuestionsCount: g.questionnaireQuestionsCount,
+                  // sampleGames: g.sampleGames,
+                  // hasQuestionnairePower: g.hasQuestionnairePower,
+                }
+              : g,
+          ),
         },
       };
+    }
 
     case ADMIN_TAXONOMY_GENRE_DELETE_SUCCESS:
       return {
@@ -120,7 +141,28 @@ export default function adminTaxonomyReducer(state = initialState, action) {
         ...state,
         tags: {
           ...state.tags,
-          items: state.tags.items.map((t) => (t.id === action.payload.id ? action.payload : t)),
+          items: state.tags.items.map((t) =>
+            t.id === action.payload.id
+              ? {
+                  ...t,
+                  // campi “anagrafici” aggiornabili
+                  code: action.payload.code, // in teoria immutabile, ma se il backend lo manda ok tenerlo allineato
+                  displayName: action.payload.displayName,
+                  category: action.payload.category,
+                  description: action.payload.description,
+                  keywordsIt: action.payload.keywordsIt,
+                  isActive: action.payload.isActive,
+                  displayOrder: action.payload.displayOrder,
+                  gamesCount: action.payload.gamesCount,
+                  // ⚠️ NON tocchiamo:
+                  // - questionnaireEffectsCount
+                  // - questionnaireTotalDelta
+                  // - questionnaireOptionsCount
+                  // - questionnaireQuestionsCount
+                  // - hasQuestionnairePower (se lo calcoli lato FE)
+                }
+              : t,
+          ),
         },
       };
 
@@ -166,7 +208,21 @@ export default function adminTaxonomyReducer(state = initialState, action) {
         ...state,
         metadata: {
           ...state.metadata,
-          items: state.metadata.items.map((m) => (m.id === action.payload.id ? action.payload : m)),
+          items: state.metadata.items.map((m) =>
+            m.id === action.payload.id
+              ? {
+                  ...m,
+                  // anagrafica
+                  type: action.payload.type, // "FOCUS" | "MOOD" | "DIFFICULTY"
+                  code: action.payload.code,
+                  name: action.payload.name,
+                  description: action.payload.description,
+                  keywordsIt: action.payload.keywordsIt,
+                  gamesCount: action.payload.gamesCount,
+                  // ⚠️ NON tocchiamo le stats questionnaire* esistenti
+                }
+              : m,
+          ),
         },
       };
 

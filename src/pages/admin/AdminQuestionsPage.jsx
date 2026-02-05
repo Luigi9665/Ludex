@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import QuestionEffectsDetail from "../../components/SectionAdmin/QuestionEffectsDetail.jsx";
+import OptionEffectsModal from "../../components/SectionAdmin/OptionEffectsModal.jsx";
 import LxLoader from "../../components/LxLoader";
 import { useToast } from "../../components/ui/ToastProvider";
 
@@ -34,25 +35,31 @@ import { fetchQuestionnaireActiveOverview, setQuestionActive } from "../../redux
  *       questionId,
  *       textIt,
  *       baseWeight,
- *       effects: [
+ *       responseCount,
+ *       responsePercentage,
+ *       totalDeltaGenres,
+ *       totalDeltaTags,
+ *       totalDeltaMetadata,
+ *       genreEffects: [
  *         {
- *           id,
- *           optionId,
- *           effectType: "Genre" | "Tag" | "Metadata",
- *           genreId: number | null,
- *           tagId: number | null,
- *           metadataCode: string | null,
- *           deltaWeight: number
+ *           effectId,
+ *           effectType: 1,
+ *           deltaWeight,
+ *           genreId,
+ *           genreName,
+ *           ...
  *         },
  *         ...
- *       ]
+ *       ],
+ *       tagEffects: [...],
+ *       metadataEffects: [...]
  *     },
  *     ...
  *   ]
  * }
  *
  * Grazie alla configurazione JSON camelCase, qui in JS i campi arrivano già
- * in camelCase (id, code, textIt, isMultipleChoice, isActive, options, effects, ecc.).
+ * in camelCase (id, code, textIt, isMultipleChoice, isActive, options, ecc.).
  */
 
 export default function AdminQuestionsPage() {
@@ -88,6 +95,10 @@ export default function AdminQuestionsPage() {
   // Set con le chiavi delle pill di effetti espanse (es: "12-genres", "12-tags")
   const [expandedEffects, setExpandedEffects] = useState(new Set());
 
+  // Stato per il modal "Gestisci effetti opzione"
+  const [effectsModalOpen, setEffectsModalOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(null);
+
   // =========================
   // CARICAMENTO INIZIALE
   // =========================
@@ -114,7 +125,7 @@ export default function AdminQuestionsPage() {
   };
 
   // =========================
-  // HANDLER – ESPANSIONE EFFETTI
+  // HANDLER – ESPANSIONE EFFETTI (pill)
   // =========================
 
   const toggleEffectDetail = (optionId, effectTypeKey) => {
@@ -131,7 +142,7 @@ export default function AdminQuestionsPage() {
   };
 
   // =========================
-  // HANDLER – TOGGLE ATTIVA / DISATTIVA
+  // HANDLER – TOGGLE ATTIVA / DISATTIVA DOMANDA
   // =========================
 
   const handleToggleActive = async (question) => {
@@ -154,6 +165,28 @@ export default function AdminQuestionsPage() {
       // Nel codice attuale la thunk NON fa throw, ma nel dubbio gestisco comunque.
       addToast(err?.message || "Errore durante il cambio di stato della domanda. Riprova.", "error");
     }
+  };
+
+  // =========================
+  // HANDLER – APERTURA / CHIUSURA MODAL EFFETTI
+  // =========================
+
+  const openOptionEffectsModal = (question, option) => {
+    if (!option?.id) return;
+
+    // Mi costruisco un oggetto opzione “arricchito” con info della domanda
+    setSelectedOption({
+      ...option,
+      questionId: question.id,
+      questionCode: question.code,
+      questionTextIt: question.textIt,
+    });
+    setEffectsModalOpen(true);
+  };
+
+  const closeOptionEffectsModal = () => {
+    setEffectsModalOpen(false);
+    setSelectedOption(null);
   };
 
   // =========================
@@ -212,7 +245,8 @@ export default function AdminQuestionsPage() {
                   Domande del questionario
                 </h3>
                 <span className="lx-chart-card-subtitle">
-                  Gestisco quali domande sono attive e, per ogni opzione, vedo come sono collegati generi, tag e metadata.
+                  Gestisco quali domande sono attive e, per ogni opzione, vedo come sono collegati generi, tag e metadata (e ora posso anche modificare gli
+                  effetti).
                 </span>
               </div>
             </div>
@@ -253,9 +287,6 @@ export default function AdminQuestionsPage() {
                             <span className="lx-toggle-slider" />
                             <span className="lx-toggle-label ms-2">{question.isActive ? "Attiva" : "Disattivata"}</span>
                           </label>
-
-                          {/* (Per questo endpoint non ho totalResponses,
-                              se lo aggiungi lato API puoi mostrarlo qui.) */}
 
                           <i className={`bi ${isExpanded ? "bi-chevron-up" : "bi-chevron-down"} ms-2`} />
                         </div>
@@ -315,10 +346,11 @@ export default function AdminQuestionsPage() {
                                   <div className="lx-option-text">{option.textIt}</div>
                                   <div className="lx-option-stats">
                                     <span className="lx-option-count">Peso base: {option.baseWeight}</span>
-                                    {/* se vuoi, puoi usare anche responseCount / percentage */}
+
                                     {typeof option.responseCount === "number" && (
                                       <span className="lx-option-count ms-3">
-                                        {option.responseCount} risposte ({option.responsePercentage?.toFixed?.(1) ?? "0.0"}%)
+                                        {option.responseCount} risposte ({option.responsePercentage?.toFixed?.(1) ?? "0.0"}
+                                        %)
                                       </span>
                                     )}
                                   </div>
@@ -375,6 +407,14 @@ export default function AdminQuestionsPage() {
                                 {tagsExpanded && <QuestionEffectsDetail type="tags" effects={tagEffects} />}
 
                                 {metaExpanded && <QuestionEffectsDetail type="metadata" effects={metadataEffects} />}
+
+                                {/* AZIONI OPZIONE: GESTISCI EFFETTI */}
+                                <div className="d-flex justify-content-end mt-2">
+                                  <button type="button" className="lx-btn lx-btn-outline lx-btn-sm" onClick={() => openOptionEffectsModal(question, option)}>
+                                    <i className="bi bi-sliders me-1" />
+                                    Gestisci effetti
+                                  </button>
+                                </div>
                               </div>
                             );
                           })}
@@ -395,6 +435,16 @@ export default function AdminQuestionsPage() {
           </div>
         </div>
       </div>
+
+      {/* MODAL: GESTIONE EFFETTI PER UNA OPZIONE */}
+      <OptionEffectsModal
+        isOpen={effectsModalOpen}
+        onClose={closeOptionEffectsModal}
+        option={selectedOption}
+        // Ogni volta che creo/modifico/cancello un effetto,
+        // ricarico l’overview per avere numeri aggiornati.
+        onChanged={() => dispatch(fetchQuestionnaireActiveOverview())}
+      />
     </div>
   );
 }

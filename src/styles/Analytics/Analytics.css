@@ -1181,8 +1181,7 @@
   max-height: 90vh;
   overflow-y: auto;
   width: 90%;
-  max-width: 500px;
-  animation: lxSlideUp 0.3s ease-out;
+  max-width: 600px;
   backdrop-filter: blur(10px);
 }
 
@@ -1942,5 +1941,628 @@
   .lx-table-actions {
     justify-content: flex-start;
     margin-top: 0.5rem;
+  }
+}
+/* ===================================
+   OPTION EFFECTS MODAL & ENTITY SUGGESTION MODAL
+   Premium, refined styles for admin modals
+   =================================== */
+
+/* === MODAL BODY SCROLL (Premium scrollbar) === */
+.lx-modal-body-scroll {
+  max-height: min(70vh, 700px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.lx-modal-body-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lx-modal-body-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lx-modal-body-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+
+.lx-modal-body-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* === MODAL SUBTITLE === */
+.lx-modal-subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* === OPTION METADATA === */
+.lx-option-metadata {
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(99, 115, 142, 0.12);
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.lx-option-text-display {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.9);
+  padding-left: 0.5rem;
+}
+
+/* === DIVIDER === */
+.lx-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(99, 115, 142, 0.2) 50%, transparent 100%);
+}
+
+/* === EFFECT FORM CARD === */
+.lx-effect-form-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(99, 115, 142, 0.15);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: all 0.2s ease-out;
+}
+
+.lx-effect-form-card:hover {
+  border-color: rgba(99, 115, 142, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.lx-effect-form-header {
+  padding: 1rem 1.25rem;
+  background: rgba(79, 158, 255, 0.05);
+  border-bottom: 1px solid rgba(99, 115, 142, 0.12);
+}
+
+.lx-effect-form-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.lx-effect-form-body {
+  padding: 1.25rem;
+}
+
+/* === SECTION HEADER === */
+.lx-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lx-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* === EFFECTS TABLE (Desktop) === */
+.lx-effects-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lx-effects-table-header {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1.5fr;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(99, 115, 142, 0.12);
+}
+
+.lx-effects-table-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1.5fr;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(99, 115, 142, 0.12);
+  border-radius: 0.5rem;
+  align-items: center;
+  transition:
+    background-color 0.18s ease-out,
+    border-color 0.18s ease-out,
+    box-shadow 0.18s ease-out;
+}
+
+.lx-effects-table-row:hover {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(99, 115, 142, 0.25);
+  box-shadow: 0 0 0 1px rgba(79, 158, 255, 0.35);
+}
+
+.lx-effects-col-type,
+.lx-effects-col-entity,
+.lx-effects-col-delta,
+.lx-effects-col-actions {
+  display: flex;
+  align-items: center;
+}
+
+.lx-effects-col-actions {
+  justify-content: flex-end;
+}
+
+/* === EFFECTS CARDS (Mobile) === */
+.lx-effects-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Card effetto (mobile) – tocco leggero */
+.lx-effect-card {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(99, 115, 142, 0.12);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition:
+    background-color 0.18s ease-out,
+    border-color 0.18s ease-out,
+    box-shadow 0.18s ease-out,
+    transform 0.12s ease-out;
+}
+
+.lx-effect-card:active {
+  transform: scale(0.99); /* meno aggressivo di 0.98 */
+}
+
+.lx-effect-card-header {
+  padding: 0.875rem 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid rgba(99, 115, 142, 0.12);
+}
+
+.lx-effect-card-body {
+  padding: 1rem;
+}
+
+.lx-effect-card-footer {
+  padding: 0.875rem 1rem;
+  background: rgba(15, 23, 42, 0.3);
+  border-top: 1px solid rgba(99, 115, 142, 0.12);
+}
+
+/* === PILL VARIANTS === */
+.lx-pill-primary {
+  background: rgba(79, 158, 255, 0.15);
+  color: #4f9eff;
+  border: 1px solid rgba(79, 158, 255, 0.3);
+}
+
+.lx-pill-secondary {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.lx-pill-tertiary {
+  background: rgba(236, 72, 153, 0.15);
+  color: #ec4899;
+  border: 1px solid rgba(236, 72, 153, 0.3);
+}
+
+/* === SUGGESTIONS INTRO === */
+.lx-suggestions-intro {
+  padding: 1rem;
+  background: rgba(79, 158, 255, 0.05);
+  border-left: 3px solid rgba(79, 158, 255, 0.5);
+  border-radius: 0.375rem;
+}
+
+/* === SUGGESTIONS TABLE (Desktop) === */
+.lx-suggestions-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lx-suggestions-table-header {
+  display: grid;
+  grid-template-columns: 50px 1.5fr 2fr 120px 100px;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(99, 115, 142, 0.12);
+}
+
+.lx-suggestions-table-row {
+  display: grid;
+  grid-template-columns: 50px 1.5fr 2fr 120px 100px;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(99, 115, 142, 0.12);
+  border-radius: 0.5rem;
+  align-items: center;
+  transition: all 0.2s ease-out;
+}
+
+.lx-suggestions-table-row:hover {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(99, 115, 142, 0.25);
+}
+
+.lx-suggestions-table-row.selected {
+  background: rgba(79, 158, 255, 0.08);
+  border-color: rgba(79, 158, 255, 0.3);
+}
+
+.lx-suggestions-col-select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lx-suggestions-col-question,
+.lx-suggestions-col-option,
+.lx-suggestions-col-delta,
+.lx-suggestions-col-score {
+  display: flex;
+  flex-direction: column;
+}
+
+.lx-suggestions-col-reason {
+  grid-column: 2 / -1;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(99, 115, 142, 0.08);
+}
+
+.lx-suggestion-question-code {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(79, 158, 255, 0.9);
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  margin-bottom: 0.25rem;
+}
+
+.lx-suggestion-question-text {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.lx-suggestion-option-text {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.lx-delta-input {
+  width: 100px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(99, 115, 142, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  font-weight: 600;
+}
+
+.lx-delta-input:focus {
+  background: rgba(15, 23, 42, 1);
+  border-color: rgba(79, 158, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(79, 158, 255, 0.1);
+}
+
+.lx-delta-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lx-score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+}
+
+.lx-score-badge.high {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.lx-score-badge.medium {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.lx-score-badge.low {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* === SUGGESTION CARDS (Mobile) === */
+.lx-suggestions-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lx-suggestion-card {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(99, 115, 142, 0.12);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: all 0.2s ease-out;
+}
+
+.lx-suggestion-card.selected {
+  background: rgba(79, 158, 255, 0.08);
+  border-color: rgba(79, 158, 255, 0.3);
+}
+
+.lx-suggestion-card:active {
+  transform: scale(0.98);
+}
+
+.lx-suggestion-card-header {
+  padding: 0.875rem 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid rgba(99, 115, 142, 0.12);
+}
+
+.lx-suggestion-card-body {
+  padding: 1rem;
+}
+
+.lx-suggestion-card-footer {
+  padding: 0.75rem 1rem;
+  background: rgba(15, 23, 42, 0.3);
+  border-top: 1px solid rgba(99, 115, 142, 0.12);
+}
+
+.lx-delta-input-mobile {
+  width: 70px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(99, 115, 142, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, monospace;
+  font-weight: 600;
+}
+
+/* === FORM ENHANCEMENTS === */
+.form-label-sm {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 0.375rem;
+}
+
+.form-select-sm,
+.form-control-sm {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(99, 115, 142, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s ease-out;
+}
+
+.form-select-sm:focus,
+.form-control-sm:focus {
+  background: rgba(15, 23, 42, 1);
+  border-color: rgba(79, 158, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(79, 158, 255, 0.1);
+  color: rgba(255, 255, 255, 1);
+}
+
+.form-select-sm:disabled,
+.form-control-sm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.form-select-sm option {
+  background: #0f1420;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.form-check-input {
+  background-color: rgba(15, 23, 42, 0.8);
+  border: 2px solid rgba(99, 115, 142, 0.3);
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+
+.form-check-input:checked {
+  background-color: #4f9eff;
+  border-color: #4f9eff;
+}
+
+.form-check-input:focus {
+  border-color: rgba(79, 158, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(79, 158, 255, 0.1);
+}
+
+/* === RESPONSIVE ADJUSTMENTS === */
+@media (max-width: 767px) {
+  .lx-modal-panel.lx-modal-xl {
+    width: 95%;
+    max-width: 95%;
+  }
+
+  .lx-modal-body-scroll {
+    max-height: min(80vh, 600px);
+  }
+
+  .lx-effect-form-body .row {
+    margin-bottom: 0;
+  }
+
+  .lx-effect-form-body .d-flex {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .lx-effect-form-body .lx-btn {
+    width: 100%;
+  }
+
+  .lx-option-metadata {
+    padding: 0.875rem;
+  }
+
+  .lx-modal-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .lx-modal-footer .d-flex {
+    width: 100%;
+  }
+
+  .lx-modal-footer .lx-btn {
+    width: 100%;
+  }
+}
+
+/* === ANIMATIONS === */
+/* Animazione ingresso modal, molto soft */
+@keyframes lxModalEnter {
+  from {
+    opacity: 0;
+    /* parte leggermente più in basso ma resta centrato */
+    transform: translate(-50%, calc(-50% + 12px)) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Applica solo ai pannelli modal, non a ogni card */
+.lx-modal-panel {
+  animation: lxModalEnter 0.18s ease-out;
+}
+
+/* Rimuovi le animazioni dalle card */
+.lx-effect-form-card,
+.lx-effect-card,
+.lx-suggestion-card {
+  animation: none;
+}
+
+/* === UTILITY CLASSES === */
+.text-white-50 {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.lx-btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(99, 115, 142, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease-out;
+}
+
+.lx-btn-ghost:hover:not(:disabled) {
+  background: rgba(99, 115, 142, 0.1);
+  border-color: rgba(99, 115, 142, 0.3);
+  color: rgba(255, 255, 255, 1);
+}
+
+.lx-btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* ===================================
+   ENTITY SUGGESTION MODAL (solo questo)
+   =================================== */
+
+/* Container più grande e ben centrato */
+.lx-modal-panel.lx-modal-entity-suggestions {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--lx-bg-card);
+  border: 1px solid var(--lx-border-color);
+  border-radius: 1rem;
+  box-shadow:
+    var(--lx-shadow-lg),
+    0 0 40px rgba(0, 0, 0, 0.5);
+  z-index: 2051;
+
+  /* 👇 più largo del modal “standard” */
+  width: min(1000px, 95vw);
+  max-width: 1000px;
+  max-height: 90vh;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Body scrollabile dentro il modal grande */
+.lx-modal-entity-suggestions .lx-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* header + footer ~ 140px → adatta se serve */
+  max-height: calc(90vh - 140px);
+}
+
+/* Footer sempre agganciato in basso */
+.lx-modal-entity-suggestions .lx-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--lx-border-color);
+  flex-shrink: 0;
+}
+
+/* Evita che il contenuto "straripi" ai lati */
+.lx-modal-entity-suggestions .lx-suggestions-table,
+.lx-modal-entity-suggestions .lx-suggestions-cards {
+  overflow-x: hidden;
+}
+
+/* Piccolo aggiustamento lato score per non attaccarsi al bordo */
+.lx-modal-entity-suggestions .lx-suggestions-col-score {
+  justify-content: flex-end;
+}
+
+@media (max-width: 767px) {
+  .lx-modal-panel.lx-modal-entity-suggestions {
+    width: 95vw;
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .lx-modal-entity-suggestions .lx-modal-body {
+    max-height: calc(95vh - 140px);
+    padding: 1rem;
   }
 }

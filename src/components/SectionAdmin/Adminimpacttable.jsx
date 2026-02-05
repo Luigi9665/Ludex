@@ -14,6 +14,7 @@ export default function AdminImpactTable({
   onEdit,
   onDelete,
   onViewUsage,
+  onSuggestLinks,
   headerAction,
   emptyMessage = "Nessun elemento trovato",
 }) {
@@ -94,7 +95,7 @@ export default function AdminImpactTable({
     }
   };
 
-  const hasActions = Boolean(onEdit || onDelete || onViewUsage);
+  const hasActions = Boolean(onEdit || onDelete || onViewUsage || onSuggestLinks);
 
   // es: "2fr 0.8fr 0.8fr 1.5fr"
   const baseTemplate = columns.map((c) => c.width || "1fr").join(" ");
@@ -145,6 +146,11 @@ export default function AdminImpactTable({
 
                 {hasActions && (
                   <div className="lx-table-col text-end lx-table-actions">
+                    {onSuggestLinks && (
+                      <button type="button" className="lx-btn-table-action" onClick={() => onSuggestLinks(row)} title="Suggerisci collegamenti">
+                        <i className="bi bi-magic" />
+                      </button>
+                    )}
                     {onViewUsage && (
                       <button type="button" className="lx-btn-table-action" onClick={() => onViewUsage(row)} title="Vedi utilizzi nel questionario">
                         <i className="bi bi-search" />

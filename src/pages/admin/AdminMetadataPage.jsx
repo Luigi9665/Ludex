@@ -19,7 +19,7 @@ import {
 import { apiFetch } from "../../apiFetch Autenticate/apiFetch.js";
 import { useToast } from "../../components/ui/ToastProvider.jsx";
 
-// 🔧 helper per EntityLink (in utils, come avevi fatto tu)
+// helper EntityLink (mapping string → enum numerico e costruzione request)
 import { buildEntityLinkSuggestionRequest, ENTITY_LINK_ENTITY_TYPE } from "../../utils/entityLinkHelpers.js";
 
 /**
@@ -27,7 +27,13 @@ import { buildEntityLinkSuggestionRequest, ENTITY_LINK_ENTITY_TYPE } from "../..
  *
  * Nota per me futuro:
  * - Legge dal reducer adminTaxonomy.metadata:
- *     state.adminTaxonomy.metadata = { items, loading, error }
+ *     state.adminTaxonomy.metadata = {
+ *       focus: { items, loading, error },
+ *       mood: { items, loading, error },
+ *       difficulty: { items, loading, error },
+ *       loading, // globale
+ *       error,   // globale
+ *     }
  * - items è una lista di MetadataAdminListItemDto in camelCase:
  *     {
  *       id,
@@ -35,16 +41,18 @@ import { buildEntityLinkSuggestionRequest, ENTITY_LINK_ENTITY_TYPE } from "../..
  *       code,
  *       name,
  *       description,
+ *       keywordsIt,
  *       gamesCount,
  *       questionnaireEffectsCount,
  *       questionnaireTotalDelta,
  *       questionnaireOptionsCount,
  *       questionnaireQuestionsCount,
- *       // opzionale: sampleGames: string[]
+ *       sampleGames?: string[]
  *     }
  */
 export default function AdminMetadataPage() {
   const dispatch = useDispatch();
+  const { addToast } = useToast();
 
   const [activeTab, setActiveTab] = useState("focus"); // 'focus' | 'mood' | 'difficulty'
 
@@ -61,9 +69,11 @@ export default function AdminMetadataPage() {
 
   const [deleteError, setDeleteError] = useState(null);
 
-  const { items: metadataItems = [], loading, error } = useSelector((state) => state.adminTaxonomy.metadata);
-
-  const { addToast } = useToast();
+  // nuovo shape dello state: metadata = { focus, mood, difficulty, loading, error }
+  const metadataState = useSelector((state) => state.adminTaxonomy.metadata || {});
+  const { loading = false, error = null } = metadataState;
+  const sliceForTab = metadataState[activeTab] || {};
+  const metadataItems = Array.isArray(sliceForTab.items) ? sliceForTab.items : [];
 
   // Al mount: carico overview metadata
   useEffect(() => {
@@ -178,8 +188,9 @@ export default function AdminMetadataPage() {
       setDeleteError(null);
       addToast(`Metadata "${selectedMetadata.name}" eliminato.`, "success");
     } catch (err) {
-      setDeleteError(err?.message || "Errore durante l'eliminazione del metadata. Controlla collegamenti a giochi / questionario.");
-      addToast(err?.message || "Errore durante l'eliminazione del metadata.", "error");
+      const msg = err?.message || "Errore durante l'eliminazione del metadata. Controlla collegamenti a giochi / questionario.";
+      setDeleteError(msg);
+      addToast(msg, "error");
     }
   };
 
@@ -190,9 +201,9 @@ export default function AdminMetadataPage() {
 
     try {
       const routeSegment = activeTab; // "focus" | "mood" | "difficulty"
-      // Endpoint pensato lato backend:
-      // GET /api/AdminTaxonomy/metadata/{type}/{id}/questionnaire-usage
-      const res = await apiFetch(`/api/AdminTaxonomy/metadata/${routeSegment}/${metadataRow.id}/questionnaire-usage`, { method: "GET" });
+      const res = await apiFetch(`/api/AdminTaxonomy/metadata/${routeSegment}/${metadataRow.id}/questionnaire-usage`, {
+        method: "GET",
+      });
 
       if (!res.ok) {
         let message = "Errore nel caricamento degli utilizzi nel questionario per questo metadata.";
@@ -200,7 +211,7 @@ export default function AdminMetadataPage() {
           const json = await res.json();
           if (json?.message) message = json.message;
         } catch {
-          // lascio il messaggio di default
+          // tengo il messaggio di default
         }
         setUsageData([]);
         setUsageError(message);
@@ -220,19 +231,21 @@ export default function AdminMetadataPage() {
     }
   };
 
-  // 👉 SUGGERIMENTI COLLEGAMENTI (EntitySuggestionModal)
+  // =========================
+  // SUGGERIMENTI COLLEGAMENTI
+  // =========================
 
   const handleSuggestLinks = async (metadataRow) => {
     if (!metadataRow) return;
 
     setSelectedMetadata(metadataRow);
 
-    // MetadataCode usato dal backend: "FOCUS:STORY", "MOOD:COZY", "DIFFICULTY:HARD"
+    // es. "FOCUS:STORY", "MOOD:COZY"
     const metadataCode = `${metadataRow.type}:${metadataRow.code}`;
 
     try {
       const request = buildEntityLinkSuggestionRequest({
-        entityType: "Metadata", // string → verrà mappato a enum numerico (3)
+        entityType: "Metadata",
         entityKey: metadataCode,
         defaultDelta: 5,
         focusQuestionId: null,
@@ -248,16 +261,24 @@ export default function AdminMetadataPage() {
   };
 
   const handleApplySuggestions = async (payload) => {
-    // payload.links: [{ optionId, deltaWeight }]
     const links = payload?.links || [];
     if (!links.length) return;
 
-    if (payload.entityType !== "Metadata") {
+    // supporto sia stringa ("Metadata") che enum numerico (3)
+    const isMetadataType = payload.entityType === "Metadata" || payload.entityType === ENTITY_LINK_ENTITY_TYPE.Metadata || payload.entityType === 3;
+
+    if (!isMetadataType) {
       addToast("I suggerimenti ricevuti non sono di tipo Metadata.", "error");
       return;
     }
 
-    const metadataCode = payload.metadataCode; // es. "FOCUS:STORY"
+    // Provo a leggere dal payload, altrimenti ricostruisco dal metadata selezionato
+    const payloadMetadataCode = payload.metadataCode;
+    const fallbackMetadataCode =
+      selectedMetadata && selectedMetadata.type && selectedMetadata.code ? `${selectedMetadata.type}:${selectedMetadata.code}` : null;
+
+    const metadataCode = payloadMetadataCode || fallbackMetadataCode;
+
     if (!metadataCode) {
       addToast("MetadataCode mancante nei suggerimenti.", "error");
       return;
@@ -267,7 +288,7 @@ export default function AdminMetadataPage() {
       for (const link of links) {
         const effectPayload = {
           optionId: link.optionId,
-          effectType: ENTITY_LINK_ENTITY_TYPE.Metadata, // 3
+          effectType: ENTITY_LINK_ENTITY_TYPE.Metadata, // 3 = Metadata
           genreId: null,
           tagId: null,
           metadataCode,
@@ -280,7 +301,6 @@ export default function AdminMetadataPage() {
       addToast(`Aggiunti ${links.length} collegamenti per ${selectedMetadata?.name || "il metadata"}.`, "success");
 
       setShowSuggestionsModal(false);
-      // ricarico i dati per aggiornare stats (Giochi, Regole, Delta, Impatto)
       dispatch(fetchAdminMetadata());
     } catch (err) {
       console.error("Errore nell'applicazione dei suggerimenti metadata:", err);
@@ -291,8 +311,6 @@ export default function AdminMetadataPage() {
   const handleSaveFromModal = () => {
     setShowFormModal(false);
     setSelectedMetadata(null);
-    // Le thunk create/update dentro il form aggiornano lo store;
-    // non servono refetch espliciti qui.
   };
 
   // =========================

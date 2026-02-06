@@ -23,17 +23,20 @@ export default function NavSearch() {
   const [localQuery, setLocalQuery] = useState(query ?? "");
   const debouncedQuery = useDebouncedValue(localQuery, 350);
 
-  // chiudi con click fuori
+  // chiudi con click fuori (usa "click" e non "mousedown" per non uccidere gli onClick dei risultati)
   useEffect(() => {
-    const onDocMouseDown = (e) => {
+    const onDocClick = (e) => {
       if (!wrapRef.current) return;
-      if (!wrapRef.current.contains(e.target)) dispatch(clearNavSearch());
+      if (!wrapRef.current.contains(e.target)) {
+        dispatch(clearNavSearch());
+      }
     };
-    document.addEventListener("mousedown", onDocMouseDown);
-    return () => document.removeEventListener("mousedown", onDocMouseDown);
+
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
   }, [dispatch]);
 
-  // ESC per chiudere
+  // ESC per chiudere + Enter per andare in libreria
   const onKeyDown = (e) => {
     if (e.key === "Escape") {
       dispatch(clearNavSearch());
@@ -126,15 +129,9 @@ export default function NavSearch() {
           )}
 
           <div className="lx-navsearch-footer">
-            {showAll ? (
-              <button type="button" className="btn lx-btn-outline w-100" onClick={goToLibraryAll}>
-                Mostra tutti →
-              </button>
-            ) : (
-              <button type="button" className="btn lx-btn-outline w-100" onClick={goToLibraryAll}>
-                Vai alla libreria →
-              </button>
-            )}
+            <button type="button" className="btn lx-btn-outline w-100" onClick={goToLibraryAll}>
+              {showAll ? "Mostra tutti →" : "Vai alla libreria →"}
+            </button>
           </div>
         </div>
       )}

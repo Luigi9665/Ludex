@@ -126,7 +126,7 @@ const AdminEditGamePage = () => {
 
           <div className="d-none d-md-flex gap-2">
             {/* Vai alla home */}
-            <button type="button" className="btn lx-btn-outline" onClick={() => navigate("/")}>
+            <button type="button" className="btn lx-btn-outline" onClick={() => navigate("/home")}>
               <i className="bi bi-house me-1" />
               Vai alla home
             </button>

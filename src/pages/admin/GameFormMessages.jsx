@@ -1,4 +1,3 @@
-// src/pages/admin/GameFormMessages.jsx
 import React, { useEffect } from "react";
 
 const GameFormMessages = ({ successMessage, errorMessage, onDismiss, variant = "inline" }) => {

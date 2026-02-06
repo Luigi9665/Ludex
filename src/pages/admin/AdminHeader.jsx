@@ -1,4 +1,4 @@
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 /**
  * Top header bar con titolo pagina, search e filtri.
@@ -6,6 +6,7 @@ import { useLocation } from "react-router";
  */
 export default function AdminHeader({ onToggleSidebar }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   // Mappa path -> "section key" logica
   let sectionKey = "analytics";
@@ -55,7 +56,12 @@ export default function AdminHeader({ onToggleSidebar }) {
       </div>
 
       <div className="lx-header-right">
-        <div className="lx-header-search">
+        {/* Vai alla home */}
+        <button type="button" className="btn lx-btn-outline d-flex align-items-center fs-4 py-2" onClick={() => navigate("/home")}>
+          <i className="bi bi-house me-1" />
+          Vai alla home
+        </button>
+        {/* <div className="lx-header-search">
           <i className="bi bi-search" />
           <input type="text" placeholder="Cerca..." className="lx-search-input" />
         </div>
@@ -68,12 +74,12 @@ export default function AdminHeader({ onToggleSidebar }) {
             <option>Ultimi 90 giorni</option>
             <option>Quest'anno</option>
           </select>
-        </div>
-
+        </div> */}
+        {/* 
         <button className="lx-btn-icon" aria-label="Notifiche">
           <i className="bi bi-bell" />
           <span className="lx-notification-badge">3</span>
-        </button>
+        </button> */}
       </div>
     </header>
   );

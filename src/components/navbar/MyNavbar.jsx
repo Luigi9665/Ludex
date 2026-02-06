@@ -10,19 +10,19 @@ import { safeJson } from "../../apiFetch Autenticate/safeJson.js";
 import NavSearch from "./NavSearch";
 import { loadLibraryPage } from "../../redux/action";
 import { useHideOnScroll } from "../../hooks/useHideOnScroll";
-import { useToast } from "../ui/ToastProvider"; // 👈 toast globale
+import { useToast } from "../ui/ToastProvider";
+import "../../styles/MyNavbarStyle.css";
 
 const MyNavbar = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [health, setHealth] = useState("loading");
+  const [scrolled, setScrolled] = useState(false);
 
   const location = useLocation();
   const isHome = location.pathname === "/home";
 
-  // hook custom per far sparire la navbar in scroll down e riapparire in scroll up
   const rawHidden = useHideOnScroll();
-  // se il menu mobile è aperto, forzo nav visibile
   const navHidden = isOpen ? false : rawHidden;
 
   const dispatch = useDispatch();
@@ -32,21 +32,24 @@ const MyNavbar = ({ user }) => {
 
   const { addToast } = useToast();
 
-  // Ogni volta che cambio route:
-  // - chiudo il menu mobile
-  // - chiudo il dropdown utente
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
     setShowUserMenu(false);
   }, [location.pathname]);
 
-  // ===== Health check DB (solo per ADMIN) =====
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 
     const fetchHealth = async () => {
-      // se non sono admin, non chiedo niente
       if (user?.role !== "Admin") return;
 
       setHealth("loading");
@@ -54,7 +57,6 @@ const MyNavbar = ({ user }) => {
       try {
         const res = await apiFetch("/api/Health");
 
-        // se il backend risponde 401, ci pensa apiFetch (refresh/logout), qui non faccio altro
         if (res.status === 401) {
           return;
         }
@@ -69,10 +71,8 @@ const MyNavbar = ({ user }) => {
       }
     };
 
-    // prima chiamata alla mount
     fetchHealth();
 
-    // richiama ogni 60s se la tab è visibile
     const id = setInterval(() => {
       if (document.visibilityState === "visible") fetchHealth();
     }, 60000);
@@ -88,131 +88,203 @@ const MyNavbar = ({ user }) => {
   };
 
   const handleLibraryClick = () => {
-    // piccolo "lazy load": se non ho ancora i giochi in store per la library, chiamo la pagina 1
     if (!library?.items || library.items.length === 0) {
       dispatch(loadLibraryPage(1));
     }
   };
 
-  // ===== Toast per logout forzato (sessione scaduta / reset password) =====
   useEffect(() => {
-    // Se l'utente risulta autenticato, non mostro alcun messaggio di logout.
     if (isAuthenticated) return;
 
-    // Se NON è autenticato, controllo se apiFetch ha lasciato il "motivo" in localStorage.
     try {
       const reason = localStorage.getItem("lx_logout_reason");
       if (reason) {
-        // Mostro il toast una sola volta
         addToast(reason, "warning");
         localStorage.removeItem("lx_logout_reason");
-
-        // Nota: NON faccio navigate("/auth").
-        // La scelta di andare alla pagina di login la lascio all'utente.
       }
     } catch {
-      // se localStorage non è accessibile non succede niente
+      // ignore
     }
   }, [isAuthenticated, addToast]);
 
   return (
-    <nav className={`navbar navbar-expand-lg navbar-dark lx-navbar ${navHidden ? "lx-nav-hidden" : "lx-nav-shown"} ${isHome ? "lx-nav-home" : "lx-nav-wide"}`}>
-      <div className="container-fluid">
-        {/* LOGO */}
-        <Link className="navbar-brand d-flex align-items-center" to="/home">
-          <img src={LogoLudexPng} style={{ width: "90px", height: "40px", objectFit: "contain" }} alt="Ludex logo" />
-        </Link>
+    <nav className={`lx-navbar ${navHidden ? "lx-navbar--hidden" : ""} ${scrolled ? "lx-navbar--scrolled" : ""} ${isHome ? "lx-navbar--home" : ""}`}>
+      <div className={`lx-navbar-inner ${isHome ? "lx-navbar-inner--home" : "lx-navbar-inner--wide"}`}>
+        <div className="lx-navbar-left">
+          <Link className="lx-navbar-brand" to="/home">
+            <img src={LogoLudexPng} className="lx-navbar-logo" alt="Ludex" />
+          </Link>
 
-        {/* BADGE ADMIN + HEALTH DB */}
-        {user?.role === "Admin" && <span className="lx-badge-admin ms-2">ADMIN</span>}
-
-        {user?.role === "Admin" && (
-          <span className={`lx-health ms-2 ${health} me-2`}>
-            <span className="lx-health-dot" />
-            DB
-          </span>
-        )}
-
-        {/* BURGER MENU (mobile) */}
-        <button className="navbar-toggler border-0" type="button" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle navigation">
-          <span className="navbar-toggler-icon"></span>
-        </button>
-
-        {/* CONTENUTO COLLAPSABILE */}
-        <div className={`collapse navbar-collapse ${isOpen ? "bg-dark text-center p-3 show" : ""}`}>
-          <div className="w-100 d-flex flex-column flex-lg-row align-items-lg-center gap-2">
-            {/* SEARCH CENTRALE */}
-            <div className="flex-grow-1 d-flex justify-content-center justify-content-lg-center mb-2 mb-lg-0">
-              <NavSearch />
+          {user?.role === "Admin" && (
+            <div className="lx-navbar-admin-badges">
+              <span className="lx-navbar-pill lx-navbar-pill--admin">ADMIN</span>
+              <span className={`lx-navbar-pill lx-navbar-pill--health lx-navbar-pill--health-${health}`}>
+                <span className="lx-navbar-health-dot" />
+                DB
+              </span>
             </div>
+          )}
+        </div>
 
-            {/* NAVLINK + UTENTE A DESTRA */}
-            <div className="d-flex flex-column flex-lg-row align-items-lg-center justify-content-lg-end ms-lg-3 gap-2">
-              <ul className="navbar-nav mb-2 mb-lg-0 justify-content-center justify-content-lg-end">
-                <li className="nav-item">
-                  <Link className="nav-link" to="/home">
-                    Home
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/library" onClick={handleLibraryClick}>
-                    Library
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/reviews">
-                    Reviews
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/community">
-                    Community
-                  </Link>
-                </li>
-              </ul>
+        <div className="lx-navbar-center">
+          <NavSearch />
+        </div>
 
-              {/* AREA UTENTE / LOGIN */}
-              {isAuthenticated ? (
-                <div className="dropdown lx-user-dropdown ms-lg-3 text-center text-lg-start">
-                  <button className="btn p-0 border-0 bg-transparent" onClick={() => setShowUserMenu(!showUserMenu)} aria-label="User menu">
-                    <img src={user.role === "Admin" ? avatarAdmin : avatar} alt={user?.username ?? "avatar"} className="lx-avatar-sm" />
-                  </button>
-                  {showUserMenu && (
-                    <div className="dropdown-menu dropdown-menu-end show lx-glass mt-2">
-                      <Link className="dropdown-item" to="/profile">
-                        <i className="bi bi-person me-2"></i>Profile
+        <div className="lx-navbar-right">
+          <ul className="lx-navbar-links">
+            <li>
+              <Link to="/home" className={`lx-navbar-link ${location.pathname === "/home" ? "lx-navbar-link--active" : ""}`}>
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/library" onClick={handleLibraryClick} className={`lx-navbar-link ${location.pathname === "/library" ? "lx-navbar-link--active" : ""}`}>
+                Library
+              </Link>
+            </li>
+            <li>
+              <Link to="/reviews" className={`lx-navbar-link ${location.pathname === "/reviews" ? "lx-navbar-link--active" : ""}`}>
+                Reviews
+              </Link>
+            </li>
+            <li>
+              <Link to="/community" className={`lx-navbar-link ${location.pathname === "/community" ? "lx-navbar-link--active" : ""}`}>
+                Community
+              </Link>
+            </li>
+          </ul>
+
+          {isAuthenticated ? (
+            <div className="lx-navbar-user">
+              <button className="lx-navbar-avatar-btn" onClick={() => setShowUserMenu(!showUserMenu)} aria-label="User menu">
+                <img src={user.role === "Admin" ? avatarAdmin : avatar} alt={user?.username ?? "avatar"} className="lx-navbar-avatar" />
+              </button>
+              {showUserMenu && (
+                <div className="lx-navbar-dropdown">
+                  <Link className="lx-navbar-dropdown-item" to="/profile">
+                    <i className="bi bi-person" />
+                    Profile
+                  </Link>
+                  <Link className="lx-navbar-dropdown-item" to="/settings">
+                    <i className="bi bi-gear" />
+                    Settings
+                  </Link>
+                  {user?.role === "Admin" && (
+                    <>
+                      <Link to="/admin" className="lx-navbar-dropdown-item">
+                        <i className="bi bi-speedometer2" />
+                        Dashboard admin
                       </Link>
-                      <Link className="dropdown-item" to="/settings">
-                        <i className="bi bi-gear me-2"></i>Settings
+                      <Link to="/admin/games/new" className="lx-navbar-dropdown-item">
+                        <i className="bi bi-plus-circle" />
+                        Nuovo gioco
                       </Link>
-                      {user?.role === "Admin" && (
-                        <>
-                          {/* Dashboard admin generale */}
-                          <Link to="/admin" className="dropdown-item">
-                            <i className="bi bi-speedometer2 me-2" />
-                            Dashboard admin
-                          </Link>
-
-                          <Link to="/admin/games/new" className="dropdown-item">
-                            <i className="bi bi-plus-circle me-2" />
-                            Nuovo gioco
-                          </Link>
-                        </>
-                      )}
-                      <hr className="dropdown-divider" />
-                      <button className="dropdown-item text-danger" onClick={() => dispatch(logoutAction())}>
-                        <i className="bi bi-box-arrow-right me-2"></i>Logout
-                      </button>
-                    </div>
+                    </>
                   )}
+                  <div className="lx-navbar-dropdown-divider" />
+                  <button className="lx-navbar-dropdown-item lx-navbar-dropdown-item--danger" onClick={() => dispatch(logoutAction())}>
+                    <i className="bi bi-box-arrow-right" />
+                    Logout
+                  </button>
                 </div>
-              ) : (
-                <button type="button" onClick={navigateToAuth} className="btn lx-btn-nav ms-lg-3">
-                  Login
-                </button>
               )}
             </div>
+          ) : (
+            <button type="button" onClick={navigateToAuth} className="lx-navbar-cta">
+              Login
+            </button>
+          )}
+        </div>
+
+        <button className="lx-navbar-toggle" type="button" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle navigation">
+          <span className={`lx-navbar-toggle-icon ${isOpen ? "lx-navbar-toggle-icon--open" : ""}`}>
+            <span />
+            <span />
+            <span />
+          </span>
+        </button>
+      </div>
+
+      <div className={`lx-navbar-mobile ${isOpen ? "lx-navbar-mobile--open" : ""}`}>
+        <div className="lx-navbar-mobile-overlay" onClick={() => setIsOpen(false)} />
+        <div className="lx-navbar-mobile-panel">
+          <div className="lx-navbar-mobile-header">
+            <img src={LogoLudexPng} className="lx-navbar-mobile-logo" alt="Ludex" />
+            <button className="lx-navbar-mobile-close" onClick={() => setIsOpen(false)} aria-label="Close menu">
+              <i className="bi bi-x-lg" />
+            </button>
           </div>
+
+          <div className="lx-navbar-mobile-search">
+            <NavSearch />
+          </div>
+
+          <nav className="lx-navbar-mobile-nav">
+            <Link to="/home" className={`lx-navbar-mobile-link ${location.pathname === "/home" ? "lx-navbar-mobile-link--active" : ""}`}>
+              <i className="bi bi-house-door" />
+              Home
+            </Link>
+            <Link
+              to="/library"
+              onClick={handleLibraryClick}
+              className={`lx-navbar-mobile-link ${location.pathname === "/library" ? "lx-navbar-mobile-link--active" : ""}`}
+            >
+              <i className="bi bi-collection" />
+              Library
+            </Link>
+            <Link to="/reviews" className={`lx-navbar-mobile-link ${location.pathname === "/reviews" ? "lx-navbar-mobile-link--active" : ""}`}>
+              <i className="bi bi-star" />
+              Reviews
+            </Link>
+            <Link to="/community" className={`lx-navbar-mobile-link ${location.pathname === "/community" ? "lx-navbar-mobile-link--active" : ""}`}>
+              <i className="bi bi-people" />
+              Community
+            </Link>
+          </nav>
+
+          {isAuthenticated ? (
+            <div className="lx-navbar-mobile-user">
+              <div className="lx-navbar-mobile-profile">
+                <img src={user.role === "Admin" ? avatarAdmin : avatar} alt={user?.username ?? "avatar"} className="lx-navbar-mobile-avatar" />
+                <div className="lx-navbar-mobile-username">
+                  {user?.username ?? "User"}
+                  {user?.role === "Admin" && <span className="lx-navbar-mobile-badge">ADMIN</span>}
+                </div>
+              </div>
+              <div className="lx-navbar-mobile-divider" />
+              <Link className="lx-navbar-mobile-link" to="/profile">
+                <i className="bi bi-person" />
+                Profile
+              </Link>
+              <Link className="lx-navbar-mobile-link" to="/settings">
+                <i className="bi bi-gear" />
+                Settings
+              </Link>
+              {user?.role === "Admin" && (
+                <>
+                  <Link to="/admin" className="lx-navbar-mobile-link">
+                    <i className="bi bi-speedometer2" />
+                    Dashboard admin
+                  </Link>
+                  <Link to="/admin/games/new" className="lx-navbar-mobile-link">
+                    <i className="bi bi-plus-circle" />
+                    Nuovo gioco
+                  </Link>
+                </>
+              )}
+              <div className="lx-navbar-mobile-divider" />
+              <button className="lx-navbar-mobile-link lx-navbar-mobile-link--danger" onClick={() => dispatch(logoutAction())}>
+                <i className="bi bi-box-arrow-right" />
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="lx-navbar-mobile-footer">
+              <button type="button" onClick={navigateToAuth} className="lx-navbar-mobile-cta">
+                Login
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

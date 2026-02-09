@@ -30,6 +30,81 @@
   --lx-text-secondary: #a0a0b0;
   --lx-border: rgba(255, 255, 255, 0.1);
   --lx-navbar-h: 70px;
+
+  /* Accent Colors */
+  --accent-cyan: #00d9ff;
+  --accent-purple: #9d4edd;
+  --accent-gold: #ffc878;
+  --accent-primary: #3b82f6;
+  --accent-warm: #f59e0b;
+
+  /* Status Colors */
+  --status-playing: #06b6d4;
+  --status-backlog: #94a3b8;
+  --status-completed: #8b5cf6;
+  --status-paused: #f59e0b;
+  --status-dropped: #ef4444;
+
+  /* Text - High Contrast */
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #cbd5e1;
+  --text-disabled: #94a3b8;
+
+  --surface-base: rgba(7, 10, 20, 0.45); /* Molto scuro, quasi trasparente */
+  --surface-light: rgba(12, 18, 35, 0.55); /* Blu scuro con trasparenza */
+  --surface-elevated: rgba(18, 25, 45, 0.65); /* Leggermente più solido */
+  --surface-premium: rgba(25, 35, 60, 0.75); /* Premium con più corpo */
+
+  /* Surface con tint neon (per hero/detail page) */
+  --surface-hero: rgba(10, 15, 28, 0.5); /* Base per hero */
+  --surface-neon-cyan: rgba(0, 217, 255, 0.08); /* Tint cyan */
+  --surface-neon-purple: rgba(157, 78, 221, 0.08); /* Tint purple */
+  --surface-neon-gold: rgba(255, 200, 120, 0.06); /* Tint gold */
+
+  /* Gradient borders con neon */
+  --gradient-border: linear-gradient(135deg, rgba(0, 217, 255, 0.4) 0%, rgba(157, 78, 221, 0.35) 50%, rgba(255, 200, 120, 0.3) 100%);
+
+  --gradient-border-subtle: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(157, 78, 221, 0.18) 50%, rgba(255, 200, 120, 0.15) 100%);
+
+  /* Glass overlay con neon hint */
+  --gradient-glass-neon: linear-gradient(135deg, rgba(0, 217, 255, 0.08) 0%, rgba(157, 78, 221, 0.06) 100%);
+
+  /* Borders */
+  --border-subtle: rgba(0, 217, 255, 0.12);
+  --border-muted: rgba(157, 78, 221, 0.18);
+  --border-strong: rgba(0, 217, 255, 0.25);
+
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+
+  /* Radius - Premium 20-24px */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  /* Shadows - Deep & Soft */
+  --shadow-subtle: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.25);
+  --shadow-strong: 0 16px 64px rgba(0, 0, 0, 0.4);
+
+  /* Spacing */
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 2.5rem;
+  --space-3xl: 3rem;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Blur */
+  --blur-glass: 24px;
+  --blur-strong: 32px;
 }
 
 * {
@@ -47,9 +122,9 @@ html {
 }
 
 /* compensazione altezza navbar SOLO dove serve */
-.lx-main-with-nav {
+/* .lx-main-with-nav {
   padding-top: calc(var(--lx-navbar-h) + 20px);
-}
+} */
 
 /* ===== GLOBAL BODY / BACKGROUND LUDEX ===== */
 
@@ -128,31 +203,6 @@ body::after {
   mask-image: linear-gradient(to left, black 0%, transparent 75%);
 }
 
-/* ===== TEMA DINAMICO PER PAGINA DETTAGLIO GIOCO ===== */
-
-/* Quando siamo sulla pagina dettaglio */
-body.lx-body-game-detail {
-  background:
-    radial-gradient(ellipse at 20% 30%, var(--lx-detail-main, rgba(45, 20, 70, 1)) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 70%, var(--lx-detail-secondary, rgba(15, 5, 25, 1)) 0%, transparent 55%),
-    linear-gradient(180deg, var(--lx-detail-secondary, rgba(15, 5, 25, 1)) 0%, rgba(10, 5, 20, 1) 100%);
-  background-attachment: fixed;
-  min-height: 100vh;
-  transition: background 0.8s ease-in-out;
-}
-
-.lx-game-detail-page {
-  width: 100%;
-  min-height: 100vh;
-  position: relative;
-}
-
-/* spegniamo le bande laterali nella pagina dettaglio */
-body.lx-body-game-detail::before,
-body.lx-body-game-detail::after {
-  opacity: 0;
-}
-
 /* Mobile: ancora più leggero */
 @media (max-width: 768px) {
   body::before,
@@ -160,6 +210,10 @@ body.lx-body-game-detail::after {
     width: 140px;
     opacity: 0.45;
   }
+}
+
+a {
+  text-decoration: none !important;
 }
 
 h1,
@@ -622,49 +676,6 @@ h3,
   }
 }
 
-/* ===== HERO SECTION ===== */
-.lx-hero {
-  position: relative;
-  padding: 4rem 0 3rem;
-  overflow: hidden;
-  max-width: 1500px;
-  margin: 0 auto;
-  border-radius: 18px;
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.lx-hero > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* Glow di sfondo più coerente con l'app */
-.lx-hero::before {
-  content: "";
-  position: absolute;
-  inset: -40% -20%;
-  background: radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.045), transparent 60%);
-  opacity: 0.55;
-  filter: blur(14px);
-  transform: translate3d(0, 0, 0);
-  animation: lx-hero-sheen 12s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-@keyframes lx-hero-sheen {
-  0%,
-  100% {
-    transform: translate3d(-2%, -1%, 0) scale(1);
-    opacity: 0.35;
-  }
-  50% {
-    transform: translate3d(2%, 1%, 0) scale(1.02);
-    opacity: 0.55;
-  }
-}
-
 /* testo evidenziato (username ecc.) */
 .lx-text-glow {
   color: var(--lx-cyan);
@@ -730,250 +741,6 @@ h3,
   opacity: 0.9;
 }
 
-.lx-hero-title {
-  font-size: clamp(2rem, 3vw, 2.7rem);
-  font-weight: 700;
-  position: relative;
-  color: var(--lx-text-primary);
-  text-shadow: 0 0 12px rgba(0, 217, 255, 0.15);
-}
-
-/* ===== GAME CARD ===== */
-.lx-glow-card {
-  background: var(--lx-bg-card);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--lx-border);
-  border-radius: 14px;
-  overflow: hidden;
-  transition: all 0.3s;
-  height: 100%;
-  position: relative;
-}
-
-.lx-glow-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at top left, rgba(0, 217, 255, 0.08), transparent 55%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-}
-
-.lx-glow-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--lx-cyan);
-  box-shadow: 0 8px 25px var(--lx-cyan-glow);
-}
-
-.lx-glow-card:hover::before {
-  opacity: 1;
-}
-
-.lx-game-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-/* ===================== */
-/* REVEAL ON SCROLL CARD */
-/* ===================== */
-
-.lx-reveal {
-  opacity: 0;
-  transform: translateY(18px) scale(0.98);
-  transition:
-    opacity 0.45s cubic-bezier(0.21, 0.8, 0.25, 1),
-    transform 0.45s cubic-bezier(0.21, 0.8, 0.25, 1);
-  will-change: opacity, transform;
-}
-
-.lx-reveal-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* Stagger leggero quando hai una grid/lista di card */
-.lx-library-grid .lx-reveal:nth-child(1) {
-  transition-delay: 0.02s;
-}
-.lx-library-grid .lx-reveal:nth-child(2) {
-  transition-delay: 0.05s;
-}
-.lx-library-grid .lx-reveal:nth-child(3) {
-  transition-delay: 0.08s;
-}
-.lx-library-grid .lx-reveal:nth-child(4) {
-  transition-delay: 0.11s;
-}
-
-/* Accessibilità: se l’utente non vuole animazioni, spegnile */
-@media (prefers-reduced-motion: reduce) {
-  .lx-reveal {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-}
-
-.lx-game-cover {
-  position: relative;
-  width: 100%;
-  padding-bottom: 133%;
-  aspect-ratio: 3/4;
-  overflow: hidden;
-}
-
-.lx-game-cover img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.lx-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  backdrop-filter: blur(10px);
-}
-
-.lx-badge-cyan {
-  background: rgba(0, 217, 255, 0.2);
-  color: var(--lx-cyan);
-  border: 1px solid var(--lx-cyan);
-}
-
-.lx-badge-purple {
-  background: rgba(157, 78, 221, 0.2);
-  color: var(--lx-purple);
-  border: 1px solid var(--lx-purple);
-}
-
-.lx-badge-gray {
-  background: rgba(160, 160, 176, 0.2);
-  color: var(--lx-text-secondary);
-  border: 1px solid var(--lx-text-secondary);
-}
-
-.lx-game-info {
-  padding: 0.9rem 0.9rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.lx-game-title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lx-platform {
-  font-size: 0.8rem;
-  color: var(--lx-text-secondary);
-  font-weight: 500;
-}
-
-/* Row che contiene i badge dei generi nella card */
-.lx-genre-row {
-  display: flex;
-  flex-wrap: wrap; /* i badge vanno a capo in modo naturale */
-  gap: 0.25rem;
-  margin-top: 0.25rem;
-
-  /* importantissimo per evitare robe strane */
-  max-width: 100%;
-}
-
-/* Singolo badge genere (pill) */
-.lx-genre-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  border: 1px solid rgba(157, 78, 221, 0.8);
-  color: var(--lx-purple);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  white-space: nowrap; /* il testo del singolo genere non va a capo */
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis; /* se il nome è assurdo tipo "Action-Adventure RPG" si tronca */
-}
-
-/* ===== RATING ROW (GameCard) – versione responsive safe ===== */
-.lx-game-rating-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.75rem;
-  padding: 0.1rem 0; /*  meno padding */
-  border-radius: 0; /* niente “contenitore” pill */
-  background: transparent; /* togli il gradient */
-  border: none; /* niente bordo */
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.lx-game-rating-row > * {
-  min-width: 0; /*  permette al testo di comprimersi/troncarsi */
-}
-
-/* blocco sinistro: stelle + valore */
-.lx-game-rating-main {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-/* valore numerico */
-.lx-game-rating-value {
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: rgba(238, 244, 255, 0.95);
-  text-shadow: 0 0 8px rgba(0, 212, 255, 0.35);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-/* testo count */
-.lx-game-rating-count {
-  font-size: 0.75rem;
-  color: rgba(238, 244, 255, 0.75);
-  opacity: 0.9;
-  white-space: nowrap;
-}
-
-/* su schermi stretti: rating su due righe, niente pill enorme */
-@media (max-width: 576px) {
-  .lx-game-rating-row {
-    padding: 0.3rem 0.5rem;
-    border-radius: 8px;
-    justify-content: flex-start;
-    gap: 0.25rem 0.5rem;
-  }
-
-  .lx-game-rating-count {
-    white-space: normal; /* 👈 può andare a capo */
-  }
-}
-
 /* StarRating generico (se non l'hai già così) */
 .lx-rating {
   display: inline-flex;
@@ -999,35 +766,6 @@ h3,
 
 .lx-star-empty {
   color: rgba(238, 244, 255, 0.25);
-}
-
-/* ===== REVIEW CARD ===== */
-.lx-review-card {
-  padding: 1.25rem;
-  margin-bottom: 1rem;
-  transition: all 0.3s;
-}
-
-.lx-review-card:hover {
-  border-color: var(--lx-purple);
-  box-shadow: 0 4px 15px var(--lx-purple-glow);
-}
-
-.lx-review-cover {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid var(--lx-border);
-}
-
-.lx-review-snippet {
-  color: var(--lx-text-secondary);
-  line-height: 1.6;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 
 /* ===== SECTIONS ===== */
@@ -1790,79 +1528,6 @@ h3,
   letter-spacing: 0.08em;
 }
 
-/* ===== BOTTONE ADD SULLA CARD – SOLO “+” FINCHÉ NON HOVERI ===== */
-/* Bottone + in alto a destra sulla cover */
-.lx-card-add-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-
-  background: rgba(10, 12, 24, 0.86);
-  border: 1px solid rgba(0, 217, 255, 0.7);
-  color: rgba(238, 244, 255, 0.95);
-
-  cursor: pointer;
-  overflow: hidden; /* 👈 importantissimo per evitare glitch */
-  transition:
-    background 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.lx-card-add-icon {
-  font-size: 1.05rem;
-  flex-shrink: 0;
-}
-
-/* testo nascosto di default, ma l'area del bottone resta la stessa */
-.lx-card-add-label {
-  white-space: nowrap;
-  opacity: 0;
-  max-width: 0;
-  transform: translateX(-4px);
-  transition:
-    opacity 0.22s ease,
-    max-width 0.22s ease,
-    transform 0.22s ease;
-}
-
-/* hover: solo il contenuto interno cambia, non la hit-area */
-.lx-card-add-btn:hover {
-  background: rgba(10, 20, 40, 0.95);
-  border-color: rgba(0, 217, 255, 1);
-  box-shadow: 0 0 14px rgba(0, 217, 255, 0.45);
-}
-
-.lx-card-add-btn:hover .lx-card-add-label {
-  opacity: 1;
-  max-width: 180px;
-  transform: translateX(0);
-}
-
-/* Pill "Nella tua libreria" */
-.lx-card-inlibrary-pill {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 0.2rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-
-  background: rgba(34, 197, 94, 0.16);
-  border: 1px solid rgba(34, 197, 94, 0.8);
-  color: rgba(187, 247, 208, 0.96);
-  backdrop-filter: blur(10px);
-}
-
 /* ===== RATING STELLE NEL MODAL ===== */
 
 .lx-rating-stars-row {
@@ -1961,423 +1626,8 @@ h3,
 
 /* ===== HERO DETTAGLIO GIOCO ===== */
 
-/* meta row sotto l’hero */
-.lx-game-detail-meta {
-  background: rgba(15, 23, 42, 0.9);
-  border-radius: 1rem;
-  padding: 1rem 1.5rem;
-}
-
-.lx-related-wrapper {
-  background: transparent;
-}
-
-/* HERO SOLO NELLA PAGINA DETTAGLIO */
-.lx-game-detail-page .lx-hero {
-  position: relative;
-  width: 100%;
-  min-height: 500px;
-  padding: 80px 40px 60px;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  max-width: 1400px;
-  margin: 0 auto;
-  border-radius: 18px;
-  backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.55);
-}
-
-/* Background blur della cover – più chiaro e saturo */
-.lx-game-detail-page .lx-hero-bg-blur {
-  position: absolute;
-  inset: -40px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: blur(40px) brightness(0.9) saturate(1.15);
-  opacity: 0.9;
-  z-index: 0;
-}
-
-/* Overlay gradient più soft (meno nero) */
-.lx-game-detail-page .lx-hero-overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(15, 23, 42, 0.35), transparent 55%), radial-gradient(circle at 100% 0%, rgba(15, 23, 42, 0.4), transparent 55%),
-    linear-gradient(180deg, rgba(5, 6, 16, 0.1), rgba(5, 6, 16, 0.9));
-  z-index: 1;
-}
-
-/* Contenuto hero */
-.lx-game-detail-page .lx-hero-content {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  gap: 40px;
-  align-items: flex-start;
-}
-
-/* Cover */
-.lx-game-detail-page .lx-hero-cover {
-  flex-shrink: 0;
-  width: 280px;
-  height: 380px;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow:
-    0 18px 60px rgba(0, 0, 0, 0.6),
-    0 0 40px rgba(0, 217, 255, 0.25);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.lx-game-detail-page .lx-hero-cover:hover {
-  transform: scale(1.02);
-  box-shadow:
-    0 25px 70px rgba(0, 0, 0, 0.6),
-    0 0 60px rgba(0, 217, 255, 0.35);
-}
-
-.lx-game-detail-page .lx-cover-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Info */
-.lx-game-detail-page .lx-hero-info {
-  flex: 1;
-  padding-top: 0.25rem;
-  padding-bottom: 20px;
-}
-
-/* Titolo */
-.lx-game-detail-page .lx-hero-title {
-  font-size: clamp(2.4rem, 3.2vw, 3rem);
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 16px 0;
-  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.6);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-/* Meta */
-.lx-game-detail-page .lx-hero-meta {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-
-.lx-game-detail-page .lx-meta-item {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-/* Genre + platform pills */
-.lx-game-detail-page .lx-hero-genres {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-}
-
-.lx-game-detail-page .lx-genre-tag {
-  padding: 6px 16px;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(148, 163, 184, 0.45);
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: rgba(226, 232, 240, 0.95);
-  transition: all 0.2s ease;
-}
-
-.lx-game-detail-page .lx-genre-tag:hover {
-  background: rgba(15, 23, 42, 0.95);
-  border-color: var(--lx-detail-accent, #00d9ff);
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.45);
-  transform: translateY(-1px);
-}
-
-/* Descrizione */
-.lx-game-detail-page .lx-hero-description {
-  max-width: 800px;
-  color: rgba(226, 232, 240, 0.92);
-  font-size: 0.98rem;
-  line-height: 1.7;
-  margin: 0 0 32px 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-/* Bottone */
-.lx-game-detail-page .lx-btn-add-library {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 32px;
-  background: linear-gradient(135deg, #00d9ff 0%, #a855f7 100%);
-  border: none;
-  border-radius: 30px;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow:
-    0 8px 24px rgba(0, 217, 255, 0.3),
-    0 0 20px rgba(168, 85, 247, 0.2);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.lx-game-detail-page .lx-btn-add-library:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 12px 32px rgba(0, 217, 255, 0.4),
-    0 0 30px rgba(168, 85, 247, 0.3);
-}
-
-.lx-game-detail-page .lx-btn-add-library:active {
-  transform: translateY(0);
-}
-
-.lx-game-detail-page .lx-btn-add-library--disabled {
-  cursor: default;
-  opacity: 0.85;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  box-shadow: none;
-  border: 1px solid rgba(34, 197, 94, 0.75);
-}
-
-.lx-game-detail-page .lx-btn-add-library--disabled:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.lx-game-detail-page .lx-btn-icon {
-  flex-shrink: 0;
-}
-
-/* Descrizione (riuso fuori dall'hero se serve) */
-.lx-game-detail-description {
-  max-width: 700px;
-  color: rgba(226, 232, 240, 0.92);
-}
-
-.lx-game-detail-description p {
-  margin: 0;
-  line-height: 1.7;
-  font-size: 0.95rem;
-  color: rgba(226, 232, 240, 0.9);
-}
-
-/* pill generi/pattaforme (se usate altrove) */
-.lx-pill {
-  border-radius: 999px;
-  padding: 0.35rem 0.85rem;
-  font-size: 0.82rem;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(15, 23, 42, 0.75);
-  color: rgba(226, 232, 240, 0.9);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.lx-pill-genre {
-  border-color: rgba(168, 85, 247, 0.7);
-  color: #e9d5ff;
-}
-
-.lx-pill-platform {
-  border-color: rgba(56, 189, 248, 0.7);
-  color: #bae6fd;
-}
-
-.lx-pill:hover {
-  border-color: rgba(59, 130, 246, 0.8);
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
-  transform: translateY(-1px);
-}
-
-/* Responsive */
-@media (max-width: 968px) {
-  .lx-game-detail-page .lx-hero {
-    padding: 60px 24px 40px;
-    min-height: auto;
-  }
-
-  .lx-game-detail-page .lx-hero-content {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .lx-game-detail-page .lx-hero-cover {
-    width: 250px;
-    height: 333px;
-  }
-
-  .lx-game-detail-page .lx-hero-title {
-    font-size: 2.5rem;
-  }
-
-  .lx-game-detail-page .lx-hero-meta {
-    justify-content: center;
-  }
-
-  .lx-game-detail-page .lx-hero-genres {
-    justify-content: center;
-  }
-
-  .lx-game-detail-page .lx-hero-description {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .lx-game-detail-page .lx-hero {
-    padding: 40px 16px 30px;
-  }
-
-  .lx-game-detail-page .lx-hero-cover {
-    width: 200px;
-    height: 267px;
-  }
-
-  .lx-game-detail-page .lx-hero-title {
-    font-size: 2rem;
-  }
-
-  .lx-game-detail-page .lx-hero-description {
-    font-size: 0.95rem;
-  }
-
-  .lx-game-detail-page .lx-btn-add-library {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
 /* ===== SEZIONE GIOCATORI ===== */
-
-.lx-game-players-section {
-  padding: 2.5rem 0 1rem;
-}
-
-.lx-game-players-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-}
-
-.lx-player-card {
-  padding: 0.9rem 1rem;
-  border-radius: 14px;
-  background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.lx-player-head {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.lx-player-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 0%, #38bdf8, #4f46e5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: white;
-}
-
-.lx-player-username-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  color: #e5e7eb;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.lx-player-username-btn:hover {
-  color: var(--lx-cyan);
-}
-
-.lx-player-status {
-  font-size: 0.8rem;
-  color: rgba(148, 163, 184, 0.95);
-}
-.lx-player-rating-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-}
-
-.lx-player-rating-value {
-  font-weight: 600;
-  color: rgba(251, 191, 36, 0.95);
-}
-
-.lx-player-rating-empty {
-  font-size: 0.8rem;
-  color: rgba(148, 163, 184, 0.85);
-}
-
-.lx-player-review {
-  margin-top: 0.75rem;
-  padding: 0.6rem 0.8rem;
-  border-radius: 0.75rem;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-}
-
-.lx-player-review-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(148, 163, 184, 0.9);
-  margin-bottom: 0.2rem;
-}
-
-.lx-player-review-text {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: rgba(226, 232, 240, 0.96);
-}
-
-.lx-player-footer {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  color: rgba(148, 163, 184, 0.85);
-}
-
+/* 
 /* ===== FOOTER ===== */
 .lx-footer {
   background: rgba(10, 10, 15, 0.8);
@@ -2413,4 +1663,1174 @@ h3,
   .lx-game-cover {
     padding-bottom: 140%;
   }
+}
+
+/* ============================================
+   GAME CARD - Store Style
+   ============================================ */
+
+.lx-gamecard {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.4s ease-out,
+    transform 0.4s ease-out;
+}
+
+.lx-gamecard--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lx-gamecard-link {
+  display: block;
+  text-decoration: none;
+  height: 100%;
+}
+
+.lx-gamecard-inner {
+  position: relative;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  transition:
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.lx-gamecard-inner:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(96, 165, 250, 0.3);
+}
+
+.lx-gamecard-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(20, 23, 30, 1), rgba(30, 35, 45, 1));
+}
+
+.lx-gamecard-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lx-gamecard-inner:hover .lx-gamecard-image {
+  transform: scale(1.08);
+}
+
+.lx-gamecard-status-wrapper {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+}
+
+.lx-gamecard-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 6px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.lx-gamecard-badge--playing {
+  background: rgba(6, 182, 212, 0.25);
+  color: #22d3ee;
+  border: 1px solid rgba(6, 182, 212, 0.5);
+}
+
+.lx-gamecard-badge--completed {
+  background: rgba(168, 85, 247, 0.25);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.5);
+}
+
+.lx-gamecard-badge--backlog {
+  background: rgba(107, 114, 128, 0.25);
+  color: #9ca3af;
+  border: 1px solid rgba(107, 114, 128, 0.5);
+}
+
+.lx-gamecard-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.lx-gamecard-overlay-default,
+.lx-gamecard-overlay-hover {
+  padding: 1.25rem;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+.lx-gamecard-overlay-default {
+  background: linear-gradient(
+    to top,
+    rgba(7, 10, 20, 0.95) 0%,
+    rgba(7, 10, 20, 0.92) 28%,
+    rgba(7, 10, 20, 0.75) 45%,
+    rgba(7, 10, 20, 0.45) 65%,
+    transparent 88%
+  );
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lx-gamecard-overlay-default::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 40px;
+  background: linear-gradient(to top, rgba(7, 10, 20, 0.9), rgba(7, 10, 20, 0.5), transparent);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.lx-gamecard-inner:hover .lx-gamecard-overlay-default {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.lx-gamecard-overlay-hover {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(7, 10, 20, 0.98) 0%,
+    rgba(7, 10, 20, 0.95) 40%,
+    rgba(7, 10, 20, 0.8) 65%,
+    rgba(7, 10, 20, 0.5) 82%,
+    transparent 100%
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+.lx-gamecard-inner:hover .lx-gamecard-overlay-hover {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.lx-gamecard-title,
+.lx-gamecard-title-hover {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.lx-gamecard-title-hover {
+  margin-bottom: 0.25rem;
+}
+
+.lx-gamecard-rating {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.lx-gamecard-rating-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lx-gamecard-rating-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.lx-gamecard-rating-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.lx-gamecard-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.lx-gamecard-meta i {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.lx-gamecard-meta-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lx-gamecard-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.lx-gamecard-genre-pill {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.lx-gamecard-actions {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.lx-btn-add-library {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  width: 100%;
+  height: 44px;
+  padding: 0 0.9rem;
+
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+
+  background: radial-gradient(circle at 0% 0%, rgba(125, 211, 252, 0.4), transparent 55%), linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 999px;
+
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease,
+    padding 0.25s ease,
+    gap 0.25s ease;
+  overflow: hidden;
+}
+
+.lx-btn-add-library .lx-btn-icon {
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.lx-btn-add-library .lx-btn-text {
+  white-space: nowrap;
+}
+
+.lx-btn-add-library:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(37, 99, 235, 0.55);
+  /* background: radial-gradient(circle at 0% 0%, rgba(125, 211, 252, 0.45), transparent 60%), linear-gradient(135deg, #2563eb, #1d4ed8); */
+}
+
+.lx-btn-add-library--disabled {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.15), rgba(16, 185, 129, 0.35));
+  border: 1px solid rgba(16, 185, 129, 0.65);
+  color: #bbf7d0;
+
+  cursor: default;
+  box-shadow: none;
+}
+
+.lx-btn-add-library--disabled .lx-btn-icon {
+  color: #4ade80;
+}
+
+.lx-btn-add-library--disabled:hover,
+.lx-btn-icon,
+.lx-btn-text {
+  transform: none;
+  box-shadow: none;
+}
+
+.lx-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+.lx-btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.lx-btn-warm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+}
+
+.lx-btn-warm:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+  transform: translateY(-1px);
+}
+
+.lx-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.lx-btn-outline:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.lx-btn-outline:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Mobile/Touch: show overlay always */
+@media (hover: none) {
+  .lx-gamecard-overlay-default {
+    opacity: 0;
+  }
+
+  .lx-gamecard-overlay-hover {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    background: linear-gradient(to top, rgba(10, 12, 16, 0.96) 0%, rgba(10, 12, 16, 0.85) 45%, rgba(10, 12, 16, 0.6) 70%, transparent 100%);
+  }
+
+  .lx-btn-add-library .lx-btn-icon {
+    margin-right: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-gamecard,
+  .lx-gamecard-inner,
+  .lx-gamecard-image,
+  .lx-gamecard-overlay-default,
+  .lx-gamecard-overlay-hover,
+  .lx-btn-add-library,
+  .lx-btn-primary,
+  .lx-btn-warm,
+  .lx-library-page-btn,
+  .lx-glow-frame::before,
+  .lx-glow-frame::after {
+    transition: none;
+    animation: none;
+  }
+}
+
+@media (hover: none) {
+  .lx-btn-add-library {
+    padding: 0 1.1rem;
+  }
+}
+
+/* Mobile: stessa pill, solo full‑width */
+@media (hover: none) {
+  .lx-btn-add-library,
+  .lx-btn-add-library--disabled {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* --------------------------------------------
+   Rotating glow border riutilizzabile
+   -------------------------------------------- */
+
+/* Custom property animabile per l'angolo */
+@property --lx-glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes lx-glow-spin {
+  from {
+    --lx-glow-angle: 0deg;
+  }
+  to {
+    --lx-glow-angle: 360deg;
+  }
+}
+
+/* Wrapper riutilizzabile */
+.lx-glow-frame {
+  position: relative;
+  border-radius: 16px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  overflow: hidden; /* per tenere il glow allineato ai bordi */
+}
+
+/* Bordo glow “fine” che gira attorno alla sezione */
+.lx-glow-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* piccolo padding = spessore del bordino */
+  padding: 4px;
+  background: conic-gradient(
+    from var(--lx-glow-angle),
+    transparent 0deg,
+    transparent 260deg,
+    rgba(0, 217, 255, 0.55) 280deg,
+    rgba(96, 165, 250, 0.8) 300deg,
+    rgba(157, 78, 221, 0.7) 320deg,
+    transparent 340deg,
+    transparent 360deg
+  );
+  /* “buca” il centro, così il glow resta solo sul bordo */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  animation: lx-glow-spin 6s linear infinite;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* alone / secondo fascio, opposto al primo */
+.lx-glow-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 4px;
+
+  /* secondo fascio, ruotato di 180° rispetto a quello di ::before */
+  background: conic-gradient(
+    from calc(var(--lx-glow-angle) + 180deg),
+    transparent 0deg,
+    transparent 260deg,
+    rgba(157, 78, 221, 0.55) 280deg,
+    rgba(0, 217, 255, 0.75) 300deg,
+    rgba(96, 165, 250, 0.7) 320deg,
+    transparent 340deg,
+    transparent 360deg
+  );
+
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  /* giro alla stessa velocità, ma puoi invertire se vuoi più “dinamica” */
+  animation: lx-glow-spin 6s linear infinite;
+  opacity: 0.9;
+
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Contenuto vero e proprio della sezione */
+.lx-glow-frame-content {
+  position: relative;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/* ============================================
+   Reusable Premium Components
+   ============================================ */
+
+.lx-glass-container,
+.lx-community-frame,
+.lx-trending-frame,
+.lx-shelves-frame {
+  background: var(--gradient-glass-neon), var(--surface-light);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
+  box-shadow:
+    var(--shadow-medium),
+    0 0 40px rgba(0, 217, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.lx-glass-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-glass);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.lx-gradient-border {
+  position: relative;
+  border-radius: var(--radius-xl);
+}
+
+.lx-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: var(--gradient-border);
+  border-radius: inherit;
+  opacity: 0.4;
+  animation: gradient-shift 8s ease infinite;
+  z-index: -1;
+}
+
+.lx-review-compact,
+.lx-reviewer-compact,
+.lx-trending-item,
+.lx-game-card {
+  background: var(--surface-elevated);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+
+.lx-review-compact:hover,
+.lx-reviewer-compact:hover,
+.lx-trending-item:hover {
+  background: var(--surface-premium);
+  border-color: var(--border-muted);
+  box-shadow:
+    var(--shadow-subtle),
+    0 0 24px rgba(0, 217, 255, 0.15);
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* ============================================
+   GAME CARD - Premium Netflix-like + Compact
+   ============================================ */
+
+.lx-game-card {
+  background: var(--surface-elevated);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-muted);
+  box-shadow: var(--shadow-medium);
+  overflow: hidden;
+  transition: all var(--transition-slow);
+  position: relative;
+
+  /* container query per layout responsive in base alla larghezza della card */
+  container-type: inline-size;
+  container-name: game-card;
+}
+
+.lx-game-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: var(--gradient-border);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  z-index: 0;
+}
+
+.lx-game-card:hover {
+  transform: translateY(-4px) rotateX(1deg);
+  box-shadow: var(--shadow-strong);
+}
+
+.lx-game-card:hover::before {
+  opacity: 0.4;
+}
+
+/* Full variant base layout: 1 colonna (mobile / card stretta) */
+.lx-game-card--full .lx-game-card-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  position: relative;
+  z-index: 1;
+}
+
+/* Azioni base: nessuna min-width rigida, così può restringersi */
+.lx-game-card--full .lx-game-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+/* ===== Container query: card media (2 colonne) ===== */
+@container game-card (min-width: 640px) {
+  .lx-game-card--full .lx-game-card-inner {
+    grid-template-columns: 200px minmax(0, 1fr);
+    padding: var(--space-xl);
+  }
+
+  .lx-game-card--full .lx-game-card-actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .lx-game-card--full .lx-game-card-rating {
+    flex: 1;
+  }
+
+  .lx-game-card--full .lx-game-card-cta {
+    flex: 1;
+  }
+}
+
+/* ===== Container query: card larga (3 colonne) ===== */
+@container game-card (min-width: 900px) {
+  .lx-game-card--full .lx-game-card-inner {
+    grid-template-columns: 200px minmax(0, 1.2fr) minmax(160px, 0.9fr);
+  }
+
+  .lx-game-card--full .lx-game-card-actions {
+    grid-column: auto;
+    flex-direction: column;
+    min-width: 180px;
+  }
+}
+
+/* Column 1: Media & Status */
+.lx-game-card-media {
+  position: relative;
+}
+
+.lx-game-card-cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-subtle);
+}
+
+.lx-game-card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.lx-game-card:hover .lx-game-card-cover img {
+  transform: scale(1.05);
+}
+
+.lx-game-card-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent 50%);
+}
+
+.lx-game-card-status-badge {
+  position: absolute;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.lx-game-card-status-badge--playing {
+  background: rgba(6, 182, 212, 0.9);
+  color: #fff;
+  border: 1px solid rgba(6, 182, 212, 1);
+}
+
+.lx-game-card-status-badge--backlog {
+  background: rgba(148, 163, 184, 0.9);
+  color: #fff;
+  border: 1px solid rgba(148, 163, 184, 1);
+}
+
+.lx-game-card-status-badge--completed {
+  background: rgba(139, 92, 246, 0.9);
+  color: #fff;
+  border: 1px solid rgba(139, 92, 246, 1);
+}
+
+.lx-game-card-status-badge--paused {
+  background: rgba(245, 158, 11, 0.9);
+  color: #fff;
+  border: 1px solid rgba(245, 158, 11, 1);
+}
+
+.lx-game-card-platforms {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.lx-game-card-platform-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.lx-game-card-progress-ring {
+  width: 60px;
+  height: 60px;
+  margin: var(--space-md) auto 0;
+  position: relative;
+}
+
+.lx-game-card-progress-ring svg {
+  transform: rotate(-90deg);
+}
+
+.lx-game-card-progress-ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 4;
+}
+
+.lx-game-card-progress-ring-fill {
+  fill: none;
+  stroke: var(--status-playing);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--transition-slow);
+}
+
+.lx-game-card-progress-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Column 2: Info */
+.lx-game-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.lx-game-card-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.lx-game-card-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.lx-game-card-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.lx-game-card-meta-separator {
+  opacity: 0.5;
+}
+
+.lx-game-card-tags {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.lx-game-card-tags::-webkit-scrollbar {
+  display: none;
+}
+
+.lx-game-card-tag {
+  flex-shrink: 0;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.lx-game-card-review-snippet {
+  padding: var(--space-md);
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lx-game-card-progress-bar {
+  margin-top: auto;
+}
+
+.lx-game-card-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.lx-game-card-progress-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.lx-game-card-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--status-playing), var(--accent-cyan));
+  border-radius: 3px;
+  transition: width var(--transition-slow);
+}
+
+/* Column 3: Actions & Insight */
+.lx-game-card-cta {
+  padding: 0.875rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--status-playing), var(--accent-primary));
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-subtle);
+  text-align: center;
+  text-decoration: none;
+  display: block;
+}
+
+.lx-game-card-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.lx-game-card-cta--backlog {
+  background: linear-gradient(135deg, var(--status-backlog), #64748b);
+}
+
+.lx-game-card-cta--completed {
+  background: linear-gradient(135deg, var(--status-completed), #7c3aed);
+}
+
+.lx-game-card-cta--paused {
+  background: linear-gradient(135deg, var(--status-paused), #d97706);
+}
+
+.lx-game-card-secondary-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.lx-game-card-secondary-btn {
+  flex: 1;
+  padding: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+  text-decoration: none;
+  display: block;
+}
+
+.lx-game-card-secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-muted);
+}
+
+.lx-game-card-rating {
+  padding: var(--space-md);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.lx-game-card-rating-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lx-game-card-rating-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+  font-family: var(--font-display);
+}
+
+.lx-game-card-rating-value--unrated {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-disabled);
+}
+
+.lx-game-card-last-activity {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: auto;
+}
+
+/* ============================================
+   GAME CARD - Compact variant (Library)
+   ============================================ */
+
+.lx-game-card--compact {
+  padding: 0;
+  box-shadow: var(--shadow-subtle);
+}
+
+.lx-game-card-compact-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.lx-game-card-compact-cover {
+  position: relative;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.lx-game-card-compact-cover img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.lx-game-card--compact:hover .lx-game-card-compact-cover img {
+  transform: scale(1.04);
+}
+
+.lx-game-card-compact-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent 55%), radial-gradient(circle at bottom, rgba(0, 217, 255, 0.35), transparent 65%);
+}
+
+.lx-game-card-compact-main {
+  position: absolute;
+  inset: auto var(--space-md) var(--space-md) var(--space-md);
+  z-index: 1;
+}
+
+.lx-game-card-compact-title {
+  font-size: 0.975rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Hover layer con dettagli aggiuntivi */
+.lx-game-card-compact-hover {
+  position: absolute;
+  inset: auto var(--space-md) var(--space-md) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+  z-index: 2;
+}
+
+.lx-game-card--compact:hover .lx-game-card-compact-hover {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lx-game-card--compact:hover .lx-game-card-compact-main {
+  opacity: 0;
+}
+
+.lx-game-card-compact-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.lx-game-card-compact-chip {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  background: rgba(15, 23, 42, 0.75);
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+}
+
+.lx-game-card-compact-footer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.lx-game-card-compact-cta {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(120deg, var(--accent-cyan), var(--accent-purple));
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.6);
+  white-space: nowrap;
+}
+
+.lx-game-card-compact-cta--owned {
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(56, 189, 248, 0.7);
+}
+
+.lx-game-card--compact .lx-game-card-compact-cover {
+  aspect-ratio: 3 / 4; /* o 16 / 9, a gusto */
 }

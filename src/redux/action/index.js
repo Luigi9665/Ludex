@@ -41,9 +41,12 @@ import {
   UPDATE_USER_GAME_REQUEST,
   UPDATE_USER_GAME_SUCCESS,
   USER_DATA_CLEAR,
-  USER_DATA_ERROR,
-  USER_DATA_REQUEST,
-  USER_DATA_SUCCESS,
+  USER_MY_PROFILE_REQUEST,
+  USER_MY_PROFILE_SUCCESS,
+  USER_MY_PROFILE_ERROR,
+  USER_PROFILE_REQUEST,
+  USER_PROFILE_SUCCESS,
+  USER_PROFILE_ERROR,
   ADMIN_GAMES_REQUEST,
   ADMIN_GAMES_SUCCESS,
   ADMIN_GAMES_ERROR,
@@ -219,15 +222,51 @@ export const logoutAction = () => {
   };
 };
 
-//azione per prelevare dal db i dettagli di un giocatore
-export const loadUserDetails = (userId, { publicProfile = false } = {}) => {
+// =========== MIO PROFILO (utente loggato) ===========
+export const loadMyProfile = (userId) => {
   return async (dispatch) => {
-    dispatch({ type: USER_DATA_REQUEST });
+    if (!userId) return;
+
+    dispatch({ type: USER_MY_PROFILE_REQUEST });
 
     try {
-      const url = publicProfile
-        ? `/api/Users/GetUtenteById?id=${userId}` // profilo di un altro (solo dati pubblici)
-        : `/api/Users/MyProfile?id=${userId}`; // mio profilo (include review private, progress ecc.)
+      const url = `/api/Users/MyProfile?id=${userId}`;
+
+      const response = await apiFetch(url, { method: "GET" });
+
+      if (response.status === 401) {
+        // opzionale: puoi gestire logout o altro
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Impossibile caricare il tuo profilo");
+      }
+
+      const data = await safeJson(response);
+
+      dispatch({
+        type: USER_MY_PROFILE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: USER_MY_PROFILE_ERROR,
+        payload: error?.message || "Errore durante il caricamento del profilo",
+      });
+    }
+  };
+};
+
+// =========== PROFILO PUBBLICO (altro utente) ===========
+export const loadUserPublicProfile = (userId) => {
+  return async (dispatch) => {
+    if (!userId) return;
+
+    dispatch({ type: USER_PROFILE_REQUEST });
+
+    try {
+      const url = `/api/Users/GetUtenteById?id=${userId}`;
 
       const response = await apiFetch(url, { method: "GET" });
 
@@ -236,19 +275,19 @@ export const loadUserDetails = (userId, { publicProfile = false } = {}) => {
       }
 
       if (!response.ok) {
-        throw new Error("Impossibile caricare i dati");
+        throw new Error("Impossibile caricare il profilo utente");
       }
 
       const data = await safeJson(response);
 
       dispatch({
-        type: USER_DATA_SUCCESS,
+        type: USER_PROFILE_SUCCESS,
         payload: data,
       });
     } catch (error) {
       dispatch({
-        type: USER_DATA_ERROR,
-        payload: error?.message || "Errore durante il caricamento, riprova più tardi",
+        type: USER_PROFILE_ERROR,
+        payload: error?.message || "Errore durante il caricamento del profilo utente",
       });
     }
   };
@@ -691,71 +730,57 @@ export const loadPatchUsergame = (userGameId, patch, isMe) => {
     const authUser = state.auth.user;
     const effectiveUserId = state.userData.userDetails?.userId ?? authUser?.userId ?? null;
 
+    if (!effectiveUserId) {
+      console.warn("[loadPatchUsergame] nessun effectiveUserId, esco");
+      return;
+    }
+
+    // 💥 CONVERSIONE SICURA QUI
+    const safePatch = {
+      ...patch,
+      status: mapStatusToEnum(patch.status),
+    };
+
     dispatch({ type: UPDATE_USER_GAME_REQUEST });
 
     try {
-      const statusEnum = mapStatusToEnum(patch.status);
-
-      const payload = {
-        status: statusEnum,
-        progress: patch.progress,
-        rating: patch.rating,
-        review: patch.review,
-        isReviewPublic: patch.isReviewPublic,
-      };
-
       const res = await apiFetch(`/api/UserGames/UpdateUserGame/${userGameId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(safePatch),
       });
 
-      const data = await safeJson(res);
-
       if (!res.ok) {
-        console.error("[loadPatchUsergame] API error", data);
-
-        let apiMsg;
-
-        if (typeof data === "string") {
-          apiMsg = data;
-        } else {
-          apiMsg = data?.errors?.request?.[0] || data?.errors?.status?.[0] || data?.title || "Impossibile modificare i dettagli del gioco.";
-        }
-
-        throw new Error(apiMsg);
+        throw new Error("Impossibile aggiornare il gioco nella libreria.");
       }
+
+      await safeJson(res);
 
       dispatch({ type: UPDATE_USER_GAME_SUCCESS });
 
-      if (effectiveUserId) {
-        dispatch(
-          loadUserDetails(effectiveUserId, {
-            publicProfile: !isMe,
-          }),
-        );
+      if (isMe) {
+        dispatch(loadMyProfile(effectiveUserId));
+      } else {
+        dispatch(loadUserPublicProfile(effectiveUserId));
       }
     } catch (error) {
       console.error("[loadPatchUsergame] exception", error);
-
       dispatch({
         type: UPDATE_USER_GAME_FAIL,
         payload: error?.message || "Errore imprevisto durante il caricamento.",
       });
-
       throw error;
     }
   };
 };
 
 //metodo per la delete usergame
-export const loadDeleteUsergame = (userGameId, isMe) => {
-  return async (dispatch, getState) => {
-    const state = getState();
-    const authUser = state.auth.user;
-    const effectiveUserId = state.userData.userDetails?.userId ?? authUser?.userId ?? null;
-
+// actions / thunk
+// actions / thunk
+export const loadDeleteUsergame = (userGameId, { isMe, userId }) => {
+  return async (dispatch) => {
     dispatch({ type: DELETE_USER_GAME_REQUEST });
+
     try {
       const res = await apiFetch(`/api/UserGames/DeleteUserGame/${userGameId}`, {
         method: "DELETE",
@@ -765,16 +790,22 @@ export const loadDeleteUsergame = (userGameId, isMe) => {
         throw new Error("Impossibile eliminare il gioco nella libreria.");
       }
 
-      await safeJson(res);
+      // se l'API ritorna 204 No Content puoi anche NON fare safeJson
+      try {
+        await safeJson(res);
+      } catch {
+        // ignora se non c'è body
+      }
 
       dispatch({ type: DELETE_USER_GAME_SUCCESS });
 
-      if (effectiveUserId) {
-        dispatch(
-          loadUserDetails(effectiveUserId, {
-            publicProfile: !isMe,
-          }),
-        );
+      // 🔁 ricarico il profilo giusto
+      if (isMe) {
+        // mio profilo (privato, completo)
+        dispatch(loadMyProfile(userId));
+      } else {
+        // profilo pubblico di un altro utente
+        dispatch(loadUserPublicProfile(userId));
       }
     } catch (error) {
       dispatch({

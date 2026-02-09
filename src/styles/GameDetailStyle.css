@@ -1,0 +1,808 @@
+/* ============================================
+   PREMIUM ANIMATION SYSTEM 2026
+   ============================================ */
+
+/* Skeleton Shimmer Premium */
+@keyframes lx-shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.lx-skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%);
+  background-size: 1000px 100%;
+  animation: lx-shimmer 2s infinite linear;
+  border-radius: var(--radius-md);
+}
+
+.lx-skeleton--hero {
+  width: 100%;
+  height: 600px;
+  border-radius: var(--radius-xl);
+}
+
+.lx-skeleton--card {
+  width: 100%;
+  height: 280px;
+  border-radius: var(--radius-lg);
+}
+
+.lx-skeleton--text {
+  height: 20px;
+  margin-bottom: 12px;
+}
+
+.lx-skeleton--title {
+  height: 36px;
+  width: 60%;
+  margin-bottom: 16px;
+}
+
+/* Fade Up Entry Animation */
+@keyframes lx-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lx-anim-fade-up {
+  animation: lx-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Blur to Sharp Image Load */
+@keyframes lx-blur-in {
+  from {
+    filter: blur(20px);
+    opacity: 0;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+.lx-anim-blur-in {
+  animation: lx-blur-in 0.6s ease-out;
+}
+
+/* Stagger Parent */
+.lx-anim-stagger-parent > * {
+  animation: lx-fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.lx-anim-stagger-parent > *:nth-child(1) {
+  animation-delay: 0s;
+}
+.lx-anim-stagger-parent > *:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.lx-anim-stagger-parent > *:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.lx-anim-stagger-parent > *:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.lx-anim-stagger-parent > *:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.lx-anim-stagger-parent > *:nth-child(6) {
+  animation-delay: 0.25s;
+}
+.lx-anim-stagger-parent > *:nth-child(7) {
+  animation-delay: 0.3s;
+}
+.lx-anim-stagger-parent > *:nth-child(8) {
+  animation-delay: 0.35s;
+}
+
+/* Section Orchestration */
+.lx-section-orchestrated {
+  animation: lx-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.lx-section-orchestrated:nth-of-type(1) {
+  animation-delay: 0.1s;
+}
+.lx-section-orchestrated:nth-of-type(2) {
+  animation-delay: 0.25s;
+}
+.lx-section-orchestrated:nth-of-type(3) {
+  animation-delay: 0.4s;
+}
+.lx-section-orchestrated:nth-of-type(4) {
+  animation-delay: 0.55s;
+}
+
+/* Progress Appear */
+@keyframes lx-progress-appear {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+.lx-anim-progress {
+  animation: lx-progress-appear 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
+  transform-origin: left;
+}
+
+/* ============================================
+   GAME DETAIL PAGE - Premium 2026
+   ============================================ */
+
+/* Tema Dinamico */
+body.lx-body-game-detail {
+  background:
+    radial-gradient(ellipse at 20% 30%, var(--lx-detail-main, rgba(45, 20, 70, 0.6)) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 70%, var(--lx-detail-secondary, rgba(15, 5, 25, 0.5)) 0%, transparent 60%),
+    linear-gradient(180deg, var(--lx-detail-secondary, rgba(15, 5, 25, 0.8)) 0%, rgba(10, 5, 20, 0.95) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.lx-body-game-detail::before,
+body.lx-body-game-detail::after {
+  opacity: 0;
+}
+
+.lx-game-detail-page {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+
+  /* Gradient verticale che sfuma verso body background */
+  background: linear-gradient(180deg, rgba(10, 12, 16, 0.6) 0%, rgba(10, 12, 16, 0.4) 30%, rgba(10, 12, 16, 0.2) 60%, transparent 100%);
+}
+
+/* ============================================
+   HERO SECTION - Full Width Premium
+   ============================================ */
+
+.lx-hero--game-detail {
+  position: relative;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  min-height: 600px;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+}
+
+.lx-hero--game-detail::after {
+  content: "";
+  position: absolute;
+  bottom: -100px;
+  left: 0;
+  right: 0;
+  height: 200px;
+
+  background: linear-gradient(180deg, transparent 0%, rgba(7, 10, 20, 0.4) 30%, rgba(7, 10, 20, 0.7) 60%, rgba(7, 10, 20, 0.9) 100%);
+
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Background Blur Layer */
+.lx-hero-bg-blur {
+  position: absolute;
+  inset: -80px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* Blur più controllato */
+  filter: blur(80px) brightness(0.6) saturate(1.4) contrast(1.1);
+
+  /* Opacità aumentata per renderlo più visibile */
+  opacity: 0.65;
+
+  z-index: 0;
+  transform: scale(1.15);
+
+  /* Smooth transition quando cambia gioco */
+  transition: opacity 0.6s ease;
+}
+
+/* Multi-layer Gradient Overlay - Gaming UI 2026 */
+.lx-hero-overlay {
+  position: absolute;
+  inset: 0;
+
+  /* Multi-layer con alpha MOLTO ridotte */
+  background:
+    /* Accent spots leggeri */
+    radial-gradient(circle at 15% 20%, var(--lx-detail-accent, rgba(0, 217, 255, 0.1)), transparent 50%),
+    radial-gradient(circle at 85% 25%, var(--lx-detail-main, rgba(157, 78, 221, 0.08)), transparent 55%),
+    /* Vignette verticale leggera per leggibilità testo */
+    linear-gradient(180deg, rgba(10, 12, 16, 0.1) 0%, rgba(10, 12, 16, 0.4) 60%, rgba(10, 12, 16, 0.85) 100%),
+    /* Vignette laterali sottili */ radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(10, 12, 16, 0.3) 100%);
+
+  z-index: 1;
+}
+
+/* Hero Content Container */
+.lx-hero-content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 100px 40px 80px;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 60px;
+  align-items: end;
+}
+
+@media (max-width: 1024px) {
+  .lx-hero-content {
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+    padding: 80px 32px 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  .lx-hero-content {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 60px 24px 40px;
+    text-align: center;
+  }
+}
+
+/* Cover - Premium Elevation */
+.lx-hero-cover {
+  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 60px var(--lx-detail-accent, rgba(0, 217, 255, 0.2));
+  transition: all var(--transition-slow);
+}
+
+.lx-hero-cover:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow:
+    0 32px 100px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 0 80px var(--lx-detail-accent, rgba(0, 217, 255, 0.35));
+}
+
+.lx-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .lx-hero-cover {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+}
+
+/* Info Section */
+.lx-hero-info {
+  flex: 1;
+  padding-bottom: 12px;
+}
+
+/* Title - Premium Typography */
+.lx-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 4vw, 3.75rem);
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 0 0 20px 0;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.6),
+    0 0 40px var(--lx-detail-accent, rgba(0, 217, 255, 0.3));
+}
+
+.lx-hero-title span {
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.65em;
+}
+
+/* Meta Row */
+.lx-hero-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .lx-hero-meta {
+    justify-content: center;
+  }
+}
+
+.lx-meta-item {
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lx-meta-item::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  background: var(--lx-detail-accent, var(--accent-cyan));
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--lx-detail-accent, var(--accent-cyan));
+}
+
+.lx-meta-item:first-child::before {
+  display: none;
+}
+
+/* Genre & Platform Pills - Premium 2026 */
+.lx-hero-genres {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 768px) {
+  .lx-hero-genres {
+    justify-content: center;
+  }
+}
+
+.lx-genre-tag {
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.lx-genre-tag::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--lx-detail-accent, var(--accent-cyan)), var(--accent-purple));
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.lx-genre-tag:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--lx-detail-accent, var(--accent-cyan));
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px var(--lx-detail-accent, rgba(0, 217, 255, 0.3));
+}
+
+.lx-genre-tag:hover::before {
+  opacity: 0.15;
+}
+
+.lx-genre-tag--platform {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Description */
+.lx-hero-description {
+  max-width: 800px;
+  color: var(--text-secondary);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  margin: 0 0 36px 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 768px) {
+  .lx-hero-description {
+    max-width: 100%;
+  }
+}
+
+/* CTA Button - Premium Gradient */
+.lx-btn-add-library {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 40px;
+  background: linear-gradient(135deg, var(--lx-detail-accent, var(--accent-cyan)), var(--accent-purple));
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  transition: all var(--transition-slow);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 40px var(--lx-detail-accent, rgba(0, 217, 255, 0.3));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+}
+
+.lx-btn-add-library::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.lx-btn-add-library:hover::before {
+  opacity: 1;
+}
+
+.lx-btn-add-library:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.15),
+    0 0 60px var(--lx-detail-accent, rgba(0, 217, 255, 0.5));
+}
+
+.lx-btn-add-library:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.lx-btn-add-library--disabled {
+  cursor: not-allowed;
+  background: linear-gradient(135deg, var(--status-completed), #16a34a);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.lx-btn-add-library--disabled:hover {
+  transform: none;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.lx-btn-icon {
+  flex-shrink: 0;
+}
+
+/* ============================================
+   GAME DETAIL CONTENT SECTIONS
+   ============================================ */
+.lx-game-detail-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 40px;
+  position: relative;
+  z-index: 10;
+
+  /* Leggero padding top per evitare overlap con dissolve */
+  padding-top: 40px;
+}
+
+@media (max-width: 768px) {
+  .lx-game-detail-content {
+    padding: 0 24px;
+  }
+}
+
+/* Meta Info Section */
+.lx-game-detail-meta {
+  background: var(--gradient-glass-neon), var(--surface-light);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
+  padding: 32px;
+  margin-bottom: 60px;
+  box-shadow:
+    var(--shadow-medium),
+    0 0 40px rgba(0, 217, 255, 0.08);
+}
+
+.lx-meta-block {
+  text-align: center;
+}
+
+.lx-meta-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.lx-meta-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ============================================
+   PLAYERS SECTION - Premium Cards
+   ============================================ */
+
+.lx-game-players-section {
+  padding: 60px 0 40px;
+}
+
+.lx-game-players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+@media (max-width: 640px) {
+  .lx-game-players-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lx-player-card {
+  padding: 20px;
+  background: radial-gradient(circle at top left, rgba(0, 217, 255, 0.06), transparent 60%), var(--surface-elevated);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-subtle);
+}
+
+.lx-player-card:hover {
+  background: radial-gradient(circle at top left, rgba(0, 217, 255, 0.1), transparent 60%), var(--surface-premium);
+  border-color: var(--border-muted);
+  transform: translateX(4px);
+  box-shadow:
+    var(--shadow-medium),
+    0 0 24px rgba(0, 217, 255, 0.12);
+}
+
+.lx-player-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lx-player-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.125rem;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.lx-player-username-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0 0 4px;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  text-align: left;
+}
+
+.lx-player-username-btn:hover {
+  color: var(--accent-cyan);
+}
+
+.lx-player-status {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.lx-player-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.lx-player-rating-value {
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.lx-player-rating-empty {
+  font-size: 0.8125rem;
+  color: var(--text-disabled);
+}
+
+.lx-player-review {
+  margin-top: 8px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: var(--radius-sm);
+}
+
+.lx-player-review-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.lx-player-review-text {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   RELATED GAMES CAROUSEL - Premium 2026
+   ============================================ */
+
+.lx-related-section {
+  padding: 60px 0 80px;
+}
+
+.lx-related-card {
+  background: var(--surface-elevated);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-slow);
+  box-shadow: var(--shadow-subtle);
+}
+
+.lx-related-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-6px);
+  box-shadow:
+    var(--shadow-strong),
+    0 0 40px rgba(0, 217, 255, 0.2);
+}
+
+.lx-related-cover {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  position: relative;
+  overflow: hidden;
+}
+
+.lx-related-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.lx-related-card:hover .lx-related-cover img {
+  transform: scale(1.08);
+}
+
+.lx-related-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10, 12, 16, 0.9), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.lx-related-card:hover .lx-related-cover-overlay {
+  opacity: 1;
+}
+
+.lx-related-info {
+  padding: 20px;
+}
+
+.lx-related-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+  line-height: 1.3;
+}
+
+.lx-related-genres {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.lx-related-genre-pill {
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   ACCESSIBILITY - Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .lx-anim-fade-up,
+  .lx-anim-blur-in,
+  .lx-anim-stagger-parent > *,
+  .lx-section-orchestrated {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .lx-skeleton {
+    animation: none;
+  }
+
+  .lx-hero-cover:hover,
+  .lx-btn-add-library:hover,
+  .lx-player-card:hover,
+  .lx-related-card:hover {
+    transform: none;
+  }
+}

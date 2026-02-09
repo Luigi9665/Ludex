@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loadLatestReviews, loadTopReviewers, loadTrendingWeeklyGames, loadUserDetails } from "../redux/action";
+import { loadLatestReviews, loadMyProfile, loadTopReviewers, loadTrendingWeeklyGames } from "../redux/action/index";
 import HomePrivateArea from "../components/HomePage/HomePrivateArea";
-import HomePublicArea from "../components/HomePage/HomePublicArea";
+import CommunitySidebar from "../components/HomePage/CommunitySidebar";
+import TrendingSidebar from "../components/HomePage/TrendingSidebar";
+import "../styles/HomePage.css";
 
 const HomePage = () => {
   const dispatch = useDispatch();
@@ -10,13 +12,15 @@ const HomePage = () => {
   const authUser = useSelector((state) => state.auth.user);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated ?? false);
 
-  // fallback nel caso non ci sia isAuthenticated
   const isLogged = isAuthenticated || !!authUser?.userId;
 
-  // dati privati utente
-  const { userDetails, loading, loaded } = useSelector((state) => state.userData);
+  const myProfileState = useSelector((state) => state.userData.my) || {
+    data: null,
+    loading: false,
+    loaded: false,
+    error: null,
+  };
 
-  // dati pubblici home
   const homePublic = useSelector((state) => state.homePublic) || {};
 
   const trendingWeeklyGames = homePublic.trendingWeeklyGames || {
@@ -37,18 +41,12 @@ const HomePage = () => {
     error: null,
   };
 
-  // load dati utente solo se loggato
   useEffect(() => {
-    if (authUser?.userId && !loaded) {
-      dispatch(
-        loadUserDetails(authUser.userId, {
-          publicProfile: true,
-        }),
-      );
+    if (authUser?.userId && !myProfileState.loaded) {
+      dispatch(loadMyProfile(authUser.userId));
     }
-  }, [authUser?.userId, loaded, dispatch]);
+  }, [authUser?.userId, myProfileState.loaded, dispatch]);
 
-  // load sezioni pubbliche
   useEffect(() => {
     dispatch(loadTrendingWeeklyGames());
     dispatch(loadLatestReviews());
@@ -56,15 +54,22 @@ const HomePage = () => {
   }, [dispatch]);
 
   return (
-    <div className="container-fluid pt-3">
-      {/* H1 SEO soft */}
-      <h1 className="lx-h1-soft text-end">Ludex</h1>
+    <div className="lx-home">
+      <h1 className="lx-h1-soft">Ludex</h1>
 
-      {/* AREA PRIVATA */}
-      <HomePrivateArea isLogged={isLogged} authUser={authUser} userDetails={userDetails} userLoading={loading} />
+      <div className="lx-home-inner">
+        <aside className="lx-home-sidebar lx-home-sidebar--left">
+          <CommunitySidebar latestReviews={latestReviews} topReviewers={topReviewers} />
+        </aside>
 
-      {/* AREA PUBBLICA */}
-      <HomePublicArea trending={trendingWeeklyGames} latest={latestReviews} topReviewers={topReviewers} />
+        <main className="lx-home-main">
+          <HomePrivateArea isLogged={isLogged} authUser={authUser} userDetails={myProfileState.data} userLoading={myProfileState.loading} />
+        </main>
+
+        <aside className="lx-home-sidebar lx-home-sidebar--right">
+          <TrendingSidebar trending={trendingWeeklyGames} />
+        </aside>
+      </div>
     </div>
   );
 };

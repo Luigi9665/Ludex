@@ -1,30 +1,39 @@
+import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import GameCard from "../HomePage/GameCard";
 
 const LibraryGrid = ({ games, enableAddButton, onAddClick }) => {
-  const userDetails = useSelector((state) => state.userData.userDetails);
+  // Stato profilo utente corretto
+  const myProfileState = useSelector((state) => state.userData.my) || {
+    data: null,
+    loading: false,
+    loaded: false,
+    error: null,
+  };
 
-  const userGames = userDetails?.games || [];
+  const userGames = myProfileState.data?.games || [];
 
-  const userGameIds = new Set(userGames?.map((ug) => ug.gameId));
+  // Set di gameId per verificare rapidamente se un gioco è già in libreria
+  const userGameIds = useMemo(() => new Set(userGames.map((ug) => ug.gameId)), [userGames]);
+
   if (!games || games.length === 0) {
     return (
-      <div className="lx-glass p-5 text-center">
-        <i className="bi bi-controller display-4 mb-3 lx-text-glow"></i>
-        <h4 className="mb-2">Nessun gioco trovato</h4>
-        <p className="text-white-50 mb-0">Prova a cambiare i filtri o la ricerca.</p>
+      <div className="lx-library-empty">
+        <i className="bi bi-controller lx-library-empty-icon" />
+        <h4 className="lx-library-empty-title">Nessun gioco trovato</h4>
+        <p className="lx-library-empty-text">Prova a cambiare i filtri o la ricerca.</p>
       </div>
     );
   }
 
   return (
-    <div className="row g-4 mb-4">
-      {games?.map((game) => {
+    <div className="lx-library-grid">
+      {games.map((game) => {
         const alreadyInLibrary = userGameIds.has(game.gameId);
 
         return (
-          <div key={game.gameId} className="col-6 col-md-4 col-lg-3 col-xl-2">
-            <GameCard game={game} enableAddButton={enableAddButton} alreadyInLibrary={alreadyInLibrary} onAddClick={onAddClick} />
+          <div key={game.gameId} className="lx-library-grid-item">
+            <GameCard game={game} variant="compact" enableAddButton={enableAddButton} alreadyInLibrary={alreadyInLibrary} onAddClick={onAddClick} />
           </div>
         );
       })}

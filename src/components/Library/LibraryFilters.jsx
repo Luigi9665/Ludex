@@ -6,9 +6,7 @@ const LibraryFilters = ({ search, onSearchChange, selectedGenres, onGenresChange
   const dispatch = useDispatch();
   const { genres, platforms } = useSelector((state) => state.selectGame);
 
-  // normalizzo
   const genreList = Array.isArray(genres) ? genres : (genres?.items ?? []);
-
   const platformList = Array.isArray(platforms) ? platforms : (platforms?.items ?? []);
 
   useEffect(() => {
@@ -36,33 +34,34 @@ const LibraryFilters = ({ search, onSearchChange, selectedGenres, onGenresChange
   };
 
   return (
-    <div className="lx-glass p-3 p-lg-4 sticky-top" style={{ top: "90px" }}>
-      <h5 className="lx-field-label mb-3 d-flex align-items-center">
-        <i className="bi bi-funnel me-2"></i>
-        Filtri
-      </h5>
-
-      {/* SEARCH */}
-      <div className="mb-4">
-        <label className="lx-field-label mb-2">Cerca gioco</label>
-        <input
-          type="text"
-          className="form-control lx-field-control"
-          placeholder="Es: Elden Ring, Zelda..."
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          onKeyDown={handleKeyPress}
-        />
+    <div className="lx-library-filters">
+      <div className="lx-library-filters-header">
+        <i className="bi bi-funnel" />
+        <h3 className="lx-library-filters-title">Filtri</h3>
       </div>
 
-      {/* GENERI */}
-      <div className="mb-4">
-        <label className="lx-field-label mb-2 d-flex justify-content-between">
-          <span>Generi</span>
-          {selectedGenres.length > 0 && <span className="badge bg-primary">{selectedGenres.length}</span>}
-        </label>
+      <div className="lx-library-filter-group">
+        <label className="lx-library-filter-label">Cerca gioco</label>
+        <div className="lx-library-search-wrapper">
+          <i className="bi bi-search lx-library-search-icon" />
+          <input
+            type="text"
+            className="lx-library-search-input"
+            placeholder="Es: Elden Ring, Zelda..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleKeyPress}
+          />
+        </div>
+      </div>
 
-        <div className="lx-multiselect-list">
+      <div className="lx-library-filter-group">
+        <div className="lx-library-filter-label-row">
+          <label className="lx-library-filter-label">Generi</label>
+          {selectedGenres.length > 0 && <span className="lx-library-filter-count">{selectedGenres.length}</span>}
+        </div>
+
+        <div className="lx-library-filter-list">
           {genreList && genreList.length > 0 ? (
             genreList.map((g) => {
               const name = g.name;
@@ -70,26 +69,26 @@ const LibraryFilters = ({ search, onSearchChange, selectedGenres, onGenresChange
               const inputId = `genre-${g.genreId ?? g.id ?? name}`;
 
               return (
-                <label key={g.genreId ?? g.id ?? name} htmlFor={inputId} className={`lx-multiselect-item ${active ? "is-checked" : ""}`}>
-                  <input id={inputId} type="checkbox" className="form-check-input me-2" checked={active} onChange={() => handleGenreToggle(name)} />
-                  <span>{name}</span>
+                <label key={g.genreId ?? g.id ?? name} htmlFor={inputId} className={`lx-library-filter-item ${active ? "lx-library-filter-item--active" : ""}`}>
+                  <input id={inputId} type="checkbox" className="lx-library-filter-checkbox" checked={active} onChange={() => handleGenreToggle(name)} />
+                  <span className="lx-library-filter-item-text">{name}</span>
+                  {active && <i className="bi bi-check2 lx-library-filter-check" />}
                 </label>
               );
             })
           ) : (
-            <div className="text-muted small">Carico i generi...</div>
+            <div className="lx-library-filter-loading">Carico i generi...</div>
           )}
         </div>
       </div>
 
-      {/* PIATTAFORME */}
-      <div className="mb-4">
-        <label className="lx-field-label mb-2 d-flex justify-content-between">
-          <span>Piattaforme</span>
-          {selectedPlatforms.length > 0 && <span className="badge bg-primary">{selectedPlatforms.length}</span>}
-        </label>
+      <div className="lx-library-filter-group">
+        <div className="lx-library-filter-label-row">
+          <label className="lx-library-filter-label">Piattaforme</label>
+          {selectedPlatforms.length > 0 && <span className="lx-library-filter-count">{selectedPlatforms.length}</span>}
+        </div>
 
-        <div className="lx-multiselect-list">
+        <div className="lx-library-filter-list">
           {platformList && platformList.length > 0 ? (
             platformList.map((p) => {
               const name = p.name;
@@ -97,26 +96,30 @@ const LibraryFilters = ({ search, onSearchChange, selectedGenres, onGenresChange
               const inputId = `platform-${p.platformId ?? p.id ?? name}`;
 
               return (
-                <label key={p.platformId ?? p.id ?? name} htmlFor={inputId} className={`lx-multiselect-item ${active ? "is-checked" : ""}`}>
-                  <input id={inputId} type="checkbox" className="form-check-input me-2" checked={active} onChange={() => handlePlatformToggle(name)} />
-                  <span>{name}</span>
+                <label
+                  key={p.platformId ?? p.id ?? name}
+                  htmlFor={inputId}
+                  className={`lx-library-filter-item ${active ? "lx-library-filter-item--active" : ""}`}
+                >
+                  <input id={inputId} type="checkbox" className="lx-library-filter-checkbox" checked={active} onChange={() => handlePlatformToggle(name)} />
+                  <span className="lx-library-filter-item-text">{name}</span>
+                  {active && <i className="bi bi-check2 lx-library-filter-check" />}
                 </label>
               );
             })
           ) : (
-            <div className="text-muted small">Carico le piattaforme...</div>
+            <div className="lx-library-filter-loading">Carico le piattaforme...</div>
           )}
         </div>
       </div>
 
-      {/* BOTTONI */}
-      <div className="d-grid gap-2 mt-2">
-        <button type="button" className="lx-btn-primary w-100" onClick={onApply}>
-          <i className="bi bi-search me-2"></i>
+      <div className="lx-library-filter-actions">
+        <button type="button" className="lx-btn-primary lx-library-filter-btn" onClick={onApply}>
+          <i className="bi bi-search" />
           Applica filtri
         </button>
-        <button type="button" className="lx-btn-outline w-100" onClick={onReset}>
-          <i className="bi bi-x-circle me-2"></i>
+        <button type="button" className="lx-btn-outline lx-library-filter-btn" onClick={onReset}>
+          <i className="bi bi-x-circle" />
           Reset
         </button>
       </div>

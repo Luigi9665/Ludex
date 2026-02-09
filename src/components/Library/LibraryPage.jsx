@@ -8,38 +8,31 @@ import LibraryGrid from "../Library/LibraryGrid";
 import LibraryPagination from "../Library/LibraryPagination";
 import AddToLibraryModal from "./AddToLibraryModal";
 
-import { loadLibraryPage, loadUserDetails, searchLibraryGames } from "../../redux/action";
+import { loadLibraryPage, loadMyProfile, searchLibraryGames } from "../../redux/action";
+
+import "../../styles/LibraryPage.css";
 
 const LibraryPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
 
-  // --- AUTH ---
   const authState = useSelector((state) => state.auth || {});
   const isAuthenticated = authState.isAuthenticated ?? false;
   const authUser = authState.user;
 
-  // --- LIBRARY STATE ---
   const library = useSelector((state) => state.libraryGames);
   const { items, loading, error, page, pageSize, totalItems, totalPages, filters, mode } = library;
 
-  // --- PARAMETRI URL ---
   const searchParams = new URLSearchParams(location.search);
 
-  // accetto sia ?Title= che ?title=
   const titleFromUrl = searchParams.get("Title") || searchParams.get("title") || "";
-
-  // da GameDetailPage: /library?genre=Action&platform=PC
   const genreFromUrl = searchParams.get("genre") || "";
   const platformFromUrl = searchParams.get("platform") || "";
 
-  // --- FILTRI UI LOCALI ---
-  // li uso solo per gestire l'interfaccia; le query effettive le mando io quando voglio
   const [searchText, setSearchText] = useState(filters.search || "");
   const [selectedGenres, setSelectedGenres] = useState(filters.genres || []);
   const [selectedPlatforms, setSelectedPlatforms] = useState(filters.platforms || []);
 
-  // quando cambiano i parametri nell’URL, sincronizzo la UI dei filtri
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchText(titleFromUrl || "");
@@ -47,14 +40,12 @@ const LibraryPage = () => {
     setSelectedPlatforms(platformFromUrl ? [platformFromUrl] : []);
   }, [titleFromUrl, genreFromUrl, platformFromUrl]);
 
-  // primo load / cambio query string → decido se usare search o catalogo base
   useEffect(() => {
     const hasTitle = titleFromUrl.trim().length >= 2;
     const hasGenre = !!genreFromUrl;
     const hasPlatform = !!platformFromUrl;
 
     if (hasTitle || hasGenre || hasPlatform) {
-      // arrivo con filtri da URL: faccio una search con quei valori
       dispatch(
         searchLibraryGames({
           page: 1,
@@ -64,12 +55,9 @@ const LibraryPage = () => {
         }),
       );
     } else {
-      // nessun filtro da URL: carico il catalogo base (paginato)
       dispatch(loadLibraryPage(1));
     }
   }, [titleFromUrl, genreFromUrl, platformFromUrl, dispatch]);
-
-  // --- AZIONI FILTRI ---
 
   const handleApplyFilters = () => {
     dispatch(
@@ -93,10 +81,8 @@ const LibraryPage = () => {
     if (newPage < 1 || newPage > totalPages) return;
 
     if (mode === "all") {
-      // lista completa
       dispatch(loadLibraryPage(newPage));
     } else {
-      // modalità search: uso i filtri salvati nello store
       dispatch(
         searchLibraryGames({
           page: newPage,
@@ -108,7 +94,6 @@ const LibraryPage = () => {
     }
   };
 
-  // --- MODALE "AGGIUNGI ALLA MIA LIBRERIA" ---
   const [selectedGame, setSelectedGame] = useState(null);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -127,67 +112,87 @@ const LibraryPage = () => {
   };
 
   const handleSaved = () => {
-    // dopo aver aggiunto / modificato un gioco nella mia libreria
+    // ricarico la pagina libreria (lista giochi globali)
     dispatch(loadLibraryPage(1));
 
+    // se sono loggato, aggiorno anche il mio profilo (my)
     if (authUser?.userId) {
-      dispatch(loadUserDetails(authUser.userId));
+      dispatch(loadMyProfile(authUser.userId));
     }
   };
 
   return (
-    <section className="lx-section">
-      <div className="container-fluid">
-        {/* HEADER */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="lx-section-title">
-            <i className="bi bi-collection-play me-2" />
-            Libreria giochi
-          </h1>
-          <span className="text-white-50 small">{mode === "search" ? "Risultati filtrati" : "Catalogo completo"}</span>
-        </div>
-
-        <div className="row">
-          {/* FILTRI */}
-          <div className="col-lg-2 col-md-4 mb-4">
-            <LibraryFilters
-              search={searchText}
-              onSearchChange={setSearchText}
-              selectedGenres={selectedGenres}
-              onGenresChange={setSelectedGenres}
-              selectedPlatforms={selectedPlatforms}
-              onPlatformsChange={setSelectedPlatforms}
-              onApply={handleApplyFilters}
-              onReset={handleResetFilters}
-            />
+    <div className="lx-library-page">
+      <div className="lx-library-header">
+        <div className="lx-library-header-content">
+          <div className="lx-library-header-left">
+            <h1 className="lx-library-title">
+              <i className="bi bi-collection-play" />
+              Libreria giochi
+            </h1>
+            <p className="lx-library-subtitle">Esplora il catalogo completo e aggiungi i tuoi preferiti</p>
           </div>
-
-          {/* CONTENUTO PRINCIPALE */}
-          <div className="col-lg-10 col-md-8">
-            {loading && <LxLoader message="Carico il catalogo giochi..." />}
-
-            {!loading && error && (
-              <div className="alert alert-danger lx-glass">
-                <i className="bi bi-exclamation-triangle me-2" />
-                {error}
-              </div>
+          <div className="lx-library-header-right">
+            {mode === "search" && (
+              <span className="lx-library-pill lx-library-pill--search">
+                <i className="bi bi-funnel-fill" />
+                Filtri attivi
+              </span>
             )}
-
-            {!loading && !error && (
-              <>
-                <LibraryGrid games={items} enableAddButton={true} onAddClick={handleOpenAdd} />
-
-                {totalPages > 0 && (
-                  <LibraryPagination page={page} pageSize={pageSize} totalItems={totalItems} totalPages={totalPages} onPageChange={handleChangePage} />
-                )}
-              </>
-            )}
+            <span className="lx-library-pill">
+              <i className="bi bi-grid-3x3-gap" />
+              {totalItems} giochi
+            </span>
           </div>
         </div>
-
-        <AddToLibraryModal game={selectedGame} open={addOpen} onClose={handleCloseAdd} onSaved={handleSaved} />
       </div>
-    </section>
+
+      <div className="lx-library-layout">
+        <aside className="lx-library-sidebar">
+          <div className="lx-glow-frame">
+            <div className="lx-glow-frame-content">
+              <LibraryFilters
+                search={searchText}
+                onSearchChange={setSearchText}
+                selectedGenres={selectedGenres}
+                onGenresChange={setSelectedGenres}
+                selectedPlatforms={selectedPlatforms}
+                onPlatformsChange={setSelectedPlatforms}
+                onApply={handleApplyFilters}
+                onReset={handleResetFilters}
+              />
+            </div>
+          </div>
+        </aside>
+
+        <main className="lx-library-content">
+          {loading && <LxLoader message="Carico il catalogo giochi..." />}
+
+          {!loading && error && (
+            <div className="lx-library-error">
+              <i className="bi bi-exclamation-triangle" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {!loading && !error && (
+            <div className="lx-glow-frame">
+              <div className="lx-glow-frame-content">
+                <div className="lx-library-content-inner">
+                  <LibraryGrid games={items} enableAddButton={true} onAddClick={handleOpenAdd} />
+
+                  {totalPages > 0 && (
+                    <LibraryPagination page={page} pageSize={pageSize} totalItems={totalItems} totalPages={totalPages} onPageChange={handleChangePage} />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      <AddToLibraryModal game={selectedGame} open={addOpen} onClose={handleCloseAdd} onSaved={handleSaved} />
+    </div>
   );
 };
 

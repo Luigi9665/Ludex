@@ -2,17 +2,17 @@ import { Outlet } from "react-router";
 import MyNavbar from "../components/navbar/MyNavbar";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { loadUserDetails } from "../redux/action";
+import { loadMyProfile } from "../redux/action";
 
 export default function MainLayout() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
 
-  const { loaded, loading } = useSelector((state) => state.userData);
+  const { loaded, loading } = useSelector((state) => state.userData.my);
 
   useEffect(() => {
     if (user?.userId && !loaded && !loading) {
-      dispatch(loadUserDetails(user.userId));
+      dispatch(loadMyProfile(user.userId));
     }
   }, [user?.userId, loaded, loading, dispatch]);
 

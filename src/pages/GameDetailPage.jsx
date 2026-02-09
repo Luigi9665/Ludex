@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
-import LxLoader from "../components/LxLoader";
 import AddToLibraryModal from "../components/Library/AddToLibraryModal";
-
+import GameDetailSkeleton from "../components/GameDetail/GameDetailSkeleton";
 import GameDetailHero from "../components/GameDetail/GameDetailHero";
 import GameDetailMeta from "../components/GameDetail/GameDetailMeta";
 import GamePlayersSection from "../components/GameDetail/GamePlayersSection";
 import GameRelatedSection from "../components/GameDetail/GameRelatedSection";
-import { loadGameDetail, loadUserDetails } from "../redux/action";
+import { loadGameDetail, loadMyProfile } from "../redux/action";
+import "../styles/GameDetailStyle.css";
 
 const GameDetailPage = () => {
   const { gameId } = useParams();
@@ -16,19 +16,24 @@ const GameDetailPage = () => {
   const dispatch = useDispatch();
 
   const authUser = useSelector((state) => state.auth.user);
-  const userGames = useSelector((state) => state.userData.userDetails?.games) || [];
+  const myProfileState = useSelector((state) => state.userData.my) || {
+    data: null,
+    loading: false,
+    loaded: false,
+    error: null,
+  };
+
+  const userGames = myProfileState.data?.games || [];
   const { game, related, loading, error } = useSelector((state) => state.gameDetail);
 
   const [modalOpen, setModalOpen] = useState(false);
 
-  // carico i dettagli gioco
   useEffect(() => {
     if (gameId) {
       dispatch(loadGameDetail(gameId));
     }
   }, [gameId, dispatch]);
 
-  // è già nella mia libreria?
   const alreadyInLibrary = useMemo(() => userGames.some((ug) => ug.gameId === gameId), [userGames, gameId]);
 
   const handleAddClick = useCallback(() => {
@@ -40,21 +45,12 @@ const GameDetailPage = () => {
   }, [authUser, navigate]);
 
   const handleModalSaved = useCallback(() => {
-    // chiudi il modal
     setModalOpen(false);
-
-    // ricarica DETTAGLI gioco (per aggiornare userGames del gioco, ecc.)
     if (gameId) {
       dispatch(loadGameDetail(gameId));
     }
-
-    // ricarica i dati utente (per aggiornare userDetails.games → alreadyInLibrary)
     if (authUser?.userId) {
-      dispatch(
-        loadUserDetails(authUser.userId, {
-          publicProfile: false,
-        }),
-      );
+      dispatch(loadMyProfile(authUser.userId));
     }
   }, [dispatch, gameId, authUser]);
 
@@ -72,10 +68,7 @@ const GameDetailPage = () => {
     [navigate],
   );
 
-  /** ===============================
-   *  TEMA DINAMICO DAL BACKEND
-   *  =============================== */
-
+  /* Dynamic Theme */
   const mainColor = game?.mainColor || game?.MainColor || "#1b1430";
   const secondaryColor = game?.secondaryColor || game?.SecondaryColor || "#090518";
   const accentColor = game?.accentColor || game?.AccentColor || "#00d9ff";
@@ -85,15 +78,30 @@ const GameDetailPage = () => {
 
     const body = document.body;
     const root = document.documentElement;
+    const page = document.querySelector(".lx-game-detail-page");
 
+    // Store previous values
     const prevMain = root.style.getPropertyValue("--lx-detail-main");
     const prevSecondary = root.style.getPropertyValue("--lx-detail-secondary");
     const prevAccent = root.style.getPropertyValue("--lx-detail-accent");
 
+    // Apply theme
     body.classList.add("lx-body-game-detail");
     root.style.setProperty("--lx-detail-main", mainColor);
     root.style.setProperty("--lx-detail-secondary", secondaryColor);
     root.style.setProperty("--lx-detail-accent", accentColor);
+
+    // NUOVO: Applica anche un tint molto leggero al page wrapper
+    if (page) {
+      page.style.setProperty(
+        "background",
+        `
+        radial-gradient(ellipse at 50% 20%, ${mainColor}15 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 60%, ${secondaryColor}10 0%, transparent 70%),
+        linear-gradient(180deg, rgba(10,12,16,0.6) 0%, rgba(10,12,16,0.4) 30%, rgba(10,12,16,0.2) 60%, transparent 100%)
+      `,
+      );
+    }
 
     return () => {
       body.classList.remove("lx-body-game-detail");
@@ -106,21 +114,19 @@ const GameDetailPage = () => {
 
       if (prevAccent) root.style.setProperty("--lx-detail-accent", prevAccent);
       else root.style.removeProperty("--lx-detail-accent");
+
+      if (page) {
+        page.style.removeProperty("background");
+      }
     };
   }, [game, mainColor, secondaryColor, accentColor]);
 
-  /** =============================== */
-
+  /* Skeleton Loader */
   if (loading) {
-    return (
-      <section className="lx-section">
-        <div className="container">
-          <LxLoader message="Carico i dettagli del gioco..." />
-        </div>
-      </section>
-    );
+    return <GameDetailSkeleton />;
   }
 
+  /* Error State */
   if (error || !game) {
     return (
       <section className="lx-section">

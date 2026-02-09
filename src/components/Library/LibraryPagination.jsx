@@ -2,7 +2,6 @@ const LibraryPagination = ({ page, pageSize, totalItems, totalPages, onPageChang
   const startItem = totalItems > 0 ? (page - 1) * pageSize + 1 : 0;
   const endItem = Math.min(page * pageSize, totalItems);
 
-  // Calculate which page buttons to show (max 5)
   const getPageNumbers = () => {
     const pages = [];
     const maxButtons = 5;
@@ -33,40 +32,34 @@ const LibraryPagination = ({ page, pageSize, totalItems, totalPages, onPageChang
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="mt-4">
-      {/* Info Text */}
-      <div className="text-center mb-3">
-        <span className="lx-text-glow">
+    <div className="lx-library-pagination">
+      <div className="lx-library-pagination-info">
+        <span>
           Mostrando {startItem}–{endItem} di {totalItems} giochi
         </span>
       </div>
 
-      {/* Pagination Buttons */}
-      <div className="d-flex justify-content-center align-items-center gap-2 flex-wrap">
-        {/* Previous Button */}
-        <button className="btn lx-btn-outline" onClick={() => onPageChange(page - 1)} disabled={page === 1} style={{ minWidth: "120px" }}>
-          <i className="bi bi-chevron-double-left me-2"></i>
-          Precedente
+      <div className="lx-library-pagination-controls">
+        <button className="lx-library-page-btn lx-library-page-btn--nav" onClick={() => onPageChange(page - 1)} disabled={page === 1}>
+          <i className="bi bi-chevron-left" />
+          <span>Precedente</span>
         </button>
 
-        {/* Page Numbers */}
-        <div className="d-flex gap-2">
+        <div className="lx-library-page-numbers">
           {pageNumbers.map((pageNum) => (
             <button
               key={pageNum}
-              className={pageNum === page ? "lx-btn-primary" : "lx-btn-outline"}
+              className={`lx-library-page-btn ${pageNum === page ? "lx-library-page-btn--active" : ""}`}
               onClick={() => onPageChange(pageNum)}
-              style={{ minWidth: "45px" }}
             >
               {pageNum}
             </button>
           ))}
         </div>
 
-        {/* Next Button */}
-        <button className="btn lx-btn-outline" onClick={() => onPageChange(page + 1)} disabled={page === totalPages} style={{ minWidth: "120px" }}>
-          Successiva
-          <i className="bi bi-chevron-double-right ms-2"></i>
+        <button className="lx-library-page-btn lx-library-page-btn--nav" onClick={() => onPageChange(page + 1)} disabled={page === totalPages}>
+          <span>Successiva</span>
+          <i className="bi bi-chevron-right" />
         </button>
       </div>
     </div>

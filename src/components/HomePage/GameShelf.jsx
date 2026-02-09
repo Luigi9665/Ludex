@@ -1,8 +1,10 @@
-import { Link } from "react-router";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
+import GameCard from "./GameCard";
 
-const GameRelatedSection = ({ relatedGames = [], genres = [] }) => {
+const GameShelf = ({ title, subtitle, games, variant }) => {
+  const variantClass = variant ? `lx-shelf--${variant}` : "";
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     containScroll: "trimSnaps",
@@ -11,6 +13,8 @@ const GameRelatedSection = ({ relatedGames = [], genres = [] }) => {
 
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState([]);
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
@@ -20,8 +24,16 @@ const GameRelatedSection = ({ relatedGames = [], genres = [] }) => {
     if (emblaApi) emblaApi.scrollNext();
   }, [emblaApi]);
 
+  const scrollTo = useCallback(
+    (index) => {
+      if (emblaApi) emblaApi.scrollTo(index);
+    },
+    [emblaApi],
+  );
+
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
     setCanScrollPrev(emblaApi.canScrollPrev());
     setCanScrollNext(emblaApi.canScrollNext());
   }, [emblaApi]);
@@ -30,18 +42,20 @@ const GameRelatedSection = ({ relatedGames = [], genres = [] }) => {
     if (!emblaApi) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     onSelect();
+    setScrollSnaps(emblaApi.scrollSnapList());
     emblaApi.on("select", onSelect);
     emblaApi.on("reInit", onSelect);
   }, [emblaApi, onSelect]);
 
-  if (!relatedGames.length) return null;
-
   return (
-    <section className="lx-related-section lx-section-orchestrated">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="lx-section-title mb-0">Giochi correlati</h2>
-        {genres.length > 0 && <span className="lx-link small ms-3">Basato su: {genres[0]}</span>}
+    <div className={`lx-shelf ${variantClass}`}>
+      <header className="lx-shelf-header">
+        <div className="lx-shelf-title-group">
+          <h3 className="lx-shelf-title">{title}</h3>
+          {subtitle && <p className="lx-shelf-subtitle">{subtitle}</p>}
+        </div>
         <div className="lx-shelf-controls">
+          <span className="lx-shelf-count">{games.length}</span>
           <button className="lx-shelf-arrow" onClick={scrollPrev} disabled={!canScrollPrev} aria-label="Precedente">
             <i className="bi bi-chevron-left" />
           </button>
@@ -49,38 +63,35 @@ const GameRelatedSection = ({ relatedGames = [], genres = [] }) => {
             <i className="bi bi-chevron-right" />
           </button>
         </div>
-      </div>
+      </header>
 
       <div className="lx-shelf-carousel">
         <div className="lx-shelf-carousel-viewport" ref={emblaRef}>
           <div className="lx-shelf-carousel-container">
-            {relatedGames.map((g, idx) => (
-              <div key={g.gameId} className="lx-shelf-carousel-slide" style={{ animationDelay: `${idx * 0.05}s` }}>
-                <Link to={`/game/${g.gameId}`} className="lx-related-card">
-                  <div className="lx-related-cover">
-                    <img src={g.coverUrl} alt={g.title} loading="lazy" />
-                    <div className="lx-related-cover-overlay" />
-                  </div>
-                  <div className="lx-related-info">
-                    <h5 className="lx-related-title">{g.title}</h5>
-                    {Array.isArray(g.genre) && g.genre.length > 0 && (
-                      <div className="lx-related-genres">
-                        {g.genre.slice(0, 2).map((genre, i) => (
-                          <span key={i} className="lx-related-genre-pill">
-                            {genre}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Link>
+            {games.map((game) => (
+              <div key={game.gameId} className="lx-shelf-carousel-slide">
+                {/* Home = versione full */}
+                <GameCard game={game} variant="full" />
               </div>
             ))}
           </div>
         </div>
+
+        {scrollSnaps.length > 1 && (
+          <div className="lx-shelf-dots">
+            {scrollSnaps.map((_, index) => (
+              <button
+                key={index}
+                className={`lx-shelf-dot ${index === selectedIndex ? "lx-shelf-dot--active" : ""}`}
+                onClick={() => scrollTo(index)}
+                aria-label={`Vai allo slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
-    </section>
+    </div>
   );
 };
 
-export default GameRelatedSection;
+export default GameShelf;

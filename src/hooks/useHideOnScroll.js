@@ -1,14 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
-/**
- * Ritorna true/false se la navbar deve essere nascosta
- * in base SOLO alla direzione dello scroll.
- * Nessun riferimento a isOpen o ad altri stati esterni.
- */
 export function useHideOnScroll() {
   const [hidden, setHidden] = useState(false);
   const lastY = useRef(0);
   const ticking = useRef(false);
+  const hiddenRef = useRef(false); // tiene il valore corrente senza triggerare re-render
 
   useEffect(() => {
     lastY.current = window.scrollY || 0;
@@ -24,17 +20,22 @@ export function useHideOnScroll() {
         const delta = y - prev; // >0 giù, <0 su
         const nearTop = y <= 8;
 
+        let nextHidden = hiddenRef.current;
+
         if (nearTop) {
-          // in alto => sempre visibile
-          setHidden(false);
+          nextHidden = false;
         } else {
           if (delta < -1) {
-            // anche pochissimo verso SU => mostra
-            setHidden(false);
+            nextHidden = false; // scroll su → mostra
           } else if (delta > 1) {
-            // verso GIÙ => nascondi
-            setHidden(true);
+            nextHidden = true; // scroll giù → nascondi
           }
+        }
+
+        // evita setState inutili
+        if (nextHidden !== hiddenRef.current) {
+          hiddenRef.current = nextHidden;
+          setHidden(nextHidden);
         }
 
         lastY.current = y;

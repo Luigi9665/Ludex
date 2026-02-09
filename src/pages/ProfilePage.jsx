@@ -1,11 +1,9 @@
-// src/pages/ProfilePage.jsx
-
 import { useCallback, useEffect, useMemo } from "react";
 import { useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 
 import LxLoader from "../components/LxLoader";
-import { loadUserDetails, loadPatchUsergame, loadDeleteUsergame } from "../redux/action";
+import { loadMyProfile, loadUserPublicProfile, loadPatchUsergame, loadDeleteUsergame } from "../redux/action";
 import ProfileHeader from "../components/Profile/ProfileHeader";
 import ProfileGameSection from "../components/Profile/ProfileGameSection";
 import "../styles/ProfilePage.css";
@@ -15,9 +13,8 @@ const ProfilePage = () => {
   const dispatch = useDispatch();
 
   const authUser = useSelector((state) => state.auth.user);
-  const userDetails = useSelector((state) => state.userData.userDetails);
-  const loading = useSelector((state) => state.userData.loading);
-  const error = useSelector((state) => state.userData.error);
+  const myProfileState = useSelector((state) => state.userData.my);
+  const publicProfileState = useSelector((state) => state.userData.profile);
 
   const isMe = useMemo(() => {
     if (!routeUserId && authUser) return true;
@@ -30,18 +27,25 @@ const ProfilePage = () => {
     return authUser?.userId ?? null;
   }, [authUser, routeUserId]);
 
+  const viewState = isMe ? myProfileState : publicProfileState;
+
+  const userDetails = viewState?.data;
+  const loading = viewState?.loading;
+  const error = viewState?.error;
+
   // carico il profilo giusto (mio o di un altro)
   useEffect(() => {
     if (!effectiveUserId) return;
 
-    dispatch(
-      loadUserDetails(effectiveUserId, {
-        publicProfile: !isMe, // se non è il mio, chiede il profilo pubblico
-      }),
-    );
+    if (isMe) {
+      dispatch(loadMyProfile(effectiveUserId));
+    } else {
+      dispatch(loadUserPublicProfile(effectiveUserId));
+    }
   }, [effectiveUserId, isMe, dispatch]);
 
   // lista giochi (backend gestisce già private/public, ma lato front filtro di sicurezza)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const allGames = userDetails?.games ?? [];
   const visibleGames = useMemo(() => {
     if (isMe) return allGames;
@@ -75,9 +79,14 @@ const ProfilePage = () => {
   // DELETE UserGame (usa thunk)
   const handleDeleteUserGame = useCallback(
     (userGameId) => {
-      return dispatch(loadDeleteUsergame(userGameId, isMe));
+      return dispatch(
+        loadDeleteUsergame(userGameId, {
+          isMe,
+          userId: effectiveUserId,
+        }),
+      );
     },
-    [dispatch, isMe],
+    [dispatch, isMe, effectiveUserId],
   );
 
   // ================= RENDER STATE =================

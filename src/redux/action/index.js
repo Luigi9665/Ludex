@@ -40,6 +40,9 @@ import {
   UPDATE_USER_GAME_FAIL,
   UPDATE_USER_GAME_REQUEST,
   UPDATE_USER_GAME_SUCCESS,
+  UPDATE_USER_GAME_QUICK_REQUEST,
+  UPDATE_USER_GAME_QUICK_SUCCESS,
+  UPDATE_USER_GAME_QUICK_FAIL,
   USER_DATA_CLEAR,
   USER_MY_PROFILE_REQUEST,
   USER_MY_PROFILE_SUCCESS,
@@ -128,6 +131,7 @@ import {
   QUESTIONNAIRE_ADMIN_DELETE_OPTION_FAILURE,
 } from "../authTypes";
 import { STATUS_TO_ENUM } from "../../utils/statusMapper";
+import { mapStatusToEnumQuick, mapStatusEnumToStringQuick } from "../../utils/statusMappingQuick";
 
 const safeJson = async (res) => {
   try {
@@ -768,6 +772,82 @@ export const loadPatchUsergame = (userGameId, patch, isMe) => {
       dispatch({
         type: UPDATE_USER_GAME_FAIL,
         payload: error?.message || "Errore imprevisto durante il caricamento.",
+      });
+      throw error;
+    }
+  };
+};
+
+// helpers da mettere vicino alle altre utility nel file action/index.js
+
+// DTO backend → client
+const mapBackendUserGameDtoToClient = (dto) => {
+  if (!dto) return null;
+
+  const statusEnum = dto.status ?? dto.Status;
+
+  return {
+    userGameId: dto.userGameId ?? dto.UserGameId,
+    gameId: dto.gameId ?? dto.GameId,
+    title: dto.title ?? dto.Title ?? "",
+    coverUrl: dto.coverUrl ?? dto.CoverUrl ?? "",
+    status: mapStatusEnumToStringQuick(statusEnum),
+    progress: dto.progress ?? dto.Progress ?? 0,
+    rating: dto.rating ?? dto.Rating ?? 0,
+    review: dto.review ?? dto.Review ?? "",
+    isReviewPublic: dto.isReviewPublic ?? dto.IsReviewPublic ?? false,
+    createdAt: dto.createdAt ?? dto.CreatedAt,
+    lastUpdatedAt: dto.lastUpdatedAt ?? dto.LastUpdatedAt,
+  };
+};
+
+// PATCH "leggera" per home / card / libreria
+export const loadQuickPatchUsergame = (userGameId, patch) => {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const authUser = state.auth.user;
+    const effectiveUserId = authUser?.userId ?? null;
+
+    if (!effectiveUserId) {
+      console.warn("[loadQuickPatchUsergame] nessun effectiveUserId, esco");
+      return;
+    }
+
+    const safePatch = {
+      ...patch,
+      status: mapStatusToEnumQuick(patch.status),
+    };
+
+    dispatch({ type: UPDATE_USER_GAME_QUICK_REQUEST });
+
+    try {
+      const res = await apiFetch(`/api/UserGames/UpdateUserGame/${userGameId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(safePatch),
+      });
+
+      if (!res.ok) {
+        throw new Error("Impossibile aggiornare il gioco nella libreria.");
+      }
+
+      const raw = await safeJson(res);
+      const updated = mapBackendUserGameDtoToClient(raw);
+
+      if (!updated || !updated.userGameId) {
+        console.error("[loadQuickPatchUsergame] DTO aggiornato senza userGameId", raw);
+        throw new Error("Risposta non valida dal server (userGameId mancante).");
+      }
+
+      dispatch({
+        type: UPDATE_USER_GAME_QUICK_SUCCESS,
+        payload: updated,
+      });
+    } catch (error) {
+      console.error("[loadQuickPatchUsergame] exception", error);
+      dispatch({
+        type: UPDATE_USER_GAME_QUICK_FAIL,
+        payload: error?.message || "Errore imprevisto durante l'aggiornamento.",
       });
       throw error;
     }

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import LxLoader from "../LxLoader";
 
 const CommunitySidebar = ({ latestReviews, topReviewers }) => {
@@ -37,18 +37,28 @@ const CommunitySidebar = ({ latestReviews, topReviewers }) => {
           {!reviewsLoading && !reviewsError && reviewsItems.length > 0 && (
             <div className="lx-community-list">
               {reviewsItems.map((review) => (
-                <article key={review.userGameId} className="lx-review-compact">
-                  <header className="lx-review-compact-header">
-                    <img src={review.coverUrl} alt={review.title} className="lx-review-compact-cover" />
-                    <div className="lx-review-compact-info">
-                      <div className="lx-review-compact-game">{review.title}</div>
-                      <button type="button" className="lx-review-compact-user" onClick={() => handleUserClick(review.userId)}>
-                        @{review.username}
-                      </button>
-                    </div>
-                  </header>
-                  <p className="lx-review-compact-text">{review.review}</p>
-                </article>
+                <Link key={review.userGameId} to={`/game/${review.gameId}`} className="lx-review-compact-link">
+                  <article className="lx-review-compact">
+                    <header className="lx-review-compact-header">
+                      <img src={review.coverUrl} alt={review.title} className="lx-review-compact-cover" />
+                      <div className="lx-review-compact-info">
+                        <div className="lx-review-compact-game">{review.title}</div>
+                        <button
+                          type="button"
+                          className="lx-review-compact-user"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleUserClick(review.userId);
+                          }}
+                        >
+                          @{review.username}
+                        </button>
+                      </div>
+                    </header>
+                    <p className="lx-review-compact-text">{review.review}</p>
+                  </article>
+                </Link>
               ))}
             </div>
           )}

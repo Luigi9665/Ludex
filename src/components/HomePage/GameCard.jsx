@@ -1,14 +1,24 @@
+import { useState, useMemo } from "react";
 import { Link } from "react-router";
-import StarRating from "../StarRating";
+import { useUserGameActions } from "../../hooks/useUserGameActions.js";
 
-const GameCard = ({ game, variant = "full", enableAddButton, alreadyInLibrary = false, onAddClick }) => {
+const GameCard = ({
+  game,
+  variant = "full",
+  enableAddButton,
+  alreadyInLibrary = false,
+  onAddClick,
+  isMe = true, // true = libreria mia, false = card “read-only” se vorrai in futuro
+}) => {
   const heroImage = game.heroImageUrl || game.coverUrl;
+
+  const platforms = useMemo(() => (Array.isArray(game.platform) ? game.platform : [game.platform].filter(Boolean)), [game.platform]);
+
+  const genres = useMemo(() => (Array.isArray(game.genre) ? game.genre : [game.genre].filter(Boolean)), [game.genre]);
+
   const hasRating = typeof game.rating === "number" && game.rating > 0;
   const hasReview = typeof game.review === "string" && game.review.trim().length > 0;
   const isReviewPublic = game.isReviewPublic === true;
-
-  const platforms = Array.isArray(game.platform) ? game.platform : [game.platform].filter(Boolean);
-  const genres = Array.isArray(game.genre) ? game.genre : [game.genre].filter(Boolean);
 
   const statusConfig = {
     Playing: { label: "Continua", className: "lx-game-card-cta" },
@@ -27,7 +37,7 @@ const GameCard = ({ game, variant = "full", enableAddButton, alreadyInLibrary = 
   const status = statusConfig[game.status] || { label: "Gioca", className: "lx-game-card-cta" };
   const badgeClass = statusBadgeClass[game.status] || "";
 
-  const progress = game.progress || 0;
+  const progress = typeof game.progress === "number" ? game.progress : 0;
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
@@ -41,10 +51,93 @@ const GameCard = ({ game, variant = "full", enableAddButton, alreadyInLibrary = 
     if (diffDays === 0) return "Aggiornato oggi";
     if (diffDays === 1) return "Aggiornato ieri";
     if (diffDays < 7) return `${diffDays} giorni fa`;
-    return lastUpdate.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
+    return lastUpdate.toLocaleDateString("it-IT", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   };
 
-  // ===== COMPACT VARIANT (per Library) =====
+  const lastActivityText = getLastActivityText();
+
+  // ===== Stato locale per l’edit “sessione” (Playing / Completed) =====
+  const [isEditingSession, setIsEditingSession] = useState(false);
+  const [isSavingSession, setIsSavingSession] = useState(false);
+
+  const [draftProgress, setDraftProgress] = useState(progress);
+  const [draftRating, setDraftRating] = useState(hasRating ? game.rating : null);
+  const [draftReview, setDraftReview] = useState(hasReview ? game.review : "");
+  const [draftIsPublic, setDraftIsPublic] = useState(isReviewPublic);
+
+  const { startFromBacklog, resumeFromPaused, replayFromCompleted, updateSession } = useUserGameActions({ isMe });
+
+  const openSessionEdit = () => {
+    setDraftProgress(typeof game.progress === "number" ? game.progress : 0);
+    setDraftRating(hasRating ? game.rating : null);
+    setDraftReview(hasReview ? game.review : "");
+    setDraftIsPublic(isReviewPublic);
+    setIsEditingSession(true);
+  };
+
+  const handlePrimaryAction = async () => {
+    switch (game.status) {
+      case "Backlog":
+        await startFromBacklog(game);
+        break;
+      case "Paused":
+        await resumeFromPaused(game);
+        break;
+      case "Completed":
+        await replayFromCompleted(game);
+        break;
+      case "Playing":
+      default:
+        openSessionEdit();
+        break;
+    }
+  };
+
+  const handleSessionCancel = () => {
+    setDraftProgress(typeof game.progress === "number" ? game.progress : 0);
+    setDraftRating(hasRating ? game.rating : null);
+    setDraftReview(hasReview ? game.review : "");
+    setDraftIsPublic(isReviewPublic);
+    setIsEditingSession(false);
+  };
+
+  const handleSessionSave = async () => {
+    const isPlaying = game.status === "Playing";
+    const payload = {
+      ...(isPlaying ? { progress: draftProgress } : {}),
+      rating: draftRating,
+      review: draftReview,
+      isReviewPublic: draftIsPublic,
+    };
+
+    setIsSavingSession(true);
+    try {
+      await updateSession(game, payload, "Sessione aggiornata.");
+      setIsEditingSession(false);
+    } finally {
+      setIsSavingSession(false);
+    }
+  };
+
+  // ===== URL "Simili" → /library?genre=...&genre=... (max 3) =====
+  const similarHref = useMemo(() => {
+    const similarGenres = genres.slice(0, 3);
+    if (similarGenres.length === 0) return "/library";
+
+    const params = new URLSearchParams();
+    similarGenres.forEach((g) => {
+      if (g) params.append("genre", g);
+    });
+
+    const query = params.toString();
+    return query ? `/library?${query}` : "/library";
+  }, [genres]);
+
+  // ===== COMPACT VARIANT (Library) =====
   if (variant === "compact") {
     const isInLibrary = alreadyInLibrary === true;
     const primaryGenre = genres[0];
@@ -57,14 +150,12 @@ const GameCard = ({ game, variant = "full", enableAddButton, alreadyInLibrary = 
             <img src={heroImage} alt={game.title} loading="lazy" />
             <div className="lx-game-card-compact-gradient" />
 
-            {/* Titolo base (sempre visibile) */}
             <div className="lx-game-card-compact-main">
               <h4 className="lx-game-card-compact-title" title={game.title}>
                 {game.title}
               </h4>
             </div>
 
-            {/* Layer hover con dettagli + CTA */}
             <div className="lx-game-card-compact-hover">
               <div className="lx-game-card-compact-meta">
                 {primaryGenre && <span className="lx-game-card-compact-chip">{primaryGenre}</span>}
@@ -78,7 +169,7 @@ const GameCard = ({ game, variant = "full", enableAddButton, alreadyInLibrary = 
                     className={`lx-game-card-compact-cta ${isInLibrary ? "lx-game-card-compact-cta--owned" : ""}`}
                     disabled={isInLibrary}
                     onClick={(e) => {
-                      e.preventDefault(); // evita il navigation del Link
+                      e.preventDefault();
                       if (!isInLibrary && onAddClick) {
                         onAddClick(game);
                       }
@@ -99,46 +190,49 @@ const GameCard = ({ game, variant = "full", enableAddButton, alreadyInLibrary = 
   return (
     <article className="lx-game-card lx-game-card--full">
       <div className="lx-game-card-inner">
-        {/* Column 1: Media & Status */}
-        <div className="lx-game-card-media">
+        {/* HEADER */}
+        <div className="lx-game-card-header">
           <div className="lx-game-card-cover">
             <img src={heroImage} alt={game.title} loading="lazy" />
             <div className="lx-game-card-cover-overlay" />
+
             {game.status && <span className={`lx-game-card-status-badge ${badgeClass}`}>{game.status}</span>}
+
+            {game.status === "Playing" && progress > 0 && (
+              <div className="lx-game-card-progress-ring">
+                <svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true">
+                  <circle className="lx-game-card-progress-ring-bg" cx="30" cy="30" r={radius} />
+                  <circle
+                    className="lx-game-card-progress-ring-fill"
+                    cx="30"
+                    cy="30"
+                    r={radius}
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                  />
+                </svg>
+                <div className="lx-game-card-progress-ring-text">{progress}%</div>
+              </div>
+            )}
+
+            {platforms.length > 0 && (
+              <div className="lx-game-card-platforms">
+                {platforms.slice(0, 3).map((platform, idx) => (
+                  <span key={idx} className="lx-game-card-platform-pill" title={platform}>
+                    {platform.substring(0, 3).toUpperCase()}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-
-          {platforms.length > 0 && (
-            <div className="lx-game-card-platforms">
-              {platforms.slice(0, 3).map((platform, idx) => (
-                <div key={idx} className="lx-game-card-platform-icon" title={platform}>
-                  {platform.substring(0, 2).toUpperCase()}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {game.status === "Playing" && progress > 0 && (
-            <div className="lx-game-card-progress-ring">
-              <svg width="60" height="60" viewBox="0 0 60 60">
-                <circle className="lx-game-card-progress-ring-bg" cx="30" cy="30" r={radius} />
-                <circle
-                  className="lx-game-card-progress-ring-fill"
-                  cx="30"
-                  cy="30"
-                  r={radius}
-                  strokeDasharray={circumference}
-                  strokeDashoffset={strokeDashoffset}
-                />
-              </svg>
-              <div className="lx-game-card-progress-ring-text">{progress}%</div>
-            </div>
-          )}
         </div>
 
-        {/* Column 2: Info */}
-        <div className="lx-game-card-info">
-          <Link to={`/game/${game.gameId}`} style={{ textDecoration: "none" }}>
-            <h4 className="lx-game-card-title">{game.title}</h4>
+        {/* BODY */}
+        <div className="lx-game-card-body">
+          <Link to={`/game/${game.gameId}`} className="lx-game-card-title-link">
+            <h4 className="lx-game-card-title" title={game.title}>
+              {game.title}
+            </h4>
           </Link>
 
           <div className="lx-game-card-meta-row">
@@ -147,56 +241,131 @@ const GameCard = ({ game, variant = "full", enableAddButton, alreadyInLibrary = 
             {genres.length > 0 && <span className="lx-game-card-meta-item">{genres[0]}</span>}
           </div>
 
-          {genres.length > 0 && (
-            <div className="lx-game-card-tags">
-              {genres.slice(0, 4).map((genre, idx) => (
-                <span key={idx} className="lx-game-card-tag">
-                  {genre}
-                </span>
-              ))}
-            </div>
-          )}
+          {genres.length > 0 &&
+            (() => {
+              const maxGenres = 3;
+              const displayedGenres = genres.slice(0, maxGenres);
+              const remainingCount = genres.length - maxGenres;
 
-          {hasReview && isReviewPublic && <div className="lx-game-card-review-snippet">{game.review}</div>}
+              return (
+                <div className="lx-game-card-tags">
+                  {displayedGenres.map((genre, idx) => (
+                    <span key={idx} className="lx-game-card-tag" title={genre}>
+                      {genre}
+                    </span>
+                  ))}
 
-          {game.status === "Playing" && progress > 0 && (
-            <div className="lx-game-card-progress-bar">
-              <div className="lx-game-card-progress-label">
-                <span>Completamento</span>
-                <span>{progress}%</span>
+                  {remainingCount > 0 && <span className="lx-game-card-tag lx-game-card-tag--more">+{remainingCount}</span>}
+                </div>
+              );
+            })()}
+
+          {/* Review / Editor inline */}
+          {isEditingSession ? (
+            <div className="lx-game-card-session-edit">
+              {game.status === "Playing" && (
+                <div className="lx-game-card-session-field">
+                  <div className="lx-game-card-progress-label">
+                    <span>Completamento</span>
+                    <span className="ms-1">{draftProgress}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={draftProgress}
+                    onChange={(e) => setDraftProgress(Number(e.target.value))}
+                    className="lx-game-card-progress-slider"
+                  />
+                </div>
+              )}
+
+              <div className="lx-game-card-session-field">
+                <label className="lx-game-card-session-label">Valutazione (1–5)</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={5}
+                  step={1}
+                  value={draftRating ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setDraftRating(val === "" ? null : Number(val));
+                  }}
+                  className="lx-game-card-session-input"
+                />
               </div>
-              <div className="lx-game-card-progress-track">
-                <div className="lx-game-card-progress-fill" style={{ width: `${progress}%` }} />
+
+              <div className="lx-game-card-session-field">
+                <label className="lx-game-card-session-label">Recensione</label>
+                <textarea
+                  rows={3}
+                  value={draftReview}
+                  onChange={(e) => setDraftReview(e.target.value)}
+                  className="lx-game-card-session-textarea"
+                  placeholder="Scrivi cosa ne pensi del gioco…"
+                />
+                <label className="lx-game-card-session-toggle">
+                  <input type="checkbox" checked={draftIsPublic} onChange={(e) => setDraftIsPublic(e.target.checked)} />
+                  <span>Rendi la recensione pubblica</span>
+                </label>
               </div>
             </div>
+          ) : hasReview ? (
+            <div className="lx-game-card-review">
+              <p className="lx-game-card-review-text">{game.review}</p>
+            </div>
+          ) : (
+            <p className="lx-game-card-review-empty">Non ancora recensito</p>
           )}
         </div>
 
-        {/* Column 3: Actions & Insight */}
-        <div className="lx-game-card-actions">
-          <Link to={`/game/${game.gameId}`} className={status.className}>
-            {status.label}
-          </Link>
+        {/* FOOTER */}
+        <div className="lx-game-card-footer">
+          {isEditingSession ? (
+            <div className="lx-game-card-footer-primary-group">
+              <button type="button" className="lx-game-card-cta lx-game-card-cta--ghost" onClick={handleSessionCancel} disabled={isSavingSession}>
+                Annulla
+              </button>
+              <button type="button" className="lx-game-card-cta lx-game-card-cta--primary-save" onClick={handleSessionSave} disabled={isSavingSession}>
+                {isSavingSession ? "Salvataggio..." : "Salva"}
+              </button>
+            </div>
+          ) : (
+            <button type="button" className={status.className} onClick={handlePrimaryAction} disabled={isSavingSession}>
+              {status.label}
+            </button>
+          )}
 
           <div className="lx-game-card-secondary-actions">
             <Link to={`/game/${game.gameId}`} className="lx-game-card-secondary-btn">
               Dettagli
             </Link>
-            <Link to={`/game/${game.gameId}`} className="lx-game-card-secondary-btn">
+            <Link to={similarHref} className="lx-game-card-secondary-btn">
               Simili
             </Link>
           </div>
 
-          <div className="lx-game-card-rating">
-            <div className="lx-game-card-rating-label">La tua valutazione</div>
-            {hasRating ? (
-              <div className="lx-game-card-rating-value">{game.rating.toFixed(1)}</div>
-            ) : (
-              <div className="lx-game-card-rating-value lx-game-card-rating-value--unrated">Non valutato</div>
-            )}
-          </div>
+          <div className="lx-game-card-footer-meta">
+            <button
+              type="button"
+              className="lx-game-card-rating lx-game-card-rating--clickable"
+              onClick={() => {
+                if (!isEditingSession && (game.status === "Playing" || game.status === "Completed")) {
+                  openSessionEdit();
+                }
+              }}
+            >
+              <span className="lx-game-card-rating-label">La tua valutazione</span>
 
-          {game.lastUpdatedAt && <div className="lx-game-card-last-activity">{getLastActivityText()}</div>}
+              <span className={hasRating ? "lx-game-card-rating-value" : "lx-game-card-rating-value lx-game-card-rating-value--unrated"}>
+                {hasRating ? game.rating.toFixed(1) : "N/D"}
+              </span>
+            </button>
+
+            {lastActivityText && <div className="lx-game-card-last-activity">{lastActivityText}</div>}
+          </div>
         </div>
       </div>
     </article>

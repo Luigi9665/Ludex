@@ -723,16 +723,26 @@
   width: 100%;
 }
 
+@media (min-width: 768px) {
+  .lx-shelf-carousel-slide {
+    width: calc(50% - var(--space-lg) / 2); /* 2 card su tablet */
+  }
+}
+
 @media (min-width: 1024px) {
   .lx-shelf-carousel-slide {
-    width: calc(50% - var(--space-lg) / 2);
+    width: calc(50% - var(--space-lg) * 2 / 3);
   }
 }
 
 @media (min-width: 1536px) {
   .lx-shelf-carousel-slide {
-    width: calc(100% / 3 - var(--space-lg) * 2 / 3);
+    width: calc(100% / 3 - var(--space-lg) * 3 / 4);
   }
+}
+
+.lx-shelf-carousel-slide > .lx-game-card {
+  height: 100%;
 }
 
 /* Carousel Controls */
@@ -1009,6 +1019,20 @@
   color: var(--text-muted);
 }
 
+/* Link wrapper per le review (navigazione al gioco) */
+.lx-review-compact-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Hover sul link: enfatizza la card intera */
+.lx-review-compact-link:hover .lx-review-compact {
+  transform: translateX(2px) scale(1.02);
+  box-shadow: var(--shadow-medium);
+  border-color: var(--accent-cyan);
+}
+
 /* ============================================
    TRENDING SIDEBAR - Discovery Panel
    ============================================ */
@@ -1161,6 +1185,225 @@
 
 .lx-trending-reviews {
   color: var(--text-muted);
+}
+
+/* ============================================
+   GAME CARD - Inline Session Editor (premium)
+   ============================================ */
+
+.lx-game-card-session-edit {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 217, 255, 0.12), transparent 55%), radial-gradient(circle at 100% 100%, rgba(157, 78, 221, 0.14), transparent 55%),
+    rgba(7, 10, 20, 0.92);
+  border: 1px solid var(--border-muted);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.lx-game-card-session-edit::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(0, 217, 255, 0.5), rgba(157, 78, 221, 0.5));
+  opacity: 0.3;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* contenuto sopra l'effetto neon */
+.lx-game-card-session-edit > * {
+  position: relative;
+  z-index: 1;
+}
+
+.lx-game-card-session-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Label progress / rating */
+
+.lx-game-card-session-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.lx-game-card-session-label strong {
+  color: var(--text-secondary);
+}
+
+/* Slider progresso (variant neon) */
+
+.lx-game-card-progress-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9));
+  outline: none;
+  position: relative;
+}
+
+.lx-game-card-progress-slider::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 999px;
+}
+
+.lx-game-card-progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 12px rgba(0, 217, 255, 0.85);
+  margin-top: -5.5px;
+  cursor: pointer;
+}
+
+.lx-game-card-progress-slider::-moz-range-track {
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.lx-game-card-progress-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 12px rgba(0, 217, 255, 0.85);
+  cursor: pointer;
+}
+
+/* Input rating numerico, mantiene look “field” */
+
+.lx-game-card-session-input {
+  width: 80px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: rgba(15, 23, 42, 0.95);
+  color: var(--text-primary);
+}
+
+/* Textarea recensione */
+
+.lx-game-card-session-textarea {
+  width: 100%;
+  min-height: 70px;
+  max-height: 120px;
+  resize: vertical;
+  font-size: 0.8rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: rgba(15, 23, 42, 0.96);
+  color: var(--text-primary);
+  padding: 0.55rem 0.7rem;
+}
+
+.lx-game-card-session-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Toggle pubblica – pill neon */
+
+.lx-game-card-session-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.lx-game-card-session-toggle input[type="checkbox"] {
+  width: 34px;
+  height: 18px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 999px;
+  background: rgba(51, 65, 85, 0.8);
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--border-subtle);
+  outline: none;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.lx-game-card-session-toggle input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  transition: transform var(--transition-fast);
+}
+
+.lx-game-card-session-toggle input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 18px rgba(0, 217, 255, 0.4);
+}
+
+.lx-game-card-session-toggle input[type="checkbox"]:checked::before {
+  transform: translateX(14px);
+}
+
+/* CTA inline al posto del main button */
+
+.lx-game-card-footer-primary-group {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.lx-game-card-cta--ghost {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--border-subtle);
+  box-shadow: none;
+  color: var(--text-secondary);
+}
+
+.lx-game-card-cta--ghost:hover {
+  background: rgba(15, 23, 42, 1);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.lx-game-card-cta--primary-save {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-cyan));
+}
+
+/* Responsive */
+
+@media (min-width: 1024px) {
+  .lx-game-card-session-edit {
+    padding: var(--space-md) var(--space-lg);
+  }
 }
 
 /* ============================================

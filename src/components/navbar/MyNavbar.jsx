@@ -192,14 +192,16 @@ const MyNavbar = ({ user }) => {
                 </Link>
               </li>
               <li>
-                <Link to="/reviews" className={`lx-navbar-link ${location.pathname === "/reviews" ? "lx-navbar-link--active" : ""}`}>
-                  Reviews
-                </Link>
+                {isAuthenticated && (
+                  <Link to="/profile" className={`lx-navbar-link ${location.pathname === "/profile" ? "lx-navbar-link--active" : ""}`}>
+                    Profile
+                  </Link>
+                )}
               </li>
               <li>
-                <Link to="/community" className={`lx-navbar-link ${location.pathname === "/community" ? "lx-navbar-link--active" : ""}`}>
+                {/* <Link to="/community" className={`lx-navbar-link ${location.pathname === "/community" ? "lx-navbar-link--active" : ""}`}>
                   Community
-                </Link>
+                </Link> */}
               </li>
             </ul>
 
@@ -225,7 +227,7 @@ const MyNavbar = ({ user }) => {
                         <i className="bi bi-person" />
                         Profile
                       </button>
-                      <button
+                      {/* <button
                         type="button"
                         className="lx-navbar-dropdown-item"
                         onClick={() => {
@@ -235,7 +237,7 @@ const MyNavbar = ({ user }) => {
                       >
                         <i className="bi bi-gear" />
                         Settings
-                      </button>
+                      </button> */}
 
                       {user?.role === "Admin" && (
                         <>
@@ -317,9 +319,11 @@ const MyNavbar = ({ user }) => {
                 </button>
               </div>
 
-              <div className="lx-navbar-mobile-search">
-                <NavSearch />
-              </div>
+              {isOpen && (
+                <div className="lx-navbar-mobile-search">
+                  <NavSearch />
+                </div>
+              )}
 
               <nav className="lx-navbar-mobile-nav">
                 <Link
@@ -341,22 +345,24 @@ const MyNavbar = ({ user }) => {
                   <i className="bi bi-collection" />
                   Library
                 </Link>
-                <Link
-                  to="/reviews"
-                  className={`lx-navbar-mobile-link ${location.pathname === "/reviews" ? "lx-navbar-mobile-link--active" : ""}`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <i className="bi bi-star" />
-                  Reviews
-                </Link>
-                <Link
+                {isAuthenticated && (
+                  <Link
+                    to="/profile"
+                    className={`lx-navbar-mobile-link ${location.pathname === "/profile" ? "lx-navbar-mobile-link--active" : ""}`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <i className="bi bi-star" />
+                    Profile
+                  </Link>
+                )}
+                {/* <Link
                   to="/community"
                   className={`lx-navbar-mobile-link ${location.pathname === "/community" ? "lx-navbar-mobile-link--active" : ""}`}
                   onClick={() => setIsOpen(false)}
                 >
                   <i className="bi bi-people" />
                   Community
-                </Link>
+                </Link> */}
               </nav>
 
               {isAuthenticated ? (
@@ -375,10 +381,10 @@ const MyNavbar = ({ user }) => {
                     <i className="bi bi-person" />
                     Profile
                   </Link>
-                  <Link className="lx-navbar-mobile-link" to="/settings" onClick={() => setIsOpen(false)}>
+                  {/* <Link className="lx-navbar-mobile-link" to="/settings" onClick={() => setIsOpen(false)}>
                     <i className="bi bi-gear" />
                     Settings
-                  </Link>
+                  </Link> */}
 
                   {user?.role === "Admin" && (
                     <>

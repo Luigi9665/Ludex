@@ -26,23 +26,34 @@ const LibraryPage = () => {
   const searchParams = new URLSearchParams(location.search);
 
   const titleFromUrl = searchParams.get("Title") || searchParams.get("title") || "";
-  const genreFromUrl = searchParams.get("genre") || "";
+
+  // multi-genre: ?genre=Action&genre=RPG&genre=Indie
+  const genresFromUrlRaw = searchParams.getAll("genre");
+  const singleGenre = searchParams.get("genre") || "";
+  const genresFromUrl = genresFromUrlRaw.length > 0 ? genresFromUrlRaw : singleGenre ? [singleGenre] : [];
+
+  // chiave stabile per le deps degli useEffect
+  const genresKey = genresFromUrl.join("|");
+
   const platformFromUrl = searchParams.get("platform") || "";
 
   const [searchText, setSearchText] = useState(filters.search || "");
   const [selectedGenres, setSelectedGenres] = useState(filters.genres || []);
   const [selectedPlatforms, setSelectedPlatforms] = useState(filters.platforms || []);
 
+  // sync stato locale con URL
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchText(titleFromUrl || "");
-    setSelectedGenres(genreFromUrl ? [genreFromUrl] : []);
+    setSelectedGenres(genresFromUrl);
     setSelectedPlatforms(platformFromUrl ? [platformFromUrl] : []);
-  }, [titleFromUrl, genreFromUrl, platformFromUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [titleFromUrl, genresKey, platformFromUrl]);
 
+  // trigger load / search quando cambia l'URL
   useEffect(() => {
     const hasTitle = titleFromUrl.trim().length >= 2;
-    const hasGenre = !!genreFromUrl;
+    const hasGenre = genresFromUrl.length > 0;
     const hasPlatform = !!platformFromUrl;
 
     if (hasTitle || hasGenre || hasPlatform) {
@@ -50,14 +61,15 @@ const LibraryPage = () => {
         searchLibraryGames({
           page: 1,
           search: titleFromUrl,
-          genres: hasGenre ? [genreFromUrl] : [],
+          genres: genresFromUrl,
           platforms: hasPlatform ? [platformFromUrl] : [],
         }),
       );
     } else {
       dispatch(loadLibraryPage(1));
     }
-  }, [titleFromUrl, genreFromUrl, platformFromUrl, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [titleFromUrl, genresKey, platformFromUrl, dispatch]);
 
   const handleApplyFilters = () => {
     dispatch(
@@ -112,10 +124,8 @@ const LibraryPage = () => {
   };
 
   const handleSaved = () => {
-    // ricarico la pagina libreria (lista giochi globali)
     dispatch(loadLibraryPage(1));
 
-    // se sono loggato, aggiorno anche il mio profilo (my)
     if (authUser?.userId) {
       dispatch(loadMyProfile(authUser.userId));
     }

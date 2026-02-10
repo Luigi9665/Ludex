@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { clearNavSearch, loadNavSearchPreview } from "../../redux/action";
+import { clearNavSearch, loadNavSearchPreview } from "../../redux/action/index.js";
 
 // debounce semplice
 function useDebouncedValue(value, delay = 350) {
@@ -27,14 +27,20 @@ export default function NavSearch() {
   useEffect(() => {
     const onDocClick = (e) => {
       if (!wrapRef.current) return;
-      if (!wrapRef.current.contains(e.target)) {
-        dispatch(clearNavSearch());
+      if (wrapRef.current.contains(e.target)) return;
+
+      // evita dispatch inutili se è già tutto chiuso e vuoto
+      const q = (query ?? "").trim();
+      if (!open && q.length === 0 && items.length === 0 && !loading && !error) {
+        return;
       }
+
+      dispatch(clearNavSearch());
     };
 
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
-  }, [dispatch]);
+  }, [dispatch, open, query, items.length, loading, error]);
 
   // ESC per chiudere + Enter per andare in libreria
   const onKeyDown = (e) => {

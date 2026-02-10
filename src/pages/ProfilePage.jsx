@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-
 import LxLoader from "../components/LxLoader";
 import { loadMyProfile, loadUserPublicProfile, loadPatchUsergame, loadDeleteUsergame } from "../redux/action";
-import ProfileHeader from "../components/Profile/ProfileHeader";
-import ProfileGameSection from "../components/Profile/ProfileGameSection";
+import ProfilePanelLeft from "../components/Profile/ProfilePanelLeft";
+import ProfileSidebarRight from "../components/Profile/ProfileSidebarRight";
+import ProfileContentArea from "../components/Profile/ProfileContentArea";
 import "../styles/ProfilePage.css";
 
 const ProfilePage = () => {
@@ -15,6 +15,10 @@ const ProfilePage = () => {
   const authUser = useSelector((state) => state.auth.user);
   const myProfileState = useSelector((state) => state.userData.my);
   const publicProfileState = useSelector((state) => state.userData.profile);
+
+  // stato condiviso tra centro e sidebar
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchText, setSearchText] = useState("");
 
   const isMe = useMemo(() => {
     if (!routeUserId && authUser) return true;
@@ -28,15 +32,12 @@ const ProfilePage = () => {
   }, [authUser, routeUserId]);
 
   const viewState = isMe ? myProfileState : publicProfileState;
-
   const userDetails = viewState?.data;
   const loading = viewState?.loading;
   const error = viewState?.error;
 
-  // carico il profilo giusto (mio o di un altro)
   useEffect(() => {
     if (!effectiveUserId) return;
-
     if (isMe) {
       dispatch(loadMyProfile(effectiveUserId));
     } else {
@@ -44,31 +45,32 @@ const ProfilePage = () => {
     }
   }, [effectiveUserId, isMe, dispatch]);
 
-  // lista giochi (backend gestisce già private/public, ma lato front filtro di sicurezza)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const allGames = userDetails?.games ?? [];
   const visibleGames = useMemo(() => {
     if (isMe) return allGames;
     return allGames.filter((g) => g.isReviewPublic);
   }, [allGames, isMe]);
 
-  // stats semplici
   const stats = useMemo(() => {
     if (!visibleGames.length) {
-      return { total: 0, completed: 0, playing: 0, avgRating: 0 };
+      return { total: 0, completed: 0, playing: 0, backlog: 0, dropped: 0, avgRating: 0, reviewsCount: 0 };
     }
 
     const total = visibleGames.length;
     const completed = visibleGames.filter((g) => g.status === "Completed").length;
     const playing = visibleGames.filter((g) => g.status === "Playing").length;
+    const backlog = visibleGames.filter((g) => g.status === "Backlog").length;
+    const dropped = visibleGames.filter((g) => g.status === "Dropped").length;
+
+    const reviewed = visibleGames.filter((g) => g.review && g.review.trim().length > 0);
+    const reviewsCount = reviewed.length;
 
     const rated = visibleGames.filter((g) => typeof g.rating === "number" && g.rating > 0);
     const avgRating = rated.length > 0 ? Number((rated.reduce((sum, g) => sum + (g.rating ?? 0), 0) / rated.length).toFixed(1)) : 0;
 
-    return { total, completed, playing, avgRating };
+    return { total, completed, playing, backlog, dropped, avgRating, reviewsCount };
   }, [visibleGames]);
 
-  // PATCH UserGame (usa thunk)
   const handleUpdateUserGame = useCallback(
     (userGameId, patch) => {
       return dispatch(loadPatchUsergame(userGameId, patch, isMe));
@@ -76,7 +78,6 @@ const ProfilePage = () => {
     [dispatch, isMe],
   );
 
-  // DELETE UserGame (usa thunk)
   const handleDeleteUserGame = useCallback(
     (userGameId) => {
       return dispatch(
@@ -88,8 +89,6 @@ const ProfilePage = () => {
     },
     [dispatch, isMe, effectiveUserId],
   );
-
-  // ================= RENDER STATE =================
 
   if (!effectiveUserId && !loading) {
     return (
@@ -129,10 +128,20 @@ const ProfilePage = () => {
 
   return (
     <section className="lx-section lx-profile-page">
-      <div className="container">
-        <ProfileHeader username={userDetails.userName} stats={stats} isMe={isMe} />
+      <div className="lx-profile-wrapper">
+        <ProfilePanelLeft username={userDetails.userName} stats={stats} isMe={isMe} />
 
-        <ProfileGameSection games={visibleGames} isMe={isMe} onUpdate={handleUpdateUserGame} onDelete={handleDeleteUserGame} />
+        <ProfileContentArea
+          games={visibleGames}
+          isMe={isMe}
+          onUpdate={handleUpdateUserGame}
+          onDelete={handleDeleteUserGame}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          searchText={searchText}
+        />
+
+        <ProfileSidebarRight games={visibleGames} activeTab={activeTab} onTabChange={setActiveTab} searchText={searchText} onSearchChange={setSearchText} />
       </div>
     </section>
   );

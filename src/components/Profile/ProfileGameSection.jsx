@@ -30,6 +30,7 @@ const ProfileGameSection = ({ games, isMe, onUpdate, onDelete }) => {
   const totalPages = Math.max(1, Math.ceil(filteredGames.length / PAGE_SIZE));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
   }, [activeTab, searchText]);
 

@@ -1,486 +1,782 @@
-/* =========================================================
-   ===============  LAYOUT BASE PAGINA PROFILO =============
-   ========================================================== */
+/* ============================================
+   PROFILE PAGE - Premium 2026 Layout
+   ============================================ */
 
 .lx-profile-page {
-  position: relative;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-.lx-profile-page .container {
-  max-width: 1320px;
-}
-
-/* =================== HERO PROFILO ====================== */
-
-.lx-profile-hero {
-  border-radius: 1.5rem;
-  padding: 1.75rem 2rem;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  margin-bottom: 2rem;
-}
-
-.lx-profile-hero-inner {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.lx-profile-hero-left {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.lx-profile-avatar-wrapper {
-  width: 72px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: radial-gradient(circle at 30% 0%, #0ea5e9, #6366f1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.lx-profile-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.lx-profile-username {
-  font-size: clamp(1.6rem, 2.1vw, 2rem);
-  font-weight: 700;
-}
-
-.lx-profile-badge-own {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid #22c55e;
-  color: #bbf7d0;
-  background: rgba(22, 163, 74, 0.15);
-}
-
-.lx-profile-subtitle {
-  margin: 0.2rem 0 0;
-  font-size: 0.95rem;
-  color: var(--lx-text-secondary);
-}
-
-/* ==================== STATS ===================== */
-
-.lx-profile-hero-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.lx-profile-stat {
-  min-width: 100px;
-  text-align: right;
-}
-
-.lx-profile-stat-number {
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-.lx-profile-stat-label {
-  font-size: 0.75rem;
-  color: var(--lx-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-@media (max-width: 768px) {
-  .lx-profile-hero-inner {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .lx-profile-hero-stats {
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
-/* =========================================================
-   ============  CARD CONTENITORE LIBRERIA ================
-   ========================================================== */
-
-.lx-profile-games-card {
-  margin-top: 1.5rem;
-  padding: 1.5rem 1.75rem 2rem;
-  border-radius: 18px;
-  background: rgba(15, 23, 42, 0.82);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-}
-
-/* Header libreria */
-
-.lx-profile-games-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.lx-profile-total-count,
-.lx-profile-games-subtitle {
-  font-size: 0.9rem;
-  color: var(--lx-text-secondary, #9ca3af);
-}
-
-.lx-profile-header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.75rem;
-}
-
-/* ===================== TABS ====================== */
-
-.lx-profile-tab-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: flex-end;
-}
-
-.lx-profile-tab {
-  border-radius: 999px;
-  border: 1px solid transparent;
-  padding: 0.3rem 0.8rem;
-  font-size: 0.78rem;
-  cursor: pointer;
-  background: rgba(15, 23, 42, 0.9);
-  color: rgba(226, 232, 240, 0.8);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: all 0.18s ease;
-}
-
-.lx-profile-tab:hover {
-  border-color: rgba(148, 163, 184, 0.7);
-  background: rgba(15, 23, 42, 0.95);
-}
-
-.lx-profile-tab--active {
-  border-color: rgba(59, 130, 246, 0.9);
-  background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.18), transparent 70%);
-  color: #e0f2fe;
-}
-
-.lx-profile-tab-count {
-  padding: 0.1rem 0.45rem;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.9);
-  font-size: 0.75rem;
-}
-
-/* Search */
-
-.lx-profile-search-wrapper {
-  min-width: 220px;
-}
-
-.lx-profile-search-input {
-  background: rgba(15, 23, 42, 0.95);
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  padding-inline: 0.9rem;
-  color: #e5e7eb;
-}
-
-.lx-profile-search-input::placeholder {
-  color: rgba(148, 163, 184, 0.85);
-}
-
-/* =========================================================
-   ================== GRIGLIA GIOCHI ======================
-   ========================================================== */
-
-.lx-profile-games-grid {
+.lx-profile-wrapper {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
-}
-
-/* ================== CARD GIOCO ========================= */
-
-.lx-profile-game-card {
-  display: flex;
-  flex-direction: column;
-  background: radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.1), transparent 60%), rgba(15, 23, 42, 0.98);
-  border-radius: 16px;
-  border: 1px solid rgba(30, 64, 175, 0.6);
-  overflow: hidden;
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.6);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
-  min-height: 0;
-  max-width: 360px;
+  gap: 24px;
+  padding: 24px;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "profile"
+    "content"
+    "sidebar";
+  max-width: 1920px;
   margin: 0 auto;
 }
 
-.lx-profile-game-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.9);
-  border-color: rgba(56, 189, 248, 0.8);
+@media (min-width: 1024px) {
+  .lx-profile-wrapper {
+    grid-template-columns: 280px 1fr;
+    grid-template-areas:
+      "profile content"
+      "profile content";
+    gap: 32px;
+    padding: 32px 40px;
+  }
 }
 
-/* =========== COVER ============= */
+@media (min-width: 1400px) {
+  .lx-profile-wrapper {
+    grid-template-columns: 320px 1fr 280px;
+    grid-template-areas: "profile content sidebar";
+    gap: 40px;
+  }
+}
 
+/* ============================================
+   PROFILE PANEL LEFT - Premium Glass
+   ============================================ */
+
+.lx-profile-panel {
+  grid-area: profile;
+  background: radial-gradient(circle at 20% 30%, rgba(0, 217, 255, 0.06), transparent 60%), var(--surface-light);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
+  padding: 32px 24px;
+  box-shadow:
+    var(--shadow-medium),
+    0 0 40px rgba(0, 217, 255, 0.08);
+  position: sticky;
+  top: 100px;
+  align-self: start;
+  animation: lx-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 1023px) {
+  .lx-profile-panel {
+    position: relative;
+    top: 0;
+  }
+}
+
+.lx-profile-avatar-section {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.lx-profile-avatar-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px;
+}
+
+.lx-profile-avatar-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  opacity: 0.6;
+  animation: pulse-glow 8s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.lx-profile-avatar-img {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--surface-light);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.lx-profile-username-display {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.lx-profile-badge-me {
+  padding: 4px 12px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+}
+
+.lx-profile-bio {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Stats Pills */
+.lx-profile-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.lx-profile-stat-pill {
+  padding: 16px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  text-align: center;
+  transition: all var(--transition-base);
+}
+
+.lx-profile-stat-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-muted);
+  transform: translateY(-2px);
+}
+
+.lx-profile-stat-pill-icon {
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+}
+
+.lx-profile-stat-pill-value {
+  letter-spacing: 3px;
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+}
+
+.lx-profile-stat-pill-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* ============================================
+   SIDEBAR NAVIGATION RIGHT - Vertical Dock
+   ============================================ */
+
+.lx-profile-sidebar {
+  grid-area: sidebar;
+  position: sticky;
+  top: 100px;
+  align-self: start;
+  animation: lx-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+}
+
+@media (max-width: 1399px) {
+  .lx-profile-sidebar {
+    display: none;
+  }
+}
+
+.lx-profile-nav-dock {
+  background: var(--gradient-glass-neon), var(--surface-light);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
+  padding: 16px 12px;
+  box-shadow:
+    var(--shadow-medium),
+    0 0 40px rgba(0, 217, 255, 0.08);
+}
+
+.lx-profile-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  width: 100%;
+  text-align: left;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-bottom: 4px;
+}
+
+.lx-profile-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.lx-profile-nav-item--active {
+  background: rgba(0, 217, 255, 0.12);
+  color: var(--accent-cyan);
+  border-left: 3px solid var(--accent-cyan);
+  padding-left: 13px;
+}
+
+.lx-profile-nav-item--active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: var(--accent-cyan);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 12px var(--accent-cyan);
+}
+
+.lx-profile-nav-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.lx-profile-nav-label {
+  flex: 1;
+}
+
+.lx-profile-nav-count {
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 28px;
+  text-align: center;
+}
+
+.lx-profile-nav-item--active .lx-profile-nav-count {
+  background: rgba(0, 217, 255, 0.2);
+  color: var(--accent-cyan);
+}
+
+/* Search Button in Sidebar */
+.lx-profile-search-trigger {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-top: 12px;
+}
+
+.lx-profile-search-trigger:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+/* ============================================
+   SEARCH POPUP - Animated
+   ============================================ */
+
+.lx-search-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 120px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lx-search-popup-card {
+  background: var(--surface-elevated);
+  backdrop-filter: blur(var(--blur-strong));
+  -webkit-backdrop-filter: blur(var(--blur-strong));
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-muted);
+  padding: 24px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: var(--shadow-strong);
+  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.lx-search-popup-input {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid var(--border-muted);
+  border-radius: var(--radius-md);
+  font-size: 1.125rem;
+  color: var(--text-primary);
+  transition: all var(--transition-base);
+}
+
+.lx-search-popup-input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+}
+
+.lx-search-popup-hint {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ============================================
+   CONTENT AREA - Games Grid
+   ============================================ */
+
+.lx-profile-content {
+  grid-area: content;
+  animation: lx-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s backwards;
+}
+
+.lx-profile-content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+@media (max-width: 1399px) {
+  .lx-profile-content-header {
+    background: var(--surface-light);
+    backdrop-filter: blur(var(--blur-glass));
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    padding: 20px;
+    box-shadow: var(--shadow-subtle);
+  }
+}
+
+.lx-profile-content-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.lx-profile-content-count {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Mobile Nav Tabs */
+.lx-profile-mobile-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 1400px) {
+  .lx-profile-mobile-nav {
+    display: none;
+  }
+}
+
+.lx-profile-mobile-tab {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lx-profile-mobile-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.lx-profile-mobile-tab--active {
+  background: rgba(0, 217, 255, 0.15);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.lx-profile-mobile-tab-count {
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+}
+
+/* Games Grid */
+.lx-profile-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .lx-profile-games-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .lx-profile-games-grid {
+    gap: 32px;
+  }
+}
+
+/* Empty State */
+.lx-profile-empty {
+  padding: 80px 40px;
+  text-align: center;
+  background: var(--surface-light);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
+}
+
+.lx-profile-empty-icon {
+  color: var(--text-disabled);
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.lx-profile-empty-text {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ============================================
+   GAME CARD - Premium 2026 Redesign
+   ============================================ */
+
+.lx-profile-game-card {
+  position: relative;
+  background: var(--surface-elevated);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  transition: all var(--transition-slow);
+  box-shadow: var(--shadow-subtle);
+  animation: lx-fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.lx-profile-game-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-6px);
+  box-shadow:
+    var(--shadow-strong),
+    0 0 40px rgba(0, 217, 255, 0.15);
+}
+
+/* Cover */
 .lx-profile-game-cover {
   position: relative;
+  width: 100%;
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 0%, rgba(15, 23, 42, 0.9), #020617);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .lx-profile-game-cover img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.02);
-  transition: transform 0.25s ease;
+  transition: all var(--transition-slow);
 }
 
 .lx-profile-game-card:hover .lx-profile-game-cover img {
-  transform: scale(1.05);
+  filter: blur(6px);
+  transform: scale(1.1);
 }
 
-/* =========== ICON BUTTONS ============= */
-
-.lx-profile-game-actions {
+/* Status Pill on Cover */
+.lx-profile-game-status-pill {
   position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  display: flex;
-  gap: 0.4rem;
-  z-index: 3;
+  top: 12px;
+  left: 12px;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 2;
 }
 
-.lx-btn-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: none;
-  background: rgba(15, 23, 42, 0.9);
-  color: #e5e7eb;
+/* Actions Overlay (hover) */
+.lx-profile-game-actions-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 12, 16, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+  z-index: 3;
+}
+
+.lx-profile-game-card:hover .lx-profile-game-actions-overlay {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.lx-profile-game-action-btn {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
   cursor: pointer;
-  padding: 0;
-  transition:
-    background 0.18s ease,
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    color 0.18s ease,
-    opacity 0.18s ease;
+  transition: all var(--transition-base);
 }
 
-/* varianti */
-
-.lx-btn-icon-edit {
-  background: radial-gradient(circle at 30% 0, rgba(56, 189, 248, 0.4), rgba(15, 23, 42, 0.98));
+.lx-profile-game-action-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 24px currentColor;
 }
 
-.lx-btn-icon-delete {
-  background: radial-gradient(circle at 30% 0, rgba(248, 113, 113, 0.4), rgba(15, 23, 42, 0.98));
+.lx-profile-game-action-btn--edit {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
 }
 
-.lx-btn-icon-save {
-  background: radial-gradient(circle at 30% 0, rgba(34, 197, 94, 0.4), rgba(15, 23, 42, 0.98));
+.lx-profile-game-action-btn--edit:hover {
+  background: var(--accent-cyan);
+  color: #fff;
 }
 
-.lx-btn-icon-cancel {
-  background: radial-gradient(circle at 30% 0, rgba(148, 163, 184, 0.5), rgba(15, 23, 42, 0.98));
+.lx-profile-game-action-btn--delete {
+  border-color: var(--status-dropped);
+  color: var(--status-dropped);
 }
 
-/* hover / active */
-
-.lx-btn-icon:hover {
-  transform: translateY(-1px) scale(1.03);
-  box-shadow: 0 0 14px rgba(15, 23, 42, 0.9);
-  opacity: 0.95;
+.lx-profile-game-action-btn--delete:hover {
+  background: var(--status-dropped);
+  color: #fff;
 }
 
-.lx-btn-icon:active {
-  transform: translateY(0) scale(0.96);
-  box-shadow: 0 0 6px rgba(15, 23, 42, 0.8);
-  opacity: 0.9;
-}
-
-.lx-btn-icon-edit:hover {
-  color: #e0f2fe;
-}
-
-.lx-btn-icon-delete:hover {
-  color: #fee2e2;
-}
-
-.lx-btn-icon-save:hover {
-  color: #bbf7d0;
-}
-
-.lx-btn-icon-cancel:hover {
-  color: #e5e7eb;
-}
-
-/* =========== BODY CARD ============= */
-
-.lx-profile-game-body {
-  padding: 0.85rem 1rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  flex: 1;
-}
-
-.lx-profile-game-headline {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  align-items: baseline;
+/* Footer Glass */
+.lx-profile-game-footer {
+  padding: 16px;
+  background: linear-gradient(to top, rgba(10, 12, 16, 0.95), transparent), rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .lx-profile-game-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #e5e7eb;
-}
-
-.lx-profile-game-updated {
-  font-size: 0.75rem;
-  color: rgba(148, 163, 184, 0.9);
-  display: inline-flex;
-  align-items: center;
-}
-
-/* =========================================================
-   =============== META: status + piattaforme ==============
-   ========================================================== */
-
-.lx-profile-game-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-  margin-top: 0.15rem;
-}
-
-.lx-profile-status-select {
-  min-width: 130px;
-}
-
-.lx-profile-game-platforms {
-  font-size: 0.8rem;
-  color: rgba(148, 163, 184, 0.95);
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-/* ============= STATUS PILL ============= */
-
-.lx-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  border-radius: 999px;
-  padding: 0.15rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 500;
-  background: rgba(148, 163, 184, 0.15);
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  color: #0f172a;
-}
-
-.lx-status-pill-sm {
-  padding: 0.1rem 0.5rem;
-  font-size: 0.7rem;
-}
-
-.lx-status-icon {
-  font-size: 0.75rem;
-  line-height: 1;
-}
-
-/* ============= RATING + PROGRESS ============= */
-
-.lx-profile-game-middle {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.lx-profile-game-rating {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.lx-profile-rating-value {
-  font-size: 0.8rem;
-  color: rgba(226, 232, 240, 0.9);
-}
-
-.lx-profile-game-progress {
-  flex: 1;
-}
-
-/* Progress bar */
-
-.lx-profile-progress {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.lx-profile-progress-bar {
-  flex: 1;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.9);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.lx-profile-progress-fill {
-  height: 100%;
-  border-radius: 999px;
+.lx-profile-game-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.lx-profile-progress-label {
+.lx-profile-game-rating-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lx-profile-game-rating-value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+/* Progress Circle */
+.lx-profile-progress-circle {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.lx-profile-progress-circle svg {
+  transform: rotate(-90deg);
+}
+
+.lx-profile-progress-circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 4;
+}
+
+.lx-profile-progress-circle-fill {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--transition-slow);
+  filter: drop-shadow(0 0 1px currentColor);
+}
+
+.lx-profile-progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.75rem;
-  color: rgba(148, 163, 184, 0.95);
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
-/* ============= REVIEW ============= */
+/* ============================================
+   PAGINATION
+   ============================================ */
 
-.lx-profile-game-review {
-  margin-top: 0.5rem;
+.lx-profile-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 40px;
 }
 
-.lx-profile-review-text {
-  font-size: 0.85rem;
-  color: rgba(209, 213, 219, 0.95);
+.lx-profile-page-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
 }
 
-.lx-profile-review-textarea {
-  font-size: 0.85rem;
+.lx-profile-page-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-muted);
+  color: var(--text-primary);
 }
 
-/* =========================================================
-   ========= OVERLAY EDIT GAME (MODAL STILIZZATA) ==========
-   ========================================================== */
+.lx-profile-page-btn--active {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: #fff;
+}
+
+.lx-profile-page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   EDIT OVERLAY - Modernized
+   ============================================ */
 
 .lx-profile-edit-overlay {
   position: fixed;
@@ -997,23 +1293,68 @@
   color: rgba(148, 163, 184, 0.9);
 }
 
-/* =========================================================
-   ================== RESPONSIVE VARI ======================
-   ========================================================== */
+/* ============================================
+   RESPONSIVE - Mobile Optimizations
+   ============================================ */
 
-@media (max-width: 991.98px) {
-  .lx-profile-games-header {
+@media (max-width: 767px) {
+  .lx-profile-wrapper {
+    padding: 16px;
+    gap: 20px;
+  }
+
+  .lx-profile-panel {
+    padding: 24px 20px;
+  }
+
+  .lx-profile-avatar-container {
+    width: 100px;
+    height: 100px;
+  }
+
+  .lx-profile-avatar-img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .lx-profile-username-display {
+    font-size: 1.25rem;
     flex-direction: column;
-    align-items: flex-start;
+    gap: 4px;
   }
-  .lx-profile-header-right {
-    width: 100%;
-    align-items: flex-start;
+
+  .lx-profile-games-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
-  .lx-profile-tab-bar {
-    justify-content: flex-start;
+
+  .lx-profile-game-action-btn {
+    width: 48px;
+    height: 48px;
   }
-  .lx-profile-search-wrapper {
-    width: 100%;
+}
+
+/* ============================================
+   ACCESSIBILITY - Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-profile-panel,
+  .lx-profile-sidebar,
+  .lx-profile-content,
+  .lx-profile-game-card {
+    animation: none !important;
+  }
+
+  .pulse-glow {
+    animation: none !important;
+  }
+
+  .lx-profile-game-card:hover {
+    transform: none;
+  }
+
+  .lx-profile-nav-item:hover {
+    transform: none;
   }
 }

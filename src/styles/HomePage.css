@@ -171,11 +171,11 @@
   }
 }
 
-.lx-hero-content {
+.lx-hero-homepage-content {
   max-width: 100%;
 }
 
-.lx-hero-title {
+.lx-hero-homepage-title {
   font-family: var(--font-display);
   font-size: 2.25rem;
   font-weight: 800;

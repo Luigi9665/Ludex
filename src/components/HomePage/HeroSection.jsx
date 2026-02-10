@@ -19,8 +19,8 @@ const HeroSection = ({ user, stats, userGames = [] }) => {
     return (
       <section className="lx-hero-frame">
         <div className="lx-hero lx-hero--guest">
-          <div className="lx-hero-content">
-            <h1 className="lx-hero-title">
+          <div className="lx-hero-homepage-content">
+            <h1 className="lx-hero-homepage-title">
               Benvenuto Viaggiatore <span className="lx-hero-emoji">👾</span>
             </h1>
 
@@ -52,7 +52,7 @@ const HeroSection = ({ user, stats, userGames = [] }) => {
   return (
     <section className="lx-hero-frame">
       <div className="lx-hero lx-hero--user">
-        <div className="lx-hero-content">
+        <div className="lx-hero-homepage-content">
           <h1 className="lx-hero-title">
             Ciao, <span className="lx-text-glow">{user.username}</span>
           </h1>

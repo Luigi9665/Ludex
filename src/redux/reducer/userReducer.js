@@ -9,6 +9,7 @@ import {
   USER_PROFILE_CLEAR,
   USER_DATA_CLEAR,
   UPDATE_USER_GAME_QUICK_SUCCESS,
+  USER_MY_PROFILE_ADD_GAME_LOCAL,
 } from "../authTypes";
 
 const myInitial = {
@@ -184,6 +185,50 @@ export default function userDataReducer(state = initialState, action) {
         ...state,
         my: mergeUpdatedUserGameIntoProfile(state.my, updated),
         profile: mergeUpdatedUserGameIntoProfile(state.profile, updated),
+      };
+    }
+    case USER_MY_PROFILE_ADD_GAME_LOCAL: {
+      const incoming = action.payload;
+      if (!incoming) return state;
+
+      // se il profilo non è caricato ancora, non inventiamo strutture
+      if (!state.my?.data) return state;
+
+      const prevData = state.my.data;
+
+      // nel tuo caso reale è "games"
+      const gamesKey = Array.isArray(prevData.games) ? "games" : Array.isArray(prevData.userGames) ? "userGames" : null;
+
+      if (!gamesKey) return state;
+
+      const prevGames = prevData[gamesKey];
+
+      const incomingUserGameId = incoming.usergameId ?? incoming.userGameId ?? incoming.id ?? null;
+      if (!incomingUserGameId) return state;
+
+      // se esiste già, aggiorno (non duplico)
+      const exists = prevGames.some((g) => {
+        const gId = g.usergameId ?? g.userGameId ?? g.id ?? null;
+        return gId === incomingUserGameId;
+      });
+
+      const nextGames = exists
+        ? prevGames.map((g) => {
+            const gId = g.usergameId ?? g.userGameId ?? g.id ?? null;
+            if (gId !== incomingUserGameId) return g;
+            return { ...g, ...incoming };
+          })
+        : [incoming, ...prevGames]; // lo metto in cima (backlog “appena aggiunto”)
+
+      return {
+        ...state,
+        my: {
+          ...state.my,
+          data: {
+            ...prevData,
+            [gamesKey]: nextGames,
+          },
+        },
       };
     }
 

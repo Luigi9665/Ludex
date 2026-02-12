@@ -1,10 +1,11 @@
 import { Link } from "react-router";
 import LxLoader from "../LxLoader";
+import React, { useMemo } from "react";
 
 const TrendingSidebar = ({ trending }) => {
   const trendingLoading = trending?.loading ?? false;
   const trendingError = trending?.error ?? null;
-  const trendingItems = (trending?.items ?? []).slice(0, 8);
+  const trendingItems = useMemo(() => (trending?.items ?? []).slice(0, 8), [trending?.items]);
 
   return (
     <aside className="lx-trending-frame">
@@ -53,4 +54,4 @@ const TrendingSidebar = ({ trending }) => {
   );
 };
 
-export default TrendingSidebar;
+export default React.memo(TrendingSidebar);

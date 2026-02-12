@@ -1,21 +1,26 @@
 import { useNavigate, Link } from "react-router";
 import LxLoader from "../LxLoader";
+import React, { useCallback, useMemo } from "react";
 
 const CommunitySidebar = ({ latestReviews, topReviewers }) => {
   const navigate = useNavigate();
 
   const reviewsLoading = latestReviews?.loading ?? false;
   const reviewsError = latestReviews?.error ?? null;
-  const reviewsItems = (latestReviews?.items ?? []).slice(0, 4);
 
   const reviewersLoading = topReviewers?.loading ?? false;
   const reviewersError = topReviewers?.error ?? null;
-  const reviewersItems = (topReviewers?.items ?? []).slice(0, 5);
 
-  const handleUserClick = (userId) => {
-    if (!userId) return;
-    navigate(`/profile/${userId}`);
-  };
+  const reviewsItems = useMemo(() => (latestReviews?.items ?? []).slice(0, 4), [latestReviews?.items]);
+  const reviewersItems = useMemo(() => (topReviewers?.items ?? []).slice(0, 5), [topReviewers?.items]);
+
+  const handleUserClick = useCallback(
+    (userId) => {
+      if (!userId) return;
+      navigate(`/profile/${userId}`);
+    },
+    [navigate],
+  );
 
   return (
     <aside className="lx-community-frame">
@@ -99,4 +104,4 @@ const CommunitySidebar = ({ latestReviews, topReviewers }) => {
   );
 };
 
-export default CommunitySidebar;
+export default React.memo(CommunitySidebar);

@@ -68,6 +68,14 @@ import {
   RECOMMENDATIONS_ERROR,
   RECOMMENDATIONS_LOAD_MORE,
   RECOMMENDATIONS_RESET,
+  RECOMMENDATION_REMOVE_LOCAL,
+  RECOMMENDATION_INTEREST_REQUEST,
+  RECOMMENDATION_INTEREST_SUCCESS,
+  RECOMMENDATION_INTEREST_ERROR,
+  RECOMMENDATION_NOT_INTEREST_REQUEST,
+  RECOMMENDATION_NOT_INTEREST_SUCCESS,
+  RECOMMENDATION_NOT_INTEREST_ERROR,
+  RECOMMENDATION_CLEAR_FEEDBACK,
   QUESTIONNAIRE_STATUS_REQUEST,
   QUESTIONNAIRE_STATUS_SUCCESS,
   QUESTIONNAIRE_STATUS_ERROR,
@@ -132,6 +140,7 @@ import {
   MARK_GAME_VIEWED_REQUEST,
   MARK_GAME_VIEWED_SUCCESS,
   MARK_GAME_VIEWED_FAIL,
+  USER_MY_PROFILE_ADD_GAME_LOCAL,
 } from "../authTypes";
 import { STATUS_TO_ENUM } from "../../utils/statusMapper";
 import { mapStatusToEnumQuick, mapStatusEnumToStringQuick } from "../../utils/statusMappingQuick";
@@ -170,6 +179,20 @@ export const loadMoreRecommendations = () => ({
 
 export const resetRecommendations = () => ({
   type: RECOMMENDATIONS_RESET,
+});
+
+export const removeRecommendationLocal = (gameId) => ({
+  type: RECOMMENDATION_REMOVE_LOCAL,
+  payload: gameId,
+});
+
+export const addUserGameToMyProfileLocal = (userGame) => ({
+  type: USER_MY_PROFILE_ADD_GAME_LOCAL,
+  payload: userGame,
+});
+
+export const clearRecommendationFeedback = () => ({
+  type: RECOMMENDATION_CLEAR_FEEDBACK,
 });
 
 const mapUserFromClaims = (c) => ({
@@ -301,8 +324,14 @@ export const loadUserPublicProfile = (userId) => {
 };
 
 //action per prenderci i giochi di tendenza settimanale
-export const loadTrendingWeeklyGames = () => {
-  return async (dispatch) => {
+export const loadTrendingWeeklyGames = (opts = {}) => {
+  const { force = false, ttlMs = 2 * 60 * 1000 } = opts;
+  return async (dispatch, getState) => {
+    const slice = getState()?.homePublic?.trendingWeeklyGames;
+    const lastFetchedAt = slice?.lastFetchedAt || 0;
+    const isFresh = Date.now() - lastFetchedAt < ttlMs;
+
+    if (!force && isFresh) return;
     dispatch({ type: TRENDING_REQUEST });
 
     try {
@@ -328,8 +357,14 @@ export const loadTrendingWeeklyGames = () => {
 };
 
 //action per prenderci le ultime recensioni
-export const loadLatestReviews = () => {
-  return async (dispatch) => {
+export const loadLatestReviews = (opts = {}) => {
+  const { force = false, ttlMs = 2 * 60 * 1000 } = opts;
+  return async (dispatch, getState) => {
+    const slice = getState()?.homePublic?.latestReviews;
+    const lastFetchedAt = slice?.lastFetchedAt || 0;
+    const isFresh = Date.now() - lastFetchedAt < ttlMs;
+
+    if (!force && isFresh) return;
     dispatch({ type: LATESTREVIEWS_REQUEST });
 
     try {
@@ -355,8 +390,14 @@ export const loadLatestReviews = () => {
 };
 
 //action per prenderci gli utenti in tendenza
-export const loadTopReviewers = () => {
-  return async (dispatch) => {
+export const loadTopReviewers = (opts = {}) => {
+  const { force = false, ttlMs = 2 * 60 * 1000 } = opts;
+  return async (dispatch, getState) => {
+    const slice = getState()?.homePublic?.latestReviews;
+    const lastFetchedAt = slice?.lastFetchedAt || 0;
+    const isFresh = Date.now() - lastFetchedAt < ttlMs;
+
+    if (!force && isFresh) return;
     dispatch({ type: TOPREVIEWERS_REQUEST });
 
     try {
@@ -1059,6 +1100,117 @@ export const loadRecommendations = () => {
       dispatch({
         type: RECOMMENDATIONS_ERROR,
         payload: error?.message || "Errore durante il caricamento delle raccomandazioni.",
+      });
+    }
+  };
+};
+
+export const markRecommendationInterested = (gameId) => {
+  return async (dispatch, getState) => {
+    if (!gameId) return;
+
+    const { recommendations, userData } = getState();
+    if (recommendations?.pendingByGameId?.[gameId]) return; // anti multi-click
+
+    dispatch({ type: RECOMMENDATION_INTEREST_REQUEST, payload: { gameId } });
+
+    try {
+      const res = await apiFetch(`/api/GameInteraction/${gameId}/interested`, {
+        method: "POST",
+      });
+
+      const data = await safeJson(res);
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Impossibile aggiungere al backlog.");
+      }
+
+      dispatch({
+        type: RECOMMENDATION_INTEREST_SUCCESS,
+        payload: {
+          gameId,
+          message: data?.message || "Aggiunto al backlog.",
+        },
+      });
+
+      // 2) aggiorno la libreria (LOCAL) usando:
+      // - response: userGameId, status
+      // - recommendation item: title/cover/platforms/genres/...
+      const recItem = recommendations?.items?.find((g) => g.gameId === gameId);
+
+      // se per qualche motivo non lo trovo, evito di rompere
+      if (recItem && userData?.my?.data) {
+        const nowIso = new Date().toISOString();
+
+        const libraryItem = {
+          gameId: recItem.gameId,
+          usergameId: data?.userGameId, // ATTENZIONE: in libreria usi "usergameId"
+          title: recItem.title,
+          coverUrl: recItem.coverUrl,
+          status: data?.status || "Backlog",
+          rating: null,
+          progress: 0,
+          review: "",
+          isReviewPublic: false,
+          lastUpdatedAt: nowIso,
+
+          // match della tua shape attuale in libreria:
+          platform: recItem.platforms || [],
+          genre: recItem.genres || [],
+
+          // se nel tuo oggetto libreria c’è releaseDate e qui NON c’è, lascialo out
+          // releaseDate: recItem.releaseDate ?? undefined,
+        };
+
+        dispatch(addUserGameToMyProfileLocal(libraryItem));
+      }
+
+      // IMPORTANTISSIMO: rimuovo localmente la card SOLO dopo success
+      dispatch(removeRecommendationLocal(gameId));
+    } catch (err) {
+      dispatch({
+        type: RECOMMENDATION_INTEREST_ERROR,
+        payload: { gameId, error: err?.message || "Errore di rete." },
+      });
+    }
+  };
+};
+
+export const markRecommendationNotInterested = (gameId, payload = null) => {
+  return async (dispatch, getState) => {
+    if (!gameId) return;
+
+    const { recommendations } = getState();
+    if (recommendations?.pendingByGameId?.[gameId]) return;
+
+    dispatch({ type: RECOMMENDATION_NOT_INTEREST_REQUEST, payload: { gameId } });
+
+    try {
+      const res = await apiFetch(`/api/GameInteraction/${gameId}/not-interested`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload ? JSON.stringify(payload) : null,
+      });
+
+      const data = await safeJson(res);
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Impossibile registrare la preferenza.");
+      }
+
+      dispatch({
+        type: RECOMMENDATION_NOT_INTEREST_SUCCESS,
+        payload: {
+          gameId,
+          message: data?.message || "Ok, non te lo mostreremo per un po'.",
+        },
+      });
+
+      dispatch(removeRecommendationLocal(gameId));
+    } catch (err) {
+      dispatch({
+        type: RECOMMENDATION_NOT_INTEREST_ERROR,
+        payload: { gameId, error: err?.message || "Errore di rete." },
       });
     }
   };

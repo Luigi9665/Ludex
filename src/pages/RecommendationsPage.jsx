@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,18 +9,46 @@ import { useVerticalCarousel } from "../hooks/useVerticalCarousel";
 
 import styles from "../styles/Recommendations/RecommendationsPage.module.css";
 
+// ✅ ToastProvider
+import { useToast } from "../components/ui/ToastProvider";
+
 const RecommendationsPage = () => {
   const dispatch = useDispatch();
+  const { addToast } = useToast();
 
-  const { items, loading, error, hasMore } = useSelector(
-    (state) =>
-      state.recommendations || {
-        items: [],
-        loading: false,
-        error: null,
-        hasMore: false,
-      },
-  );
+  const { items, loading, error, hasMore, lastActionMessage, lastActionError } = useSelector((state) => state.recommendations) || {
+    items: [],
+    loading: false,
+    error: null,
+    hasMore: false,
+    lastActionMessage: null,
+    lastActionError: null,
+  };
+
+  // ✅ anti-toast duplicati (re-render, persist, ecc.)
+  const lastShownSuccessRef = useRef(null);
+  const lastShownErrorRef = useRef(null);
+
+  // ✅ Toast success (Mi interessa / Non fa per me -> success)
+  useEffect(() => {
+    if (!lastActionMessage) return;
+
+    // evita spam sullo stesso messaggio
+    if (lastShownSuccessRef.current === lastActionMessage) return;
+
+    addToast(lastActionMessage, "success");
+    lastShownSuccessRef.current = lastActionMessage;
+  }, [lastActionMessage, addToast]);
+
+  // ✅ Toast error (se hai lastActionError nello store)
+  useEffect(() => {
+    if (!lastActionError) return;
+
+    if (lastShownErrorRef.current === lastActionError) return;
+
+    addToast(lastActionError, "error");
+    lastShownErrorRef.current = lastActionError;
+  }, [lastActionError, addToast]);
 
   // blocco lo scroll del body per avere effetto "pagina ferma"
   useEffect(() => {
@@ -43,6 +71,16 @@ const RecommendationsPage = () => {
       dispatch(loadMoreRecommendations());
     }
   });
+
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    // se currentIndex ora punta fuori, spostati sull'ultimo valido
+    if (currentIndex > items.length - 1) {
+      goToIndex(items.length - 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
 
   const handleRetry = () => {
     dispatch(loadRecommendations());
@@ -147,7 +185,9 @@ const RecommendationsPage = () => {
                 <motion.div
                   className={styles.badgeProgressFill}
                   initial={{ width: 0 }}
-                  animate={{ width: `${((safeIndex + 1) / items.length) * 100}%` }}
+                  animate={{
+                    width: `${((safeIndex + 1) / items.length) * 100}%`,
+                  }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 />
               </div>
@@ -158,12 +198,9 @@ const RecommendationsPage = () => {
 
       {/* PROGRESS BAR LATERALE SINISTRA - PREMIUM VERSION */}
       <aside className={`${styles.sideProgress} ${isComplete ? styles.sideProgressComplete : ""}`}>
-        {/* Glow ambientale */}
         <div className={styles.sideAmbientGlow} aria-hidden="true" />
 
-        {/* Track container */}
         <div className={styles.sideTrack}>
-          {/* Fill animato */}
           <motion.div
             className={styles.sideFill}
             initial={{ height: 0 }}
@@ -171,7 +208,6 @@ const RecommendationsPage = () => {
             transition={{ duration: 0.3, ease: "easeOut" }}
           />
 
-          {/* Effetto shimmer che segue il fill */}
           <motion.div
             className={styles.sideShimmer}
             initial={{ top: "100%" }}
@@ -180,7 +216,6 @@ const RecommendationsPage = () => {
             aria-hidden="true"
           />
 
-          {/* Tick marks decorativi */}
           <div className={styles.sideTicks} aria-hidden="true">
             {[0, 25, 50, 75, 100].map((tick) => (
               <div key={tick} className={`${styles.sideTick} ${progress >= tick ? styles.sideTickActive : ""}`} style={{ bottom: `${tick}%` }} />
@@ -188,7 +223,6 @@ const RecommendationsPage = () => {
           </div>
         </div>
 
-        {/* Label percentuale */}
         <div className={styles.sideLabel}>
           {isComplete && <span className={styles.sideLabelIcon}>🎉</span>}
           <span className={styles.sideLabelText}>{isComplete ? "Completo!" : `${safeCompletion}%`}</span>

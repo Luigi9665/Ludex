@@ -94,7 +94,8 @@ const ProfileGameCard = ({ game, isMe, onEdit, onDelete, style }) => {
           confirmLabel="Sì, rimuovi"
           cancelLabel="Annulla"
           onConfirm={() => {
-            onDelete?.(game.userGameId);
+            const id = game.userGameId ?? game.usergameId ?? game.id;
+            onDelete?.(id);
             setShowDeleteConfirm(false);
           }}
           onCancel={() => setShowDeleteConfirm(false)}

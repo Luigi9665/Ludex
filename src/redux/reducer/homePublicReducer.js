@@ -15,16 +15,19 @@ const initialState = {
     items: [],
     loading: false,
     error: null,
+    lastFetchedAt: 0,
   },
   latestReviews: {
     items: [],
     loading: false,
     error: null,
+    lastFetchedAt: 0,
   },
   topReviewers: {
     items: [],
     loading: false,
     error: null,
+    lastFetchedAt: 0,
   },
 };
 
@@ -47,6 +50,7 @@ export default function homePublicReducer(state = initialState, action) {
           loading: false,
           error: null,
           items: action.payload || [],
+          lastFetchedAt: Date.now(),
         },
       };
 
@@ -77,6 +81,7 @@ export default function homePublicReducer(state = initialState, action) {
           items: action.payload || [],
           loading: false,
           error: null,
+          lastFetchedAt: Date.now(),
         },
       };
 
@@ -107,6 +112,7 @@ export default function homePublicReducer(state = initialState, action) {
           items: action.payload || [],
           loading: false,
           error: null,
+          lastFetchedAt: Date.now(),
         },
       };
 

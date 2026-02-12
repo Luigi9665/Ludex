@@ -21,24 +21,25 @@ const HomePage = () => {
     error: null,
   };
 
-  const homePublic = useSelector((state) => state.homePublic) || {};
-
-  const trendingWeeklyGames = homePublic.trendingWeeklyGames || {
+  const trendingWeeklyGames = useSelector((state) => state.homePublic?.trendingWeeklyGames) || {
     items: [],
     loading: false,
     error: null,
+    lastFetchedAt: 0,
   };
 
-  const latestReviews = homePublic.latestReviews || {
+  const latestReviews = useSelector((state) => state.homePublic?.latestReviews) || {
     items: [],
     loading: false,
     error: null,
+    lastFetchedAt: 0,
   };
 
-  const topReviewers = homePublic.topReviewers || {
+  const topReviewers = useSelector((state) => state.homePublic?.topReviewers) || {
     items: [],
     loading: false,
     error: null,
+    lastFetchedAt: 0,
   };
 
   useEffect(() => {

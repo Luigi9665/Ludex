@@ -1,5 +1,6 @@
 <p align="center">
-  <img src="../Ludex/src/assets/LogoLudex3Ridimensionato.png" alt="Ludex Logo" width="300"/>
+  <img src="/public/public/Me.png" alt="Ludex Logo" width="300"/>
+  <img src="/public/LogoLudex3Ridimensionato.png" alt="Ludex Logo" width="300"/>
 </p>
 
 <p align="center">
@@ -10,42 +11,56 @@
 
 ---
 
-# 🇬🇧 LUDEX — Frontend Architecture Documentation
+# LUDEX — Frontend Architecture
+
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![Redux](https://img.shields.io/badge/Redux-State%20Orchestrated-764ABC?logo=redux&logoColor=white)
+![Architecture](https://img.shields.io/badge/Architecture-Behavior%20Driven-111111)
+![Performance](https://img.shields.io/badge/Performance-Optimized-success)
+![Status](https://img.shields.io/badge/State-Deterministic-blueviolet)
+
+---
+
+**Backend Repository**  
+https://github.com/Luigi9665/BackEndCapstone
 
 ## Executive Summary
 
-Ludex is a **behavior-driven game discovery platform** built around progressive personalization.
+Ludex is a behavior-driven game discovery platform built around progressive personalization.
 
-The frontend is architected as a **state-orchestrated interaction layer** designed to:
+The frontend is not merely a UI layer.  
+It is a deterministic state orchestration engine designed to:
 
 - Capture behavioral signals
-- Maintain deterministic UI state
-- Propagate state transitions predictably
+- Maintain consistent UI state
+- Propagate predictable state transitions
 - Synchronize with backend scoring logic
-- Deliver real-time feedback without compromising consistency
-
-**Backend Repository:**  
-🔗 https://github.com/Luigi9665/BackEndCapstone
+- Deliver responsive feedback without breaking referential integrity
 
 ---
 
-# 1. Architectural Principles
+## 1. Architectural Principles
 
-## 1.1 Deterministic State
+### 1.1 Deterministic State
 
 All state transitions are reducer-driven.
 
-There are **no hidden side effects**.
+Given:
 
 State + Action → New State
 
-The system guarantees reproducibility and traceability.
+The system guarantees:
+
+- Reproducibility
+- Traceability
+- Predictable UI rendering
+- No hidden side effects
 
 ---
 
-## 1.2 Behavioral Signal Aggregation
+### 1.2 Behavioral Signal Aggregation
 
-Every meaningful interaction generates a signal:
+Every meaningful interaction generates a scoring signal:
 
 - Viewing a game page
 - Adding to backlog
@@ -54,19 +69,20 @@ Every meaningful interaction generates a signal:
 - Rating
 - Reviewing
 - Marking “Not Interested”
-- Questionnaire preferences
+- Submitting questionnaire preferences
 
 The frontend ensures these signals are:
 
 - Persisted
 - Reflected locally
 - Maintained across navigation flows
+- Synchronized with backend recalculation
 
 ---
 
-## 1.3 Domain Isolation
+### 1.3 Domain Isolation
 
-Redux state is segmented by domain:
+Redux state is segmented into domains:
 
 - `auth`
 - `userData`
@@ -80,24 +96,24 @@ Each domain:
 - Owns its reducer
 - Owns its async lifecycle
 - Avoids cross-domain mutation
-- Maintains referential integrity
+- Maintains referential stability
 
 ---
 
-# 2. State Modeling Strategy
+## 2. State Modeling Strategy
 
-## 2.1 Game Lifecycle Model
+### 2.1 Game Lifecycle Model
 
-A game can exist in one of the following contexts:
+A game can exist in multiple contexts.
 
-### A. Recommendation Context (Transient)
+#### A. Recommendation Context (Transient)
 
 - Visible
 - Pending interaction
-- Excluded (15-day TTL)
-- Converted to UserGame
+- Temporarily excluded (15-day TTL)
+- Convertible to UserGame
 
-### B. Library Context (Persistent)
+#### B. Library Context (Persistent)
 
 - `userGameId`
 - `status`
@@ -107,149 +123,140 @@ A game can exist in one of the following contexts:
 - `visibility`
 - `lastUpdatedAt`
 
-### C. Exclusion Context (15-Day Rule)
+#### C. Exclusion Context (15-Day Rule)
 
-When the user selects **"Not Interested"**:
+When the user selects "Not Interested":
 
 - Backend stores exclusion timestamp
-- Game becomes invisible in recommendation feed
+- Game disappears from recommendation feed
 - Automatically re-evaluated after 15 days
 - Re-injected into scoring model
 
 This ensures:
 
 - User intent is respected
-- Recommendation pool remains dynamic
+- The recommendation pool remains dynamic
 - Hard blacklisting is avoided
 
 ---
 
 ## 2.2 Interested Flow
 
-**User Click → API POST → Backend CreateUserGame  
-→ Redux Success  
+User Click  
+→ API POST  
+→ Backend creates UserGame  
+→ Redux success action  
 → Merge into `userData.my.games`  
-→ Remove from `recommendation.items`  
-→ Toast Feedback**
+→ Remove from `recommendations.items`  
+→ Toast feedback
 
 Key properties:
 
 - No global refetch required
 - Controlled local removal
-- Success-based mutation only
+- Mutation only after success
 - `pendingByGameId` prevents multi-click
 
 ---
 
 ## 2.3 Not Interested Flow
 
-**User Click → API POST (Exclusion)  
-→ Redux Success  
+User Click  
+→ API POST exclusion  
+→ Redux success  
 → Remove locally  
-→ Backend enforces TTL lifecycle**
+→ Backend enforces TTL lifecycle
 
-The frontend does **not permanently delete** the entity.  
+The frontend does not permanently delete the entity.  
 It respects backend-controlled expiration.
 
 ---
 
-# 3. Data Consistency Strategy
+## 3. Data Consistency Strategy
 
 The frontend guarantees:
 
 - Immutable reducer returns
 - No nested mutation
 - Patch-based updates
-- Avoidance of unnecessary profile reloads
+- Avoidance of unnecessary full profile reloads
 - Referential stability where possible
 
-Example patch strategy:
+### Example Patch Strategy
 
-```js
+````javascript
 userData.my.games.map(g =>
   g.userGameId === updated.userGameId ? updated : g
-)
-This avoids cascade re-renders.
+);
+This prevents cascade re-renders and preserves component memoization.
+
 
 4. Recommendation Feedback Loop
 The frontend participates in a scoring feedback cycle.
 
-Signals Sent to Backend
-Interaction	Impact
+Interaction	Signal Impact
 View game	Implicit interest
 Add to backlog	Positive weight
-Complete	Strong positive weight
+Complete	Strong positive
 High rating	Genre reinforcement
 Drop game	Negative signal
 Not Interested	Temporary exclusion
 Questionnaire	Explicit preference
 Frontend responsibilities:
 
-Avoid caching stale recommendation sets blindly
+Avoid caching stale recommendation sets
 
 Allow refresh when behavioral model changes
 
 Maintain UX consistency during transitions
 
 5. Performance Strategy
-5.1 Render Optimization
+Render Optimization
 React.memo for heavy sidebars
 
-Domain-specific useSelector calls
+Domain-specific useSelector
 
 Avoid selecting entire slices
 
 Stable reducer shapes
 
-Avoid object recreation when data unchanged
+Avoid unnecessary object recreation
 
-5.2 Async Optimization
+Async Optimization
 Controlled dispatch
 
 No redundant fetch if data already present
 
 Optional TTL-based caching
 
-Parallel fetch where safe
+Parallel fetch when safe
 
-5.3 UX Optimization
-Toast feedback system
+UX Optimization
+Toast-based feedback
 
 Non-blocking transitions
 
 Optimistic UI updates
 
-Carousel virtualization logic
+Carousel virtualization
 
-6. Scalability Considerations
-The frontend architecture supports:
+6. Engineering Tradeoffs
+Tradeoff 1: Optimistic Merge vs Full Refetch
+Decision: Patch locally instead of refetching profile.
+Benefit: Reduced network overhead and faster UX.
+Risk: Requires strict reducer discipline.
 
-Increased recommendation volume
+Tradeoff 2: TTL-Based Exclusion vs Permanent Delete
+Decision: Temporary exclusion (15 days).
+Benefit: Prevents algorithm stagnation.
+Risk: Requires backend enforcement and synchronization.
 
-Additional behavioral signals
+Tradeoff 3: Redux Over Context
+Decision: Centralized state orchestration.
+Benefit: Cross-domain consistency.
+Cost: Higher architectural complexity.
 
-Multi-layer scoring logic
-
-Feature flag integration
-
-Real-time updates (WebSocket-ready design)
-
-Domain separation ensures:
-
-New features can be added without refactoring core reducers.
-
-7. Architectural Decision Records (ADR)
-ADR-01: Redux for cross-domain consistency
-
-ADR-02: Remove recommendation only after success
-
-ADR-03: TTL-based exclusion instead of permanent delete
-
-ADR-04: Optimistic merge instead of full refetch
-
-ADR-05: Domain-based selectors to prevent unnecessary re-renders
-
-8. Interaction Flow Diagram
+7. Interaction Flow Diagram
 flowchart TD
 
 A[User Action] --> B{Interaction Type}
@@ -271,10 +278,8 @@ I --> J
 
 J --> K[New Recommendation Set]
 K --> L[Frontend Refresh Trigger]
-9. Professional Positioning
-Ludex frontend is not just a UI layer.
-
-It is:
+8. Architectural Positioning
+Ludex frontend is:
 
 A behavioral state orchestrator
 
@@ -284,79 +289,22 @@ A consistency-preserving bridge to recommendation logic
 
 A scalable architecture designed for evolving personalization models
 
-🇮🇹 LUDEX — Documentazione Architetturale Frontend
-Executive Summary
-Ludex è una piattaforma di scoperta videogiochi basata su modellazione comportamentale progressiva.
+It is not a simple SPA.
 
-Il frontend è:
-
-Un orchestratore di stato
-
-Un motore di segnali comportamentali
-
-Un layer deterministico tra utente e algoritmo
-
-Repository Backend:
-🔗 https://github.com/Luigi9665/BackEndCapstone
-
-Ciclo di Vita del Gioco
-Un gioco può essere:
-
-Raccomandazione attiva
-
-Convertito in UserGame
-
-Escluso temporaneamente (15 giorni)
-
-Parte della libreria
-
-Eliminato
-
-Ogni transizione è tracciata e riflessa immediatamente nello stato globale.
-
-Gestione Esclusione 15 Giorni
-Persistenza lato backend
-
-Rimozione immediata lato frontend
-
-Nessuna blacklist permanente
-
-Rientro nel ciclo dopo TTL
-
-Questo garantisce:
-
-Rispetto dell’intento utente
-
-Evoluzione continua delle raccomandazioni
-
-Assenza di stagnazione algoritmica
-
-Performance
-React.memo su componenti ad alto costo
-
-Selettori granulari
-
-Merge immutabile
-
-Nessun refetch non necessario
-
-Ottimizzazione animazioni
-
-Conclusione
-Ludex frontend è progettato per:
-
-Essere scalabile
-
-Essere deterministico
-
-Essere performante
-
-Supportare modelli di raccomandazione evolutivi
-
-Non è una semplice SPA.
-
-È un sistema di stato orientato al comportamento utente.
+It is a state-driven behavioral system.
 
 
 ---
-```
+
+# 🎯 PROFESSIONAL BADGE SET (Stronger Impact)
+
+Puoi sostituire i badge con questi per effetto più “enterprise”:
+
+```md
+![Architecture](https://img.shields.io/badge/Architecture-State%20Orchestrated-black)
+![Pattern](https://img.shields.io/badge/Pattern-Behavior%20Driven-purple)
+![Scalability](https://img.shields.io/badge/Scalability-High-success)
+![Rendering](https://img.shields.io/badge/Rendering-Optimized-blue)
+![Consistency](https://img.shields.io/badge/Consistency-Deterministic-critical)
+
+````

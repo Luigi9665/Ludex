@@ -699,7 +699,7 @@ body.lx-body-game-detail::after {
   background: var(--surface-elevated);
   backdrop-filter: blur(var(--blur-glass));
   -webkit-backdrop-filter: blur(var(--blur-glass));
-  border: 1px solid var(--border-subtle);
+  /* border: 1px solid var(--border-subtle); */
   border-radius: var(--radius-lg);
   overflow: hidden;
   transition: all var(--transition-slow);

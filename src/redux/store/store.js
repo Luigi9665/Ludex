@@ -17,6 +17,7 @@ import adminTaxonomyReducer from "../reducer/adminTaxonomyReducer.js";
 import questionnaireActiveReducer from "../reducer/questionnaireActiveReducer.js";
 import questionnaireEffectsReducer from "../reducer/questionnaireEffectsReducer.js";
 import { questionnaireAdminReducer } from "../reducer/questionnaireAdminReducer.js";
+import gameInteractionReducer from "../reducer/gameInteractionReducer.js";
 
 const persistConfig = {
   key: "root",
@@ -41,6 +42,7 @@ const rootReducer = combineReducers({
   questionnaireAdmin: questionnaireAdminReducer,
   questionnaireActive: questionnaireActiveReducer,
   questionnaireEffects: questionnaireEffectsReducer,
+  gameInteraction: gameInteractionReducer,
 });
 
 const persisterReducer = persistReducer(persistConfig, rootReducer);

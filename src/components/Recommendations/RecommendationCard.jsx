@@ -23,6 +23,8 @@ const RecommendationCard = ({ game }) => {
     }
   };
 
+  const MAX_REASONS = 4;
+
   return (
     <article className={styles.card} data-game-id={gameId} onClick={handleCardClick} role="button" tabIndex={0} onKeyDown={handleKeyDown}>
       {/* Ambient glow layer */}
@@ -100,7 +102,7 @@ const RecommendationCard = ({ game }) => {
             {/* Matched Reasons */}
             {matchedReasons && matchedReasons.length > 0 && (
               <div className={styles.reasonsSection}>
-                <ReasonsList reasons={matchedReasons} />
+                <ReasonsList reasons={matchedReasons.slice(0, MAX_REASONS)} />
               </div>
             )}
 

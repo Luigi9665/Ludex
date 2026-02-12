@@ -1,18 +1,23 @@
+// src/components/auth/LoginForm.jsx
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, Link } from "react-router";
 import { loginAction } from "../../redux/action";
-import { useNavigate } from "react-router";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
   const [isEmailTouched, setIsEmailTouched] = useState(false);
   const [isPasswordTouched, setIsPasswordTouched] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
 
+  // redirect se già loggato
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/home", { replace: true });
@@ -21,71 +26,80 @@ const LoginForm = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
+
+    // per ora rememberMe è solo UI → non lo passo all’azione
     dispatch(loginAction({ email, password }));
   };
 
   const isEmailValid = email.trim().length > 0;
   const isPasswordValid = password.length >= 8;
+
   const showEmailError = isEmailTouched && !isEmailValid;
   const showPasswordError = isPasswordTouched && !isPasswordValid;
+
   const isFormValid = isEmailValid && isPasswordValid;
 
   return (
-    <form onSubmit={onSubmit} className="d-grid gap-3 auth-form">
-      <div>
-        <label className="form-label">Email</label>
+    <form onSubmit={onSubmit} className="lx-auth-form">
+      {/* Email */}
+      <div className="lx-auth-field">
+        <label className="lx-auth-label">Email</label>
         <input
-          className={`form-control ${showEmailError ? "is-invalid" : ""}`}
+          className={`lx-auth-input ${showEmailError ? "lx-auth-input--invalid" : ""}`}
           placeholder="you@example.com"
           type="email"
           value={email}
-          onChange={(e) => {
-            setEmail(e.target.value);
-          }}
+          onChange={(e) => setEmail(e.target.value)}
           onBlur={() => setIsEmailTouched(true)}
           required
         />
-
-        {showEmailError && <div className="invalid-feedback">Inserisci un’email valida.</div>}
+        {showEmailError && <div className="lx-auth-error">Inserisci un’email valida.</div>}
       </div>
 
-      <div>
-        <label className="form-label">Password</label>
+      {/* Password */}
+      <div className="lx-auth-field">
+        <label className="lx-auth-label">Password</label>
         <input
-          className={`form-control ${showPasswordError ? "is-invalid" : ""}`}
-          placeholder="********"
+          className={`lx-auth-input ${showPasswordError ? "lx-auth-input--invalid" : ""}`}
+          placeholder="••••••••"
           type="password"
           value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-          }}
+          onChange={(e) => setPassword(e.target.value)}
           onBlur={() => setIsPasswordTouched(true)}
           required
         />
-        {showPasswordError && <div className="invalid-feedback">Inserisci una password valida</div>}
+        {showPasswordError && <div className="lx-auth-error">Inserisci una password valida (min. 8 caratteri).</div>}
       </div>
 
-      {/* CONTAINER PER BUTTON RICORDAMI E PASSWORD DIMENTICATA */}
-      {/* <div className="d-flex align-items-center justify-content-between small">
-        <label className="form-check-label d-flex align-items-center gap-2 text-white">
-          <input className="form-check-input mt-0" type="checkbox" />
-          Ricordami
+      {/* Opzioni: remember + forgot */}
+      <div className="lx-auth-options">
+        <label className="lx-auth-checkbox">
+          <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
+          <span>Ricordami</span>
         </label>
-        <button className="btn btn-link p-0 auth-link" type="button">
+
+        {/* questa route la aggiungeremo in App.jsx */}
+        <Link to="/forgot-password" className="lx-auth-link-soft">
           Password dimenticata?
-        </button>
-      </div> */}
+        </Link>
+      </div>
 
-      {error && <div className="alert alert-danger text-center mb-2">{error}</div>}
+      {/* Errore globale da Redux */}
+      {error && (
+        <div className="lx-auth-error lx-auth-error--global">
+          <i className="bi bi-exclamation-circle" /> {error}
+        </div>
+      )}
 
-      <button className="btn btn-lx-primary btn-lg d-flex align-items-center justify-content-center gap-2" type="submit" disabled={!isFormValid || loading}>
+      {/* Submit */}
+      <button className="lx-auth-btn lx-auth-btn--primary" type="submit" disabled={!isFormValid || loading}>
         {loading ? (
           <>
-            <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
-            <span role="status">Accesso in corso...</span>
+            <span className="lx-auth-spinner" />
+            <span>Accesso in corso...</span>
           </>
         ) : (
-          "Login"
+          "Accedi"
         )}
       </button>
     </form>

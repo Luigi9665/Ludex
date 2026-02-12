@@ -3,6 +3,9 @@ import "./App.css";
 import "./styles/AdminFormStyles.css";
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
+import ConfirmEmailPage from "./pages/ConfirmEmailPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import MainLayout from "./layouts/MainLayout";
 import AdminCreateGamePage from "./pages/admin/AdminCreateGamePage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
@@ -20,13 +23,22 @@ import AdminGenresPage from "./pages/admin/AdminGenresPage";
 import AdminTagsPage from "./pages/admin/AdminTagsPage";
 import AdminMetadataPage from "./pages/admin/AdminMetadataPage";
 import AdminQuestionsPage from "./pages/admin/AdminQuestionsPage";
+import LandingPage from "./pages/LandingPage";
+import { useSelector } from "react-redux";
 
 function App() {
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/auth" />} />
+      {/* Landing come prima pagina, senza navbar */}
+      <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <LandingPage />} />
 
       <Route path="/auth" element={<AuthPage />} />
+
+      {/* Pagine auth "semplici" con layout dedicato (senza MainLayout) */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/confirm-email" element={<ConfirmEmailPage />} />
 
       <Route element={<MainLayout />}>
         <Route path="/home" element={<HomePage />} />

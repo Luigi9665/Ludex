@@ -1,13 +1,17 @@
+// src/pages/GameDetailPage.jsx
 import { useEffect, useMemo, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
+
 import AddToLibraryModal from "../components/Library/AddToLibraryModal";
 import GameDetailSkeleton from "../components/GameDetail/GameDetailSkeleton";
 import GameDetailHero from "../components/GameDetail/GameDetailHero";
 import GameDetailMeta from "../components/GameDetail/GameDetailMeta";
 import GamePlayersSection from "../components/GameDetail/GamePlayersSection";
 import GameRelatedSection from "../components/GameDetail/GameRelatedSection";
-import { loadGameDetail, loadMyProfile } from "../redux/action";
+
+import { loadGameDetail, loadMyProfile, markGameViewed } from "../redux/action";
+
 import "../styles/GameDetailStyle.css";
 
 const GameDetailPage = () => {
@@ -16,6 +20,7 @@ const GameDetailPage = () => {
   const dispatch = useDispatch();
 
   const authUser = useSelector((state) => state.auth.user);
+
   const myProfileState = useSelector((state) => state.userData.my) || {
     data: null,
     loading: false,
@@ -23,16 +28,26 @@ const GameDetailPage = () => {
     error: null,
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const userGames = myProfileState.data?.games || [];
   const { game, related, loading, error } = useSelector((state) => state.gameDetail);
 
   const [modalOpen, setModalOpen] = useState(false);
 
+  // Carico i dettagli del gioco
   useEffect(() => {
     if (gameId) {
       dispatch(loadGameDetail(gameId));
     }
   }, [gameId, dispatch]);
+
+  // Registra l'interazione "Viewed" quando l'utente entra nella pagina del gioco
+  useEffect(() => {
+    if (!gameId) return;
+    if (!authUser?.userId) return;
+
+    dispatch(markGameViewed(gameId));
+  }, [gameId, authUser?.userId, dispatch]);
 
   const alreadyInLibrary = useMemo(() => userGames.some((ug) => ug.gameId === gameId), [userGames, gameId]);
 
@@ -46,9 +61,11 @@ const GameDetailPage = () => {
 
   const handleModalSaved = useCallback(() => {
     setModalOpen(false);
+
     if (gameId) {
       dispatch(loadGameDetail(gameId));
     }
+
     if (authUser?.userId) {
       dispatch(loadMyProfile(authUser.userId));
     }
@@ -91,7 +108,7 @@ const GameDetailPage = () => {
     root.style.setProperty("--lx-detail-secondary", secondaryColor);
     root.style.setProperty("--lx-detail-accent", accentColor);
 
-    // NUOVO: Applica anche un tint molto leggero al page wrapper
+    // Tint leggero sul wrapper della pagina
     if (page) {
       page.style.setProperty(
         "background",

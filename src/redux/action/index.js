@@ -129,6 +129,9 @@ import {
   QUESTIONNAIRE_ADMIN_DELETE_OPTION_REQUEST,
   QUESTIONNAIRE_ADMIN_DELETE_OPTION_SUCCESS,
   QUESTIONNAIRE_ADMIN_DELETE_OPTION_FAILURE,
+  MARK_GAME_VIEWED_REQUEST,
+  MARK_GAME_VIEWED_SUCCESS,
+  MARK_GAME_VIEWED_FAIL,
 } from "../authTypes";
 import { STATUS_TO_ENUM } from "../../utils/statusMapper";
 import { mapStatusToEnumQuick, mapStatusEnumToStringQuick } from "../../utils/statusMappingQuick";
@@ -2350,6 +2353,83 @@ export const deleteQuestionnaireOption = (optionId) => {
       dispatch({
         type: QUESTIONNAIRE_ADMIN_DELETE_OPTION_FAILURE,
         payload: { optionId, message: err?.message },
+      });
+    }
+  };
+};
+
+/**
+ * Registra che l'utente ha visualizzato la pagina di un gioco (Viewed).
+ * Usa getState per:
+ * - NON chiamare l'API se l'utente non è loggato
+ * - evitare spam se abbiamo appena registrato lo stesso gioco.
+ */
+export const markGameViewed = (gameId) => {
+  return async (dispatch, getState) => {
+    if (!gameId) return;
+
+    const state = getState();
+    const authUser = state.auth?.user;
+
+    // se non sono loggato non ha senso chiamare l'endpoint
+    if (!authUser?.userId) return;
+
+    const viewedState = state.gameInteractions?.viewed || {};
+    const { lastViewedGameId, lastViewedAt, loading } = viewedState;
+
+    // se stiamo già inviando una richiesta, non spammare
+    if (loading) return;
+
+    const now = Date.now();
+
+    // se è lo stesso gioco appena registrato (es. entro 30s), saltiamo
+    if (lastViewedGameId === gameId && lastViewedAt && now - lastViewedAt < 30 * 1000) {
+      return;
+    }
+
+    dispatch({
+      type: MARK_GAME_VIEWED_REQUEST,
+      meta: { gameId },
+    });
+
+    try {
+      const res = await apiFetch(`/api/GameInteraction/${gameId}/viewed`, {
+        method: "POST",
+      });
+
+      // se per qualche motivo l'utente è diventato 401 nel frattempo
+      if (res.status === 401) {
+        dispatch({
+          type: MARK_GAME_VIEWED_FAIL,
+          payload: "Utente non autenticato.",
+          error: true,
+          meta: { gameId },
+        });
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error("Impossibile registrare la visualizzazione del gioco.");
+      }
+
+      await safeJson(res);
+
+      dispatch({
+        type: MARK_GAME_VIEWED_SUCCESS,
+        payload: {
+          gameId,
+          timestamp: now,
+        },
+        meta: { gameId },
+      });
+    } catch (error) {
+      console.error("[markGameViewed] exception", error);
+
+      dispatch({
+        type: MARK_GAME_VIEWED_FAIL,
+        payload: error?.message || "Errore imprevisto durante la registrazione della visualizzazione.",
+        error: true,
+        meta: { gameId },
       });
     }
   };

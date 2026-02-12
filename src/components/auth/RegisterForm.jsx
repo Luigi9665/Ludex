@@ -2,7 +2,7 @@ import { useState } from "react";
 import Email from "./Email";
 import Username from "./Username";
 
-const RegisterForm = ({ onRegistered }) => {
+const RegisterForm = ({ onRegistered = () => {} }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [userName, setUserName] = useState("");
@@ -10,16 +10,19 @@ const RegisterForm = ({ onRegistered }) => {
   const [confirmEmail, setConfirmEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [isEmailOkForSubmit, setIsEmailOkForSubmit] = useState(false);
   const [isUsernameOkForSubmit, setIsUsernameOkForSubmit] = useState(false);
+
   const [emailServerError, setEmailServerError] = useState("");
   const [userNameServerError, setUsernameServerError] = useState("");
-  const [alert, setAlert] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(null);
+  const [globalError, setGlobalError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  //controlli per validazione password anche a livelli di backend
+  // --- Validazioni password / nome / cognome ---
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
@@ -29,7 +32,6 @@ const RegisterForm = ({ onRegistered }) => {
   const isFirstNameValid = firstName.trim().length >= 2;
   const isLastNameValid = lastName.trim().length >= 2;
 
-  //booleano per controllo email e password
   const isFormValid = isEmailOkForSubmit && isUsernameOkForSubmit && isPasswordValid && isFirstNameValid && isLastNameValid;
 
   const safeJson = async (res) => {
@@ -42,9 +44,13 @@ const RegisterForm = ({ onRegistered }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    // console.log(firstName, lastName, userName, email, password);
+
+    // pulizia errori prima di un nuovo tentativo
     setIsSubmitting(true);
-    setAlert(null);
+    setGlobalError("");
+    setSuccessMessage("");
+    setEmailServerError("");
+    setUsernameServerError("");
 
     const payload = {
       firstName: firstName.trim(),
@@ -61,20 +67,23 @@ const RegisterForm = ({ onRegistered }) => {
     try {
       const response = await fetch(URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const data = await safeJson(response);
+
       if (!response.ok) {
+        // il backend manda { field, message } per le CheckException
         throw data || { message: "Errore durante la registrazione" };
       }
-      setAlert({ type: "success", message: "Registrazione completata! Ora puoi fare login." });
 
+      setSuccessMessage(data?.message || "Registrazione completata! Controlla la tua email per confermare l'account.");
+
+      // dopo 2s switch su login
       setTimeout(() => {
         onRegistered();
-      }, 800);
+      }, 2000);
     } catch (err) {
       const field = err?.field;
       const message = err?.message || "Errore durante la registrazione. Riprova tra poco.";
@@ -84,7 +93,8 @@ const RegisterForm = ({ onRegistered }) => {
       } else if (field === "username") {
         setUsernameServerError(message);
       } else {
-        setAlert({ type: "danger", message });
+        // "form", "server" o qualsiasi altro -> errore globale
+        setGlobalError(message);
       }
     } finally {
       setIsSubmitting(false);
@@ -92,90 +102,173 @@ const RegisterForm = ({ onRegistered }) => {
   };
 
   return (
-    <form onSubmit={onSubmit} className="d-grid gap-3 auth-form">
-      <div>
-        <label className="form-label">Name</label>
-        <input
-          className="form-control"
-          placeholder="Mario"
-          type="text"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          required
-          maxLength={50}
-        />
-      </div>
-      <div>
-        <label className="form-label">Cognome</label>
-        <input
-          className="form-control"
-          placeholder="Rossi"
-          type="text"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          required
-          maxLength={50}
+    <form onSubmit={onSubmit} className="lx-auth-form">
+      {/* Username */}
+      <div className="lx-auth-field">
+        <label className="lx-auth-label">Username</label>
+        <Username
+          userName={userName}
+          setUserName={(value) => {
+            setUserName(value);
+            // quando l'utente modifica l'username, pulisco eventuale errore server
+            setUsernameServerError("");
+            setGlobalError("");
+          }}
+          baseUrl={baseUrl}
+          setUsernameAvailableParent={setIsUsernameOkForSubmit}
+          userNameServerErrorParent={userNameServerError}
         />
       </div>
 
-      <Username
-        userName={userName}
-        setUserName={setUserName}
-        baseUrl={baseUrl}
-        setUsernameAvailableParent={setIsUsernameOkForSubmit}
-        userNameServerErrorParent={userNameServerError}
-      />
+      {/* Email */}
+      <div className="lx-auth-field">
+        <label className="lx-auth-label">Email</label>
+        <Email
+          baseUrl={baseUrl}
+          email={email}
+          confirmEmail={confirmEmail}
+          setEmail={(value) => {
+            setEmail(value);
+            // se l'utente cambia email, ha senso pulire l'errore server
+            setEmailServerError("");
+            setGlobalError("");
+          }}
+          setConfirmEmail={setConfirmEmail}
+          setIsEmailOkForSubmit={setIsEmailOkForSubmit}
+          emailServerErrorParent={emailServerError}
+          // opzionale: se aggiorni Email, puoi usare questa per pulire l'errore dall'interno
+          // clearEmailServerError={setEmailServerError}
+        />
+      </div>
 
-      <Email
-        baseUrl={baseUrl}
-        email={email}
-        confirmEmail={confirmEmail}
-        setEmail={setEmail}
-        setConfirmEmail={setConfirmEmail}
-        setIsEmailOkForSubmit={setIsEmailOkForSubmit}
-        emailServerErrorParent={emailServerError}
-      />
+      {/* Nome + Cognome */}
+      <div className="lx-auth-row">
+        <div className="lx-auth-field">
+          <label className="lx-auth-label">Nome</label>
+          <input
+            className="lx-auth-input"
+            placeholder="Mario"
+            type="text"
+            value={firstName}
+            onChange={(e) => {
+              setFirstName(e.target.value);
+              setGlobalError("");
+            }}
+            required
+            maxLength={50}
+          />
+        </div>
 
-      <div>
-        <label className="form-label">Password</label>
+        <div className="lx-auth-field">
+          <label className="lx-auth-label">Cognome</label>
+          <input
+            className="lx-auth-input"
+            placeholder="Rossi"
+            type="text"
+            value={lastName}
+            onChange={(e) => {
+              setLastName(e.target.value);
+              setGlobalError("");
+            }}
+            required
+            maxLength={50}
+          />
+        </div>
+      </div>
+
+      {/* Password */}
+      <div className="lx-auth-field">
+        <label className="lx-auth-label">Password</label>
         <input
-          className="form-control"
-          placeholder="Crea una password"
+          className="lx-auth-input"
+          placeholder="Crea una password sicura"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setGlobalError("");
+          }}
           required
         />
+
+        <ul className="lx-auth-pwd-checks">
+          <li className={hasMinLength ? "valid" : "invalid"}>
+            <i className={`bi ${hasMinLength ? "bi-check-circle-fill" : "bi-x-circle"}`} />
+            Minimo 8 caratteri
+          </li>
+          <li className={hasUppercase ? "valid" : "invalid"}>
+            <i className={`bi ${hasUppercase ? "bi-check-circle-fill" : "bi-x-circle"}`} />
+            Almeno una maiuscola
+          </li>
+          <li className={hasLowercase ? "valid" : "invalid"}>
+            <i className={`bi ${hasLowercase ? "bi-check-circle-fill" : "bi-x-circle"}`} />
+            Almeno una minuscola
+          </li>
+        </ul>
       </div>
-      <ul className="small mt-2 ps-3">
-        <li className={hasMinLength ? "text-success" : "text-danger"}>Minimo 8 caratteri</li>
-        <li className={hasUppercase ? "text-success" : "text-danger"}>Almeno una lettera maiuscola</li>
-        <li className={hasLowercase ? "text-success" : "text-danger"}>Almeno una lettera minuscola</li>
-        <li className={passwordsMatch ? "text-success" : "text-danger"}>Le password coincidono</li>
-      </ul>
-      <div>
-        <label className="form-label">Conferma password</label>
+
+      {/* Conferma password */}
+      <div className="lx-auth-field">
+        <label className="lx-auth-label">Conferma password</label>
         <input
-          className="form-control"
+          className="lx-auth-input"
           placeholder="Ripeti la password"
           type="password"
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            setGlobalError("");
+          }}
           required
         />
+        {confirmPassword && !passwordsMatch && (
+          <div className="lx-auth-hint lx-auth-hint--error">
+            <i className="bi bi-x-circle" /> Le password non coincidono
+          </div>
+        )}
       </div>
-      <label className="form-check-label d-flex align-items-start gap-2 text-white small">
-        <input className="form-check-input mt-1" type="checkbox" required />
-        Accetto i termini e la privacy policy.
+
+      {/* Hint conferma email */}
+      <div className="lx-auth-hint">
+        <i className="bi bi-envelope" /> Ti invieremo un link di conferma email dopo la registrazione.
+      </div>
+
+      {/* Privacy / Termini */}
+      <label className="lx-auth-checkbox">
+        <input
+          type="checkbox"
+          required
+          onChange={() => {
+            setGlobalError("");
+          }}
+        />
+        <span>Accetto i termini e la privacy policy</span>
       </label>
-      {alert && (
-        <div className={`alert alert-${alert.type} mb-3`} role="alert">
-          {alert.message}
+
+      {/* Errori globali */}
+      {globalError && (
+        <div className="lx-auth-error lx-auth-error--global">
+          <i className="bi bi-exclamation-circle" /> {globalError}
         </div>
       )}
 
-      <button className="btn btn-lx-warm btn-lg" type="submit" disabled={!isFormValid || isSubmitting}>
-        {isSubmitting ? "Registrazione..." : "Registrati"}
+      {/* Success message */}
+      {successMessage && (
+        <div className="lx-auth-success">
+          <i className="bi bi-check-circle" /> {successMessage}
+        </div>
+      )}
+
+      {/* Submit */}
+      <button className="lx-auth-btn lx-auth-btn--primary" type="submit" disabled={!isFormValid || isSubmitting}>
+        {isSubmitting ? (
+          <>
+            <span className="lx-auth-spinner" />
+            <span>Registrazione...</span>
+          </>
+        ) : (
+          "Registrati"
+        )}
       </button>
     </form>
   );

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/public/public/Me.png" alt="Ludex Logo" width="300"/>
+  <img src="/public/Me.png" alt="Me" width="150"/>
   <img src="/public/LogoLudex3Ridimensionato.png" alt="Ludex Logo" width="300"/>
 </p>
 
@@ -12,12 +12,6 @@
 ---
 
 # LUDEX — Frontend Architecture
-
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
-![Redux](https://img.shields.io/badge/Redux-State%20Orchestrated-764ABC?logo=redux&logoColor=white)
-![Architecture](https://img.shields.io/badge/Architecture-Behavior%20Driven-111111)
-![Performance](https://img.shields.io/badge/Performance-Optimized-success)
-![Status](https://img.shields.io/badge/State-Deterministic-blueviolet)
 
 ---
 
@@ -184,12 +178,13 @@ The frontend guarantees:
 
 ### Example Patch Strategy
 
-````javascript
+### Example Patch Strategy
+
+```javascript
 userData.my.games.map(g =>
   g.userGameId === updated.userGameId ? updated : g
 );
 This prevents cascade re-renders and preserves component memoization.
-
 
 4. Recommendation Feedback Loop
 The frontend participates in a scoring feedback cycle.
@@ -202,8 +197,7 @@ High rating	Genre reinforcement
 Drop game	Negative signal
 Not Interested	Temporary exclusion
 Questionnaire	Explicit preference
-Frontend responsibilities:
-
+Frontend Responsibilities
 Avoid caching stale recommendation sets
 
 Allow refresh when behavioral model changes
@@ -293,18 +287,9 @@ It is not a simple SPA.
 
 It is a state-driven behavioral system.
 
-
----
-
-# 🎯 PROFESSIONAL BADGE SET (Stronger Impact)
-
-Puoi sostituire i badge con questi per effetto più “enterprise”:
-
-```md
 ![Architecture](https://img.shields.io/badge/Architecture-State%20Orchestrated-black)
 ![Pattern](https://img.shields.io/badge/Pattern-Behavior%20Driven-purple)
 ![Scalability](https://img.shields.io/badge/Scalability-High-success)
 ![Rendering](https://img.shields.io/badge/Rendering-Optimized-blue)
 ![Consistency](https://img.shields.io/badge/Consistency-Deterministic-critical)
-
-````
+```

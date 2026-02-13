@@ -184,6 +184,8 @@ The frontend guarantees:
 userData.my.games.map(g =>
   g.userGameId === updated.userGameId ? updated : g
 );
+
+```
 This prevents cascade re-renders and preserves component memoization.
 
 4. Recommendation Feedback Loop

@@ -415,11 +415,18 @@
 
 .lx-landing-hero-pills {
   position: absolute;
-  top: 1rem;
+  top: 5px;
   right: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.lx-landing-pill--backlog:hover,
+.lx-landing-pill--playing:hover,
+.lx-landing-pill--completed:hover,
+.lx-landing-pill--recommended:hover {
+  transform: scale(1.05);
 }
 
 @media (max-width: 640px) {
@@ -801,8 +808,20 @@
   width: 100%;
   aspect-ratio: 2 / 3;
   background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(157, 78, 221, 0.1));
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.12), rgba(157, 78, 221, 0.12));
+}
+
+.lx-landing-mini-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  transition: transform var(--transition-slow);
+  display: block;
+  border-radius: 1rem;
 }
 
 .lx-landing-mini-card-pill {
@@ -1014,13 +1033,33 @@
   gap: 1rem;
   margin-bottom: 2rem;
 }
+.lx-landing-database-cover {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
 
 .lx-landing-database-cover-blur {
-  aspect-ratio: 2 / 3;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(157, 78, 221, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.5rem;
-  filter: blur(4px);
-  opacity: 0.5;
+  opacity: 0.9;
+  filter: blur(0px);
+}
+
+.lx-landing-database-cover-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 35%;
+  transform: scale(1.02);
+  filter: blur(1.5px) saturate(1.05) contrast(1.02);
+  opacity: 0.85;
 }
 
 .lx-landing-database-tags {
@@ -1048,6 +1087,10 @@
 .lx-landing-database-feature i {
   font-size: 1.5rem;
   color: var(--lx-cyan);
+}
+.lx-landing-database-cover:hover .lx-landing-database-cover-img {
+  filter: blur(1px) saturate(1.08) contrast(1.03);
+  opacity: 0.92;
 }
 
 /* ============================================

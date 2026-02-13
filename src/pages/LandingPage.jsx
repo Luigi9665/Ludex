@@ -84,6 +84,57 @@ const LandingPage = () => {
     return () => observer.disconnect();
   }, []);
 
+  const DATABASE_COVERS = [
+    {
+      url: "https://cdn2.steamgriddb.com/grid/078d2a1275f0d53cda67d165440aeb50.png",
+      title: "Animal Crossing: New Horizons",
+    },
+    {
+      url: "https://cdn2.steamgriddb.com/grid/5cdf5c84489e801e6bac5693b1c8e290.png",
+      title: "Baldur's Gate III",
+    },
+    {
+      url: "https://cdn2.steamgriddb.com/grid/a350d0242847ce6bf914261c6e2712c1.png",
+      title: "Astro Bot",
+    },
+    {
+      url: "https://image.api.playstation.com/vulcan/ap/rnd/202504/1515/99f254edff001a6a52d1d9f09af28959abfbaf1fe1a034b4.jpg",
+      title: "ARC Raiders",
+    },
+    {
+      url: "https://cdn2.steamgriddb.com/grid/ce95c1acad71f8b15e61223a530cef0c.jpg",
+      title: "Apollo Justice: Ace Attorney Trilogy",
+    },
+    {
+      url: "https://cdn2.steamgriddb.com/grid/45713287ba01bb2c9dfa4a9c486e4cc9.png",
+      title: "Battlefield 6",
+    },
+    {
+      url: "https://cdn2.steamgriddb.com/grid/325ab9f1731fdc4a2cffc4de6f5c480b.png",
+      title: "Blue Prince",
+    },
+    {
+      url: "https://cdn2.steamgriddb.com/grid/ccd427e9a45f148777fe91e6850bf8eb.png",
+      title: "Call of Duty: Black Ops 6",
+    },
+    {
+      url: "https://cdn2.steamgriddb.com/grid/e7fff0c2739cf86c8aa5559eefe74220.png",
+      title: "Clair Obscur: Expedition 33",
+    },
+    {
+      url: "https://assets.gam3s.gg/hytale_cover_8177e5e369.png",
+      title: "Hytale",
+    },
+    {
+      url: "https://cdn2.steamgriddb.com/grid/5855660034a74cfe0e5fc8d57d17f4ac.png",
+      title: "God of War",
+    },
+    {
+      url: "https://cdn2.steamgriddb.com/grid/557fa68027943a8b0d3b66c4e72ff23b.png",
+      title: "Elden Ring ",
+    },
+  ];
+
   return (
     <div className="lx-landing">
       {/* Navbar */}
@@ -258,7 +309,7 @@ const LandingPage = () => {
               <h2 className="lx-landing-section-title">Un questionario, e Ludex capisce come giochi</h2>
 
               <p className="lx-landing-text">
-                Dopo la registrazione, Ludex ti propone un <strong>breve questionario guidato</strong>
+                Dopo la registrazione, Ludex ti propone un <strong>breve questionario guidato </strong>
                 che ti aiuta a personalizzare completamente la tua esperienza.
               </p>
 
@@ -362,16 +413,22 @@ const LandingPage = () => {
                 </div>
                 <div className="lx-landing-mini-shelf-cards">
                   <div className="lx-landing-mini-card">
-                    <div className="lx-landing-mini-card-cover" />
-                    <span className="lx-landing-mini-card-pill lx-landing-pill--playing">Playing</span>
+                    <div className="lx-landing-mini-card-cover">
+                      <span className="lx-landing-mini-card-pill lx-landing-pill--playing">Playing</span>
+                      <img src="https://cdn2.steamgriddb.com/grid/e7fff0c2739cf86c8aa5559eefe74220.png" alt="Clair Obscur: Expedition 33" loading="lazy" />
+                    </div>
                   </div>
                   <div className="lx-landing-mini-card">
-                    <div className="lx-landing-mini-card-cover" />
-                    <span className="lx-landing-mini-card-pill lx-landing-pill--playing">Playing</span>
+                    <div className="lx-landing-mini-card-cover">
+                      <span className="lx-landing-mini-card-pill lx-landing-pill--playing">Playing</span>
+                      <img src="https://cdn2.steamgriddb.com/grid/557fa68027943a8b0d3b66c4e72ff23b.png" alt="Clair Obscur: Expedition 33" loading="lazy" />
+                    </div>
                   </div>
                   <div className="lx-landing-mini-card">
-                    <div className="lx-landing-mini-card-cover" />
-                    <span className="lx-landing-mini-card-pill lx-landing-pill--playing">Playing</span>
+                    <div className="lx-landing-mini-card-cover">
+                      <span className="lx-landing-mini-card-pill lx-landing-pill--playing">Playing</span>
+                      <img src="https://cdn2.steamgriddb.com/grid/c32d0e02132a853fdf5b8010aa71602e.png" alt="Clair Obscur: Expedition 33" loading="lazy" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -434,8 +491,19 @@ const LandingPage = () => {
             <div className="lx-landing-database-visual lx-landing-reveal">
               <div className="lx-landing-database-box">
                 <div className="lx-landing-database-covers">
-                  {[...Array(12)].map((_, i) => (
-                    <div key={i} className="lx-landing-database-cover-blur" />
+                  {DATABASE_COVERS.map((src, i) => (
+                    <div key={i} className="lx-landing-database-cover">
+                      <div className="lx-landing-database-cover-blur" aria-hidden="true" />
+                      <img
+                        className="lx-landing-database-cover-img"
+                        src={src.url}
+                        alt={src.title}
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    </div>
                   ))}
                 </div>
                 <div className="lx-landing-database-tags">
